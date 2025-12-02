@@ -1,34 +1,41 @@
 \documentclass{report}
 \usepackage[utf8]{inputenc}
+\usepackage[italian]{babel}
 
 \title{
-    isi notes \\
+    Easy Notes \\
     \large Applicazioni e Servizi Web
 }
 
-\author{Nome Autore - 000725342 \{nome.cognome@unibo.it\}}
-\date{01 Gennaio 2020}
+\author{Emanuele Sanchi - 0000000000 \{emanuele.sanchi@studio.unibo.it\} \\
+Francesco Buda - 0000000000 \{francesco.buda3@studio.unibo.it\} \\
+Tommaso Severi - 0001172431 \{tommaso.severi2@studio.unibo.it\}}
+\date{\today}
 
 \usepackage{natbib}
 \usepackage{graphicx}
 
 \begin{document}
-
 \maketitle
-\section{Introduzione}
-Introduzione \citep{adams1995hitchhiker}
+
+\clearpage
+\tableofcontents
+\clearpage
+
+\input{./chapters/introduction.tex}
+\newpage
 
 \section{Requisiti}
-Descrizione delle caratteristiche e funzionalità che il sistema prevede. 
+Descrizione delle caratteristiche e funzionalità che il sistema prevede.
 
 \section{Design}
 Design dell'architettura del sistema e delle interfacce utente.
 
 \begin{figure}[h!]
-\centering
-\includegraphics[scale=0.44]{deathStar2.jpg}
-\caption{Death Star}
-\label{fig:deathstar}
+    \centering
+    \includegraphics[scale=0.44]{figures/deathStar2.jpg}
+    \caption{Death Star}
+    \label{fig:deathstar}
 \end{figure}
 
 \section{Tecnologie}
@@ -46,6 +53,9 @@ Rilascio, installazione e messa in funzione.
 
 \section{Conclusioni}
 Conclusioni
+
+% TODO: remove this line when done
+\citep{adams1995hitchhiker}
 
 \bibliographystyle{plain}
 \bibliography{references}
