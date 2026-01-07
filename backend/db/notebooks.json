@@ -1,0 +1,7 @@
+{
+  "subject": "string",
+  "date": "ISODate",
+  "last_page": 0,
+  "type": "simple | slide",
+  "ownerUsername": "StudentId"
+}

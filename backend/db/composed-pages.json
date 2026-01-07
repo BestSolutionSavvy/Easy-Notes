@@ -1,0 +1,13 @@
+{
+  "_id": {
+    "notebookId": "ObjectId",
+    "pageNumber": 0
+  },
+  "slideId": {
+    "idPdf": "PdfDocumentId",
+    "slideNumber": 0
+  },
+  "idNote": "NoteId",
+  "textBoxes": ["object"],
+  "highlights": ["object"]
+}
