@@ -7,8 +7,5 @@ body {
   font-family: 'Inter', sans-serif;
 }
 
-*, *::before, *::after {
-  border-width: 0;
-}
 
 
