@@ -6,8 +6,17 @@ import SignupPage from '../pages/SignupPage.vue';
 import ProfilePage from '../pages/ProfilePage.vue';
 import ClassesPage from '../pages/ClassesPage.vue';
 import LecturesPage from '../pages/LecturesPage.vue';
+import NotesPage from '../pages/NotesListPage.vue';
+import SlidesPage from '../pages/SlidesPage.vue';
 
 const routes = [
+    {
+        path: '/notes',
+        components: {
+            left: NotesPage,
+            right: SlidesPage
+        }
+    },
     {
         path: '/login',
         components: {

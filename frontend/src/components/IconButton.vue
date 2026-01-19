@@ -15,10 +15,14 @@ const handleClick = () => {
 </script>
 
 <template>
-  <img 
-    :src="icon" 
-    :alt="alt || ''" 
-    @click="handleClick"
-    class="h-[2rem] w-[2rem] rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
-  />
+  <div
+    class="w-8 h-8 p-2 bg-blue-950 rounded-lg inline-flex justify-center items-center gap-2 overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+  >
+    <img
+      :src="icon"
+      :alt="alt || ''"
+      @click="handleClick"
+      class="flex-1 self-stretch"
+    />
+  </div>
 </template>
