@@ -4,6 +4,8 @@ import LogoPage from '../pages/LogoPage.vue';
 import LoginPage from '../pages/LoginPage.vue';
 import SignupPage from '../pages/SignupPage.vue';
 import ProfilePage from '../pages/ProfilePage.vue';
+import ClassesPage from '../pages/ClassesPage.vue';
+import LecturesPage from '../pages/LecturesPage.vue';
 
 const routes = [
     {
@@ -25,6 +27,13 @@ const routes = [
         components: {
             left: LogoPage,
             right: ProfilePage
+        }
+    },
+    {
+        path: '/classes',
+        components: {
+            left: ClassesPage,
+            right: LecturesPage
         }
     },
     { 
