@@ -4,8 +4,17 @@ import LogoPage from '../pages/LogoPage.vue';
 import LoginPage from '../pages/LoginPage.vue';
 import SignupPage from '../pages/SignupPage.vue';
 import ProfilePage from '../pages/ProfilePage.vue';
+import PdfPage from '../pages/PdfPage.vue';
+import NotePage from '../pages/NotePage.vue';
 
 const routes = [
+    {
+        path: '/',
+        components: {
+            left: PdfPage,
+            right: NotePage
+        }
+    },
     {
         path: '/login',
         components: {
