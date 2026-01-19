@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router';
 import NotFound from '../pages/NotFound.vue';
 import LogoPage from '../pages/LogoPage.vue';
-import LoginPage from '../pages/LoginPage.vue';
+import SigninPage from '../pages/SigninPage.vue';
 import SignupPage from '../pages/SignupPage.vue';
 import ProfilePage from '../pages/ProfilePage.vue';
 import PdfPage from '../pages/PdfPage.vue';
@@ -33,10 +33,10 @@ const routes: RouteRecordRaw[] = [
         }
     },
     {
-        path: '/login',
+        path: '/signin',
         components: {
             left: LogoPage,
-            right: LoginPage
+            right: SigninPage
         }
     },
     {
