@@ -3,6 +3,7 @@ import NotFound from '../pages/NotFound.vue';
 import LogoPage from '../pages/LogoPage.vue';
 import LoginPage from '../pages/LoginPage.vue';
 import SignupPage from '../pages/SignupPage.vue';
+import ProfilePage from '../pages/ProfilePage.vue';
 
 const routes = [
     {
@@ -17,6 +18,13 @@ const routes = [
         components: {
             left: LogoPage,
             right: SignupPage
+        }
+    },
+    {
+        path: '/profile',
+        components: {
+            left: LogoPage,
+            right: ProfilePage
         }
     },
     { 
