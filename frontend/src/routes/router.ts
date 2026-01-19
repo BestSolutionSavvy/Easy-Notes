@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router';
+import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router';
 import NotFound from '../pages/NotFound.vue';
 import LogoPage from '../pages/LogoPage.vue';
 import LoginPage from '../pages/LoginPage.vue';
@@ -11,12 +11,15 @@ import LecturesPage from '../pages/LecturesPage.vue';
 import MenuPage from '../pages/Menu.vue';
 import NotesPage from '../pages/NotesListPage.vue';
 
-const routes = [
+const routes: RouteRecordRaw[] = [
     {
         path: '/',
         components: {
             left: PdfPage,
             right: NotePage
+        },
+        props: {
+            left: { id: 0 }
         }
     },
     {
@@ -24,6 +27,9 @@ const routes = [
         components: {
             left: NotesPage,
             right: PdfPage
+        },
+        props: {
+            right: { id: 0, toolBar: false }
         }
     },
     {
