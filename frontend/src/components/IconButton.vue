@@ -19,6 +19,6 @@ const handleClick = () => {
     :src="icon" 
     :alt="alt || ''" 
     @click="handleClick"
-    class="h-[2rem] w-[2rem] rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+    class="h-[2rem] w-full relative rounded-lg"
   />
 </template>
