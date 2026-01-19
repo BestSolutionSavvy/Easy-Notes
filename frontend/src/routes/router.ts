@@ -9,7 +9,7 @@ import NotePage from '../pages/NotePage.vue';
 import ClassesPage from '../pages/ClassesPage.vue';
 import LecturesPage from '../pages/LecturesPage.vue';
 import MenuPage from '../pages/Menu.vue';
-
+import NotesPage from '../pages/NotesListPage.vue';
 
 const routes = [
     {
@@ -17,6 +17,13 @@ const routes = [
         components: {
             left: PdfPage,
             right: NotePage
+        }
+    },
+    {
+        path: '/notes',
+        components: {
+            left: NotesPage,
+            right: PdfPage
         }
     },
     {

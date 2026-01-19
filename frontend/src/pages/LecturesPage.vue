@@ -3,6 +3,7 @@ import { ref } from "vue";
 import ListElement from '../components/ListElement.vue';
 import trashIcon from '../assets/trash.svg';
 import plusIcon from '../assets/plus.svg';
+import RoundIconButton from "../components/AddItemButton.vue";
 
 const classes = ref([
   {
@@ -33,7 +34,14 @@ const handleDelete = (index: number) => {
     		<div class="absolute top-[calc(50%_-_147px)] left-[calc(50%_-_250px)] w-[31.25rem] overflow-hidden flex flex-col items-center p-[0.312rem] box-border gap-[0.625rem]">
       			<div class="self-stretch flex items-center gap-[0.625rem] text-[1.875rem] text-darkslategray">
         				<div class="relative font-semibold">Lorem Lectures - Class 1</div>
-        				<img class="w-[1.563rem] rounded-[32px] max-h-full" :src="plusIcon" alt="" />
+        				<RoundIconButton
+          					:icon="plusIcon"
+          					alt="Add Lecture"
+          					:onClick="
+            					() => {
+              						// !TODO
+            					}
+          					"/>
       			</div>
       			<ListElement 
               v-for="(classItem, index) in classes"
