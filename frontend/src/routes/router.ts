@@ -6,6 +6,10 @@ import SignupPage from '../pages/SignupPage.vue';
 import ProfilePage from '../pages/ProfilePage.vue';
 import PdfPage from '../pages/PdfPage.vue';
 import NotePage from '../pages/NotePage.vue';
+import ClassesPage from '../pages/ClassesPage.vue';
+import LecturesPage from '../pages/LecturesPage.vue';
+import MenuPage from '../pages/Menu.vue';
+
 
 const routes = [
     {
@@ -34,6 +38,20 @@ const routes = [
         components: {
             left: LogoPage,
             right: ProfilePage
+        }
+    },
+    {
+        path: '/classes',
+        components: {
+            left: ClassesPage,
+            right: LecturesPage
+        }
+    },
+    {
+        path: '/menuTest',
+        components: {
+            left: MenuPage,
+            right: LogoPage
         }
     },
     { 
