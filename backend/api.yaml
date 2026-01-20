@@ -282,9 +282,6 @@ components:
       type: object
       required:
         - id
-        - subject
-        - date
-        - last_page
       properties:
         id:
           type: integer
@@ -307,7 +304,6 @@ components:
       required:
         - id
         - notebookId
-        - content
       properties:
         id:
           type: integer
