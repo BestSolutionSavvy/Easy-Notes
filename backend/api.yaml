@@ -1,0 +1,134 @@
+openapi: 3.0.3
+info:
+  title: Easy Notes API
+  version: 1.0.0
+  description: API per la gestione di una SPA per appunti su PDF.
+servers:
+  - url: http://localhost:3000
+paths:
+  /notes:
+    get:
+      summary: Lista di tutte le note
+      responses:
+        '200':
+          description: Elenco delle note
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Notes'
+    post:
+      summary: Aggiungi una nuova nota
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Notes'
+      responses:
+        '201':
+          description: Nota aggiunta con successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notes'
+        '400':
+          description: Dati della nota non validi
+  /notes/{username}/{id}:
+    get:
+      summary: Dettagli di una nota specifica per utente
+      parameters:
+        - in: path
+          name: username
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Nota trovata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notes'
+        '404':
+          description: Nota non trovata
+    post:
+      summary: Crea o aggiorna una nota
+      parameters:
+        - in: path
+          name: username
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Notes'
+      responses:
+        '200':
+          description: Nota creata o aggiornata con successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notes'
+        '400':
+          description: Dati della nota non validi
+    delete:
+      summary: Elimina una nota
+      parameters:
+        - in: path
+          name: username
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Nota eliminata con successo (nessun contenuto)
+        '404':
+          description: Nota non trovata
+
+components:
+  schemas:
+    Notes:
+      type: object
+      required:
+        - id
+        - subject
+        - date
+        - last_page
+      properties:
+        id:
+          type: integer
+          example: 1
+        username:
+          type: string
+          example: "user123"
+        subject:
+          type: string
+          example: "ASW"
+        date:
+          type: string
+          format: date
+          example: "2024-10-01"
+        last_page:
+          type: integer
+          example: 15
+
