@@ -8,7 +8,6 @@ import PdfPage from '../pages/PdfPage.vue';
 import NotePage from '../pages/NotePage.vue';
 import ClassesPage from '../pages/ClassesPage.vue';
 import LecturesPage from '../pages/LecturesPage.vue';
-import MenuPage from '../pages/Menu.vue';
 import NotesPage from '../pages/NotesListPage.vue';
 
 const routes: RouteRecordRaw[] = [
@@ -58,13 +57,6 @@ const routes: RouteRecordRaw[] = [
         components: {
             left: ClassesPage,
             right: LecturesPage
-        }
-    },
-    {
-        path: '/menuTest',
-        components: {
-            left: MenuPage,
-            right: LogoPage
         }
     },
     { 
