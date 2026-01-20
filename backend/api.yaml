@@ -2,42 +2,42 @@ openapi: 3.0.3
 info:
   title: Easy Notes API
   version: 1.0.0
-  description: API per la gestione di una SPA per appunti su PDF.
+  description: API for managing a SPA for notes on PDF.
 servers:
   - url: http://localhost:3000
 paths:
-  /notes:
+  /notebooks:
     get:
-      summary: Lista di tutte le note
+      summary: List of all notebooks
       responses:
-        '200':
-          description: Elenco delle note
+        "200":
+          description: List of notebooks
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Notes'
+                  $ref: "#/components/schemas/Notebook"
     post:
-      summary: Aggiungi una nuova nota
+      summary: Add a new notebook
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Notes'
+              $ref: "#/components/schemas/Notebook"
       responses:
-        '201':
-          description: Nota aggiunta con successo
+        "201":
+          description: Notebook added successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Notes'
-        '400':
-          description: Dati della nota non validi
-  /notes/{username}/{id}:
+                $ref: "#/components/schemas/Notebook"
+        "400":
+          description: Invalid notebook data
+  /notebooks/{username}/{id}:
     get:
-      summary: Dettagli di una nota specifica per utente
+      summary: Details of a specific notebook for a user
       parameters:
         - in: path
           name: username
@@ -50,16 +50,16 @@ paths:
           schema:
             type: integer
       responses:
-        '200':
-          description: Nota trovata
+        "200":
+          description: Notebook found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Notes'
-        '404':
-          description: Nota non trovata
+                $ref: "#/components/schemas/Notebook"
+        "404":
+          description: Notebook not found
     post:
-      summary: Crea o aggiorna una nota
+      summary: Create or update a notebook
       parameters:
         - in: path
           name: username
@@ -76,18 +76,18 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Notes'
+              $ref: "#/components/schemas/Notebook"
       responses:
-        '200':
-          description: Nota creata o aggiornata con successo
+        "200":
+          description: Notebook created or updated successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Notes'
-        '400':
-          description: Dati della nota non validi
+                $ref: "#/components/schemas/Notebook"
+        "400":
+          description: Invalid notebook data
     delete:
-      summary: Elimina una nota
+      summary: Delete a notebook
       parameters:
         - in: path
           name: username
@@ -100,14 +100,185 @@ paths:
           schema:
             type: integer
       responses:
-        '204':
-          description: Nota eliminata con successo (nessun contenuto)
-        '404':
-          description: Nota non trovata
+        "204":
+          description: Notebook deleted successfully (no content)
+        "404":
+          description: Notebook not found
+  /notes/{notebookId}:
+    get:
+      summary: Get all notes for a specific notebook
+      parameters:
+        - in: path
+          name: notebookId
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of notes for the notebook
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Note"
+        "404":
+          description: Notebook not found
+    post:
+      summary: Add a new note to a specific notebook
+      parameters:
+        - in: path
+          name: notebookId
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Note"
+      responses:
+        "201":
+          description: Note added successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Note"
+        "400":
+          description: Invalid note data
+  /notes/{notebookId}/{noteId}:
+    delete:
+      summary: Delete a specific note
+      parameters:
+        - in: path
+          name: notebookId
+          required: true
+          schema:
+            type: integer
+        - in: path
+          name: noteId
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Note deleted successfully (no content)
+        "404":
+          description: Note not found
+  /classes:
+    get:
+      summary: Get list of all classes
+      responses:
+        "200":
+          description: List of classes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Classes"
+        "404":
+          description: No classes found
+    post:
+      summary: Add a new class
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Classes"
+      responses:
+        "201":
+          description: Class added successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Classes"
+        "400":
+          description: Invalid class data
+  /classes/{id}:
+    delete:
+      summary: Delete a specific class
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Class deleted successfully (no content)
+        "404":
+          description: Class not found
+  /pdf/{classesId}:
+    get:
+      summary: Get all PDF for a specific class
+      parameters:
+        - in: path
+          name: classesId
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of PDFs for the class
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PDF"
+        "404":
+          description: Class not found
+    post:
+      summary: Add a new PDF to a specific class
+      parameters:
+        - in: path
+          name: classesId
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PDF"
+      responses:
+        "201":
+          description: PDF added successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PDF"
+        "400":
+          description: Invalid PDF data
+        "404":
+          description: Class not found
+  /pdf/{classesId}/{pdfId}:
+    delete:
+      summary: Delete a specific PDF
+      parameters:
+        - in: path
+          name: classesId
+          required: true
+          schema:
+            type: integer
+        - in: path
+          name: pdfId
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: PDF deleted successfully (no content)
+        "404":
+          description: PDF not found
 
 components:
   schemas:
-    Notes:
+    Notebook:
       type: object
       required:
         - id
@@ -131,4 +302,46 @@ components:
         last_page:
           type: integer
           example: 15
-
+    Note:
+      type: object
+      required:
+        - id
+        - notebookId
+        - content
+      properties:
+        id:
+          type: integer
+          example: 1
+        notebookId:
+          type: integer
+          example: 1
+        content:
+          type: string
+          example: "This is a note content."
+    Classes:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        teacher:
+          type: string
+          example: "Dr. Smith"
+        name:
+          type: string
+          example: "ASW"
+    PDF:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        classesId:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: "Lecture Notes"
+        url:
+          type: string
+          example: "http://example.com/lecture-notes.pdf"
