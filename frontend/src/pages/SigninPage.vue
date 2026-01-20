@@ -2,6 +2,7 @@
 import { ref } from "vue";
 import InputBox from "../components/InputBox.vue";
 import PrivacyLink from "../components/PrivacyLink.vue";
+import SimpleButton from "../components/SimpleButton.vue";
 
 const email = ref("");
 const password = ref("");
@@ -36,11 +37,7 @@ const password = ref("");
         <div
           class="w-[1.875rem] h-[1.188rem] relative overflow-hidden shrink-0"
         />
-        <div
-          class="rounded-lg bg-darkslateblue overflow-hidden flex items-center justify-center p-[0.75rem] text-whitesmoke-100"
-        >
-          <div class="relative leading-[100%]">Login</div>
-        </div>
+        <SimpleButton text="Sign In" />
       </div>
       <div class="w-[2.188rem] flex-1 relative overflow-hidden" />
       <PrivacyLink />

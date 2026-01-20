@@ -5,11 +5,11 @@ defineProps<{
 }>();
 </script>
 <template>
-    <div
-        class="w-[14.938rem] h-[2.875rem] shadow-[0px_2px_4px_rgba(0,_0,_0,_0.25)] rounded-[10px] [background:linear-gradient(90deg,_#ced8ff,_#e5ebff_65.38%,_#f5f7ff)] border-gray border-solid border-[1px] box-border overflow-hidden shrink-0 flex items-center py-[0.625rem] px-[1.125rem] gap-[0.937rem] cursor-pointer hover:opacity-80 transition-opacity">
-        <img :src="icon" class="h-[1rem] w-[1rem] relative" alt="" />
-        <div class="h-[1rem] relative overflow-hidden shrink-0">
-            <div class="absolute top-[0rem] left-[0rem] leading-[100%] font-medium">{{ title }}</div>
+    <RouterLink :to = "'/' + title.toLowerCase()"
+        class="w-60 h-11 px-4 py-2.5 bg-gradient-to-r from-indigo-200 via-indigo-100 to-violet-50 rounded-[10px] shadow-[0px_2px_4px_0px_rgba(0,0,0,0.25)] flex justify-start items-center gap-3.5 cursor-pointer hover:opacity-85 hover:scale-[1.01] active:scale-[0.99] transition-all duration-200">
+        <img :src="icon" class="w-4 h-4 flex-shrink-0" alt="" />
+        <div class="flex-1 text-blue-950 text-base font-medium font-['Inter'] leading-4 overflow-hidden text-ellipsis whitespace-nowrap">
+            {{ title }}
         </div>
-    </div>
+    </RouterLink>
 </template>

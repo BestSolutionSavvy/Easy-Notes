@@ -12,7 +12,7 @@
         <div class="relative font-semibold">Easy Notes</div>
       </div>
       <div
-        class="self-stretch overflow-hidden flex items-center justify-center text-[1.875rem] text-gray-200"
+        class="self-stretch overflow-hidden flex items-center justify-center text-[1.875rem] text-gray-300"
       >
         <div class="relative font-semibold">Note taking made easy</div>
       </div>
