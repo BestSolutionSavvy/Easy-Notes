@@ -109,7 +109,7 @@ const props = withDefaults(defineProps<Props>(), {
           alt=""
         />
         <img
-          src="../assets/post-it.svg"
+          src="../assets/post-it-white.svg"
           class="h-[0.875rem] w-[0.875rem] cursor-pointer transition-transform hover:scale-125 hover:brightness-125"
           alt=""
         />

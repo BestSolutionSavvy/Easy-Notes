@@ -52,43 +52,24 @@ const notebooksPerSubject = computed(() => {
 
 <template>
   <div
-    class="h-full flex-1 w-full relative overflow-hidden shrink-0 flex flex-col items-start text-left text-[1rem] text-darkslateblue font-inter"
-  >
+    class="h-full flex-1 w-full relative overflow-hidden shrink-0 flex flex-col items-start text-left text-[1rem] text-darkslateblue font-inter">
     <div
-      class="self-stretch flex-1 rounded-tl-none rounded-tr-num-8 rounded-br-num-8 rounded-bl-none bg-white overflow-hidden flex flex-col items-center justify-center p-[0.625rem] gap-[1.875rem]"
-    >
+      class="self-stretch flex-1 rounded-tl-none rounded-tr-num-8 rounded-br-num-8 rounded-bl-none bg-white overflow-hidden flex flex-col items-center justify-center p-[0.625rem] gap-[1.875rem]">
       <ul>
-        <li
-          v-for="subject in subjects"
-          :key="subject"
-          class="w-[31.25rem] overflow-hidden flex flex-col items-center p-[0.312rem] box-border gap-[0.625rem]"
-        >
-          <div
-            class="self-stretch flex items-center gap-[0.625rem] text-[1.875rem] text-darkslategray"
-          >
+        <li v-for="subject in subjects" :key="subject"
+          class="w-[31.25rem] overflow-hidden flex flex-col items-center p-[0.312rem] box-border gap-[0.625rem]">
+          <div class="self-stretch flex items-center gap-[0.625rem] text-[1.875rem] text-darkslategray">
             <div class="relative font-semibold">{{ subject }}</div>
-            <RoundIconButton
-              :icon="plusIcon"
-              alt="Add Note"
-              :onClick="
-                () => {
-                  // TODO: Add Note action
-                }
-              "
-            />
+            <RoundIconButton :icon="plusIcon" alt="Add Note" :onClick="() => {
+                // TODO: Add Note action
+              }
+              " />
           </div>
           <div
-            class="w-[30.063rem] h-[0.063rem] relative border-black border-solid border-t-[1px] box-border opacity-[0.5]"
-          />
+            class="w-[30.063rem] h-[0.063rem] relative border-black border-solid border-t-[1px] box-border opacity-[0.5]" />
           <ul class="flex flex-col gap-[0.625rem]">
-            <ListElement
-              v-for="(notebook, index) in notebooksPerSubject[subject]"
-              :key="notebook.title"
-              :title="notebook.title"
-              :date="notebook.date"
-              :style="{ animationDelay: `${index * 0.2}s` }"
-              class="animate-slide-in"
-              :buttons="[
+            <ListElement v-for="(notebook, index) in notebooksPerSubject[subject]" :key="notebook.title"
+              :title="notebook.title" :date="notebook.date" :index="index" :buttons="[
                 {
                   icon: wandIcon,
                   alt: 'AI Summary',
@@ -110,28 +91,10 @@ const notebooksPerSubject = computed(() => {
                     // TODO: Delete Note action
                   },
                 },
-              ]"
-            />
+              ]" />
           </ul>
         </li>
       </ul>
     </div>
   </div>
 </template>
-
-<style scoped>
-@keyframes slideInFromLeft {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-slide-in {  
-  opacity: 0;  animation: slideInFromLeft 0.7s ease-out forwards;
-}
-</style>

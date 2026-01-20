@@ -59,6 +59,10 @@ const routes: RouteRecordRaw[] = [
             right: LecturesPage
         }
     },
+    {
+        path: '/home',
+        redirect: '/'
+    },
     { 
       path: '/:pathMatch(.*)*', 
       components: {
