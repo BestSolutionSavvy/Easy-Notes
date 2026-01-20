@@ -4,7 +4,7 @@ info:
   version: 1.0.0
   description: API for managing a SPA for notes on PDF.
 servers:
-  - url: http://localhost:3000
+- url: http://localhost:3000
 paths:
   /notebooks:
     get:
@@ -39,16 +39,16 @@ paths:
     get:
       summary: Details of a specific notebook for a user
       parameters:
-        - in: path
-          name: username
-          required: true
-          schema:
-            type: string
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: integer
+      - in: path
+        name: username
+        required: true
+        schema:
+          type: string
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
       responses:
         "200":
           description: Notebook found
@@ -61,16 +61,16 @@ paths:
     post:
       summary: Create or update a notebook
       parameters:
-        - in: path
-          name: username
-          required: true
-          schema:
-            type: string
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: integer
+      - in: path
+        name: username
+        required: true
+        schema:
+          type: string
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
       requestBody:
         required: true
         content:
@@ -89,16 +89,16 @@ paths:
     delete:
       summary: Delete a notebook
       parameters:
-        - in: path
-          name: username
-          required: true
-          schema:
-            type: string
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: integer
+      - in: path
+        name: username
+        required: true
+        schema:
+          type: string
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
       responses:
         "204":
           description: Notebook deleted successfully (no content)
@@ -108,11 +108,11 @@ paths:
     get:
       summary: Get all notes for a specific notebook
       parameters:
-        - in: path
-          name: notebookId
-          required: true
-          schema:
-            type: integer
+      - in: path
+        name: notebookId
+        required: true
+        schema:
+          type: integer
       responses:
         "200":
           description: List of notes for the notebook
@@ -127,11 +127,11 @@ paths:
     post:
       summary: Add a new note to a specific notebook
       parameters:
-        - in: path
-          name: notebookId
-          required: true
-          schema:
-            type: integer
+      - in: path
+        name: notebookId
+        required: true
+        schema:
+          type: integer
       requestBody:
         required: true
         content:
@@ -151,16 +151,16 @@ paths:
     delete:
       summary: Delete a specific note
       parameters:
-        - in: path
-          name: notebookId
-          required: true
-          schema:
-            type: integer
-        - in: path
-          name: noteId
-          required: true
-          schema:
-            type: integer
+      - in: path
+        name: notebookId
+        required: true
+        schema:
+          type: integer
+      - in: path
+        name: noteId
+        required: true
+        schema:
+          type: integer
       responses:
         "204":
           description: Note deleted successfully (no content)
@@ -201,11 +201,11 @@ paths:
     delete:
       summary: Delete a specific class
       parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: integer
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
       responses:
         "204":
           description: Class deleted successfully (no content)
@@ -215,11 +215,11 @@ paths:
     get:
       summary: Get all PDF for a specific class
       parameters:
-        - in: path
-          name: classesId
-          required: true
-          schema:
-            type: integer
+      - in: path
+        name: classesId
+        required: true
+        schema:
+          type: integer
       responses:
         "200":
           description: List of PDFs for the class
@@ -234,11 +234,11 @@ paths:
     post:
       summary: Add a new PDF to a specific class
       parameters:
-        - in: path
-          name: classesId
-          required: true
-          schema:
-            type: integer
+      - in: path
+        name: classesId
+        required: true
+        schema:
+          type: integer
       requestBody:
         required: true
         content:
@@ -260,28 +260,148 @@ paths:
     delete:
       summary: Delete a specific PDF
       parameters:
-        - in: path
-          name: classesId
-          required: true
-          schema:
-            type: integer
-        - in: path
-          name: pdfId
-          required: true
-          schema:
-            type: integer
+      - in: path
+        name: classesId
+        required: true
+        schema:
+          type: integer
+      - in: path
+        name: pdfId
+        required: true
+        schema:
+          type: integer
       responses:
         "204":
           description: PDF deleted successfully (no content)
         "404":
           description: PDF not found
+  /users:
+    get:
+      summary: Get the informations of a specific user
+      parameters:
+      - in: query
+        name: username
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: User found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserInfo'
+        "404":
+          description: User not found
+    put:
+      summary: Update the informations of a specific user
+      parameters:
+      - in: query
+        name: username
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        "200":
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserInfo'
+        "400":
+          description: Weak password
+        "409":
+          description: Username already exists
+        "404":
+          description: User not found
+    delete:
+      summary: Delete a specific user
+      parameters:
+      - in: query
+        name: username
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: User deleted successfully (no content)
+        "404":
+          description: User not found
+  /users/login:
+    post:
+      summary: Verify user credentials (login)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - username
+              - password
+              properties:
+                username:
+                  type: string
+                  example: "user123"
+                password:
+                  type: string
+                  example: "securepassword"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Login successful"
+                  user:
+                    $ref: '#/components/schemas/UserInfo'
+        "401":
+          description: Invalid credentials
+        "400":
+          description: Missing username or password
+  /users/signup:
+    post:
+      summary: Create a new user (signup)
+      parameters:
+      - in: query
+        name: role
+        required: true
+        schema:
+          $ref: '#/components/schemas/UserRole'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        "201":
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserInfo'
+        "400":
+          description: Weak password
+        "409":
+          description: Username already exists
 
 components:
   schemas:
     Notebook:
       type: object
       required:
-        - id
+      - id
       properties:
         id:
           type: integer
@@ -302,8 +422,8 @@ components:
     Note:
       type: object
       required:
-        - id
-        - notebookId
+      - id
+      - notebookId
       properties:
         id:
           type: integer
@@ -341,3 +461,44 @@ components:
         url:
           type: string
           example: "http://example.com/lecture-notes.pdf"
+    User:
+      type: object
+      required:
+      - username
+      - password
+      - role
+      properties:
+        username:
+          type: string
+          example: "User123"
+        name:
+          type: string
+          example: "John"
+        surname:
+          type: string
+          example: "Doe"
+        password:
+          type: string
+          example: "securepassword"
+        role:
+          $ref: '#/components/schemas/UserRole'
+    UserRole:
+      type: string
+      enum:
+      - student
+      - teacher
+      example: student
+    UserInfo:
+      type: object
+      properties:
+        username:
+          type: string
+          example: "user123"
+        name:
+          type: string
+          example: "John"
+        surname:
+          type: string
+          example: "Doe"
+        role:
+          $ref: '#/components/schemas/UserRole'
