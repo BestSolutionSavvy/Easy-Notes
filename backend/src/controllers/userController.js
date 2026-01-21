@@ -3,9 +3,9 @@ const bcrypt = require("bcrypt");
 
 const SALT_ROUNDS = 12;
 
-// GET /users?email=...
+// GET /users/:email
 exports.getUser = (req, res) => {
-  const { email } = req.query;
+  const { email } = req.params;
   if (!email) {
     return res.status(400).json({ message: "email is required" });
   }
@@ -22,9 +22,9 @@ exports.getUser = (req, res) => {
     });
 };
 
-// PUT /users?email=...
+// PUT /users/:email
 exports.updateUser = async (req, res) => {
-  const { email } = req.query;
+  const { email } = req.params;
   const { password, name, surname } = req.body;
   if (!email) {
     return res.status(400).json({ message: "email is required" });
@@ -51,9 +51,9 @@ exports.updateUser = async (req, res) => {
   }
 };
 
-// DELETE /users?email=...
-exports.deleteUser = (req, res) => {
-  const { email } = req.query;
+// DELETE /users/:email
+exports.deleteUser = async (req, res) => {
+  const { email } = req.params;
   if (!email) {
     return res.status(400).json({ message: "email is required" });
   }

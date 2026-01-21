@@ -317,11 +317,11 @@ paths:
           description: PDF deleted successfully (no content)
         "404":
           description: PDF not found
-  /users:
+  /users/{email}:
     get:
       summary: Get the informations of a specific user
       parameters:
-      - in: query
+      - in: path
         name: email
         required: true
         schema:
@@ -339,7 +339,7 @@ paths:
     put:
       summary: Update the informations of a specific user
       parameters:
-      - in: query
+      - in: path
         name: email
         required: true
         schema:
@@ -365,7 +365,7 @@ paths:
     delete:
       summary: Delete a specific user
       parameters:
-      - in: query
+      - in: path
         name: email
         required: true
         schema:
