@@ -436,6 +436,154 @@ paths:
                 $ref: '#/components/schemas/UserInfo'
         "400":
           description: Weak password
+  /pdfs/upload:
+    post:
+      summary: Upload a new PDF file
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+              - pdf
+              - name
+              - type
+              - owner
+              properties:
+                pdf:
+                  type: string
+                  format: binary
+                  description: PDF file to upload
+                name:
+                  type: string
+                  example: "Lecture 1 Notes"
+                type:
+                  type: string
+                  enum:
+                  - class
+                  - note
+                  example: "note"
+                owner:
+                  type: string
+                  example: "user@example.com"
+                  description: User E-mail
+      responses:
+        "201":
+          description: PDF uploaded successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PDFDocument'
+        "400":
+          description: Invalid file or missing fields
+  /pdfs/{id}:
+    get:
+      summary: Get PDF metadata
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        description: PDF document ID
+      responses:
+        "200":
+          description: PDF metadata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PDFDocument'
+        "404":
+          description: PDF not found
+    delete:
+      summary: Delete a PDF document
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        description: PDF document ID
+      responses:
+        "204":
+          description: PDF deleted successfully
+        "404":
+          description: PDF not found
+  /pdfs/{id}/download:
+    get:
+      summary: Download the PDF file
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        description: PDF document ID
+      responses:
+        "200":
+          description: PDF file download
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: PDF not found
+  /pdfs/{id}/upload:
+    put:
+      summary: Replace PDF file with a new version
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        description: PDF document ID
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+              - pdf
+              properties:
+                pdf:
+                  type: string
+                  format: binary
+                  description: New PDF file to upload
+      responses:
+        "200":
+          description: PDF file replaced successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PDFDocument'
+        "400":
+          description: No file uploaded
+        "404":
+          description: PDF not found
+  /pdfs/search:
+    get:
+      summary: Get all PDFs metadata for a specific owner
+      parameters:
+      - in: query
+        name: owner
+        required: true
+        schema:
+          type: string
+          example: "user@example.com"
+        description: User E-mail
+      responses:
+        "200":
+          description: List of PDFs of the owner
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PDFDocument'
 
 components:
   schemas:
@@ -540,3 +688,30 @@ components:
           example: "Doe"
         role:
           $ref: '#/components/schemas/UserRole'
+    PDFDocument:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: "507f1f77bcf86cd799439011"
+        name:
+          type: string
+          example: "Lecture 1"
+        date:
+          type: string
+          format: date-time
+          example: "2026-01-01T10:30:00Z"
+        type:
+          type: string
+          enum:
+          - class
+          - note
+          example: "note"
+        owner:
+          type: string
+          example: "user@example.com"
+          description: User E-mail
+        gridFsFileId:
+          type: string
+          example: "507f1f77bcf86cd799439012"
+          description: GridFS file ID

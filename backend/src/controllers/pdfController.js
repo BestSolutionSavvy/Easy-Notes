@@ -1,0 +1,168 @@
+const { pdfModel } = require("../models/pdfsModel");
+const { userModel } = require("../models/usersModel");
+const mongoose = require("mongoose");
+
+let gridFSBucket;
+
+mongoose.connection.once("open", () => {
+  gridFSBucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, {
+    bucketName: "pdfs",
+  });
+});
+
+// POST /pdfs/upload - Upload a new PDF file with metadata
+exports.uploadPdf = async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: "No file uploaded" });
+  }
+  const { name, type, owner } = req.body;
+  if (!name || !type || !owner) {
+    return res
+      .status(400)
+      .json({ message: "Missing required fields: name, type, owner" });
+  }
+  if (!["class", "note"].includes(type)) {
+    return res
+      .status(400)
+      .json({ message: "Invalid type. Must be 'class' or 'note'" });
+  }
+  try {
+    const uploadStream = gridFSBucket.openUploadStream(req.file.originalname, {
+      contentType: req.file.mimetype,
+    });
+    uploadStream.end(req.file.buffer);
+    await new Promise((resolve, reject) => {
+      uploadStream.on("finish", resolve);
+      uploadStream.on("error", reject);
+    });
+    const newPdf = new pdfModel({
+      name,
+      type,
+      owner,
+      gridFsFileId: uploadStream.id,
+    });
+    const savedPdf = await newPdf.save();
+    res.status(201).json(savedPdf);
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
+
+// GET /pdfs/:id - Read PDF metadata only
+exports.readPdfData = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const pdf = await pdfModel.findById(id);
+    if (!pdf) {
+      return res.status(404).json({ message: "PDF not found" });
+    }
+    const owner = await userModel.findOne({ email: pdf.owner });
+    const pdfData = pdf.toJSON();
+    if (owner) {
+      pdfData.owner = owner.toUserInfo();
+    }
+    res.json(pdfData);
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
+
+// GET /pdfs/:id/download
+exports.downloadPdf = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const pdf = await pdfModel.findById(id);
+    if (!pdf) {
+      return res.status(404).json({ message: "PDF not found" });
+    }
+    const files = await gridFSBucket.find({ _id: pdf.gridFsFileId }).toArray();
+    if (files.length === 0) {
+      return res.status(404).json({ message: "File not found in GridFS" });
+    }
+    const downloadStream = gridFSBucket.openDownloadStream(pdf.gridFsFileId);
+    res.set("Content-Type", "application/pdf");
+    res.set("Content-Disposition", `attachment; filename="${pdf.name}.pdf"`);
+    downloadStream.pipe(res);
+    downloadStream.on("error", (err) => {
+      console.error("GridFS download error:", err);
+      if (!res.headersSent) {
+        res
+          .status(404)
+          .json({ message: "Error downloading file", error: err.message });
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
+
+// PUT /pdfs/:id/upload - Replace PDF file (upload new version)
+exports.updatePdf = async (req, res) => {
+  const { id } = req.params;
+  if (!req.file) {
+    return res.status(400).json({ message: "No file uploaded" });
+  }
+  try {
+    const pdf = await pdfModel.findById(id);
+    if (!pdf) {
+      return res.status(404).json({ message: "PDF not found" });
+    }
+    await gridFSBucket.delete(pdf.gridFsFileId);
+    const uploadStream = gridFSBucket.openUploadStream(req.file.originalname, {
+      contentType: req.file.mimetype,
+    });
+    uploadStream.end(req.file.buffer);
+    uploadStream.on("finish", async () => {
+      pdf.gridFsFileId = uploadStream.id;
+      const updatedPdf = await pdf.save();
+      res.json(updatedPdf);
+    });
+    uploadStream.on("error", (err) => {
+      res
+        .status(500)
+        .json({ message: "Error uploading file", error: err.message });
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
+
+// DELETE /pdfs/:id - Delete PDF (metadata and file from GridFS)
+exports.deletePdf = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const pdf = await pdfModel.findById(id);
+    if (!pdf) {
+      return res.status(404).json({ message: "PDF not found" });
+    }
+    await gridFSBucket.delete(pdf.gridFsFileId);
+    await pdfModel.findByIdAndDelete(id);
+    res.status(204).send();
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
+
+// GET /pdfs/search?owner=email - Get list of PDF metadata by owner
+exports.findPdfsByOwner = async (req, res) => {
+  const { owner } = req.query;
+  if (!owner) {
+    return res
+      .status(400)
+      .json({ message: "Owner query parameter is required" });
+  }
+  try {
+    const pdfs = await pdfModel.find({ owner });
+    const ownerData = await userModel.findOne({ email: owner });
+    const pdfsWithOwner = pdfs.map((pdf) => {
+      const pdfData = pdf.toJSON();
+      if (ownerData) {
+        pdfData.owner = ownerData.toUserInfo();
+      }
+      return pdfData;
+    });
+    res.json(pdfsWithOwner);
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
