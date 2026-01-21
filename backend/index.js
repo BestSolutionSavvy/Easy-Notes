@@ -20,9 +20,14 @@ app.use(express.static('public'));
 
 app.use('/notebooks', notebookRouter);
 app.use('/classes', classesRouter);
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
+if (process.env.NODE_ENV == 'development') {
+    app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+}
 
 app.listen(3000, () => {
     console.log('Server listening on http://localhost:3000');
-    console.log('API docs available at http://localhost:3000/api-docs');
+    if (process.env.NODE_ENV == 'development') {
+        console.log('API docs available at http://localhost:3000/api-docs');
+    }
 });
