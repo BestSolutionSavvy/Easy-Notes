@@ -3,14 +3,14 @@ const bcrypt = require("bcrypt");
 
 const SALT_ROUNDS = 12;
 
-// GET /users?username=...
+// GET /users?email=...
 exports.getUser = (req, res) => {
-  const { username } = req.query;
-  if (!username) {
-    return res.status(400).json({ message: "Username is required" });
+  const { email } = req.query;
+  if (!email) {
+    return res.status(400).json({ message: "email is required" });
   }
   userModel
-    .findOne({ username })
+    .findOne({ email })
     .then((user) => {
       if (!user) {
         return res.status(404).json({ message: "User not found" });
@@ -22,12 +22,12 @@ exports.getUser = (req, res) => {
     });
 };
 
-// PUT /users?username=...
+// PUT /users?email=...
 exports.updateUser = async (req, res) => {
-  const { username } = req.query;
+  const { email } = req.query;
   const { password, name, surname } = req.body;
-  if (!username) {
-    return res.status(400).json({ message: "Username is required" });
+  if (!email) {
+    return res.status(400).json({ message: "email is required" });
   }
   if (password && password.length < 8) {
     return res
@@ -35,7 +35,7 @@ exports.updateUser = async (req, res) => {
       .json({ message: "Weak password - must be at least 8 characters" });
   }
   try {
-    const user = await userModel.findOne({ username });
+    const user = await userModel.findOne({ email });
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -51,14 +51,14 @@ exports.updateUser = async (req, res) => {
   }
 };
 
-// DELETE /users?username=...
+// DELETE /users?email=...
 exports.deleteUser = (req, res) => {
-  const { username } = req.query;
-  if (!username) {
-    return res.status(400).json({ message: "Username is required" });
+  const { email } = req.query;
+  if (!email) {
+    return res.status(400).json({ message: "email is required" });
   }
   userModel
-    .findOneAndDelete({ username })
+    .findOneAndDelete({ email })
     .then((user) => {
       if (!user) {
         return res.status(404).json({ message: "User not found" });
@@ -72,12 +72,12 @@ exports.deleteUser = (req, res) => {
 
 // POST /users/login
 exports.login = async (req, res) => {
-  const { username, password } = req.body;
-  if (!username || !password) {
-    return res.status(400).json({ message: "Missing username or password" });
+  const { email, password } = req.body;
+  if (!email || !password) {
+    return res.status(400).json({ message: "Missing email or password" });
   }
   try {
-    const user = await userModel.findOne({ username });
+    const user = await userModel.findOne({ email });
     if (!user) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
@@ -97,14 +97,14 @@ exports.login = async (req, res) => {
 // POST /users/signup?role=...
 exports.signup = async (req, res) => {
   const { role } = req.query;
-  const { username, password, name, surname } = req.body;
+  const { email, password, name, surname } = req.body;
   if (!role) {
     return res.status(400).json({ message: "Role is required" });
   }
-  if (!username || !password) {
+  if (!email || !password) {
     return res
       .status(400)
-      .json({ message: "Username and password are required" });
+      .json({ message: "email and password are required" });
   }
   if (password.length < 8) {
     return res
@@ -112,13 +112,13 @@ exports.signup = async (req, res) => {
       .json({ message: "Weak password - must be at least 8 characters" });
   }
   try {
-    const existingUser = await userModel.findOne({ username });
+    const existingUser = await userModel.findOne({ email });
     if (existingUser) {
-      return res.status(409).json({ message: "Username already exists" });
+      return res.status(409).json({ message: "email already exists" });
     }
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
     const newUser = new userModel({
-      username,
+      email,
       password: hashedPassword,
       name: name || "",
       surname: surname || "",

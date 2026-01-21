@@ -2,6 +2,6 @@
   "name": "string",
   "date": "ISODate",
   "type": "class | note",
-  "ownerUsername": "UserId"
+  "ownerEmail": "UserId"
 }
 

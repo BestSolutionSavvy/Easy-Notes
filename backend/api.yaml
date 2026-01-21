@@ -35,12 +35,12 @@ paths:
                 $ref: "#/components/schemas/Notebook"
         "400":
           description: Invalid notebook data
-  /notebooks/{username}/{id}:
+  /notebooks/{email}/{id}:
     get:
       summary: Details of a specific notebook for a user
       parameters:
       - in: path
-        name: username
+        name: email
         required: true
         schema:
           type: string
@@ -62,7 +62,7 @@ paths:
       summary: Create or update a notebook
       parameters:
       - in: path
-        name: username
+        name: email
         required: true
         schema:
           type: string
@@ -90,7 +90,7 @@ paths:
       summary: Delete a notebook
       parameters:
       - in: path
-        name: username
+        name: email
         required: true
         schema:
           type: string
@@ -322,10 +322,11 @@ paths:
       summary: Get the informations of a specific user
       parameters:
       - in: query
-        name: username
+        name: email
         required: true
         schema:
           type: string
+          example: "user@example.com"
       responses:
         "200":
           description: User found
@@ -339,10 +340,11 @@ paths:
       summary: Update the informations of a specific user
       parameters:
       - in: query
-        name: username
+        name: email
         required: true
         schema:
           type: string
+          example: "user@example.com"
       requestBody:
         required: true
         content:
@@ -358,18 +360,17 @@ paths:
                 $ref: '#/components/schemas/UserInfo'
         "400":
           description: Weak password
-        "409":
-          description: Username already exists
         "404":
           description: User not found
     delete:
       summary: Delete a specific user
       parameters:
       - in: query
-        name: username
+        name: email
         required: true
         schema:
           type: string
+          example: "user@example.com"
       responses:
         "204":
           description: User deleted successfully (no content)
@@ -385,12 +386,12 @@ paths:
             schema:
               type: object
               required:
-              - username
+              - email
               - password
               properties:
-                username:
+                email:
                   type: string
-                  example: "user123"
+                  example: "user@example.com"
                 password:
                   type: string
                   example: "securepassword"
@@ -410,7 +411,7 @@ paths:
         "401":
           description: Invalid credentials
         "400":
-          description: Missing username or password
+          description: Missing email or password
   /users/signup:
     post:
       summary: Create a new user (signup)
@@ -435,8 +436,6 @@ paths:
                 $ref: '#/components/schemas/UserInfo'
         "400":
           description: Weak password
-        "409":
-          description: Username already exists
 
 components:
   schemas:
@@ -448,9 +447,9 @@ components:
         id:
           type: integer
           example: 1
-        username:
+        email:
           type: string
-          example: "user123"
+          example: "user@example.com"
         subject:
           type: string
           example: "ASW"
@@ -503,13 +502,13 @@ components:
     User:
       type: object
       required:
-      - username
+      - email
       - password
       - role
       properties:
-        username:
+        email:
           type: string
-          example: "User123"
+          example: "user@example.com"
         name:
           type: string
           example: "John"
@@ -530,9 +529,9 @@ components:
     UserInfo:
       type: object
       properties:
-        username:
+        email:
           type: string
-          example: "user123"
+          example: "user@example.com"
         name:
           type: string
           example: "John"
