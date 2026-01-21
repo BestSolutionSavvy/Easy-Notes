@@ -484,6 +484,10 @@ components:
         name:
           type: string
           example: "ASW"
+        date:
+          type: string
+          format: date
+          example: "2024-10-01"
     PDF:
       type: object
       properties:

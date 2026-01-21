@@ -8,6 +8,10 @@ const classSchema = new mongoose.Schema({
     teacher: {
         type: String,
         required: true
+    },
+    date: {
+        type: Date,
+        required: true
     }
 });
 const classModel = mongoose.model('Class', classSchema);
