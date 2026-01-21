@@ -9,3 +9,12 @@ Nel diagramma è omessa la parte relativa alla richiesta del consenso e della re
     \caption{Diagramma di sequenza per la notifica relativa ad un nuovo PDF}
     \label{fig:seq_pdf}
 \end{figure}
+
+\subsection{Notifica generazione riassunto tramite LLM}
+In figura \ref{fig:seq_llm} è possibile vedere il diagramma di sequenza relativo alla generazione di un riassunto tramite LLM. In questo caso, lo studente richiede al server la generazione del riassunto per un determinato Notebook. Il server, a sua volta, invia la richiesta al servizio di LLM e, una volta ricevuta la risposta, la inoltra allo studente. La notifica viene inviata al dispositivo dello studente tramite il servizio di notifiche push.
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=1\textwidth]{diagrams/Sequence-llm.png}
+    \caption{Diagramma di sequenza per la notifica relativa alla generazione di un riassunto tramite LLM}
+    \label{fig:seq_llm}
+\end{figure}
