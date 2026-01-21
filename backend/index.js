@@ -9,7 +9,9 @@ const swaggerDocument = YAML.load('./api.yaml');
 const notebookRouter = require('./src/routes/notebookRoutes');
 const classesRouter = require('./src/routes/classesRoutes');
 
-mongoose.connect(process.env.MONGO_URI);
+mongoose.connect(process.env.MONGO_URI, {
+    dbName: 'easy-notes'
+});
 
 const app = express();
 app.use(cors());
