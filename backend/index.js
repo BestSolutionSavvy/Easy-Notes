@@ -8,6 +8,7 @@ const swaggerDocument = YAML.load('./api.yaml');
 
 const notebookRouter = require('./src/routes/notebookRoutes');
 const classesRouter = require('./src/routes/classesRoutes');
+const summarizeRouter = require('./src/routes/summarizeRoutes');
 
 mongoose.connect(process.env.MONGO_URI);
 
@@ -18,6 +19,7 @@ app.use(express.static('public'));
 
 app.use('/notebooks', notebookRouter);
 app.use('/classes', classesRouter);
+app.use('/summarize', summarizeRouter);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.listen(3000, () => {
