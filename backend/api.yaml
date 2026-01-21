@@ -205,7 +205,7 @@ paths:
           name: id
           required: true
           schema:
-            type: integer
+            type: string
       responses:
         "200":
           description: Class found
@@ -222,7 +222,7 @@ paths:
           name: id
           required: true
           schema:
-            type: integer
+            type: string
       requestBody:
         required: true
         content:
@@ -247,7 +247,7 @@ paths:
           name: id
           required: true
           schema:
-            type: integer
+            type: string
       responses:
         "204":
           description: Class deleted successfully (no content)
@@ -359,9 +359,6 @@ components:
     Classes:
       type: object
       properties:
-        id:
-          type: integer
-          example: 1
         teacher:
           type: string
           example: "Dr. Smith"

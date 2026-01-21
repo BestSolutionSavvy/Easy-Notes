@@ -12,7 +12,7 @@ exports.listClasses = (req, res) => {
 }
 
 exports.createClass = (req, res) => {
-    if (!req.body || Object.keys(req.body).length === 0) {
+    if (!req.body) {
         return res.status(400).json({ error: 'Invalid class data' });
     }
     const newClass = new classesModel(req.body);
@@ -21,7 +21,7 @@ exports.createClass = (req, res) => {
             res.status(201).json(doc);
         })
         .catch(err => {
-            res.status(400).json({ error: 'Invalid class data' });
+            res.status(400).json({ error: err.message });
         });
 }
 
@@ -43,8 +43,6 @@ exports.updateClass = (req, res) => {
         .then(updatedClass => {
             if (!updatedClass) {
                 return res.status(404).json({ error: 'Class not found' });
-            } else if (req.body.id && req.body.id !== updatedClass.id) {
-                return res.status(400).json({ error: 'Invalid class data' });
             }
             res.json(updatedClass);
         })
@@ -58,7 +56,7 @@ exports.deleteClass = (req, res) => {
             if (!deletedClass) {
                 return res.status(404).json({ error: 'Class not found' });
             }
-            res.status(204).json({ message: 'Class deleted successfully (no content)' });
+            res.status(204).send();
         })
         .catch(err => res.status(500).json({ error: err.message }));
 }
