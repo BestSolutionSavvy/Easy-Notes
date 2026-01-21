@@ -198,6 +198,48 @@ paths:
         "400":
           description: Invalid class data
   /classes/{id}:
+    get:
+      summary: Get details of a specific class
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Class found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Classes"
+        "404":
+          description: Class not found
+    put:
+      summary: Update a specific class
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Classes"
+      responses:
+        "200":
+          description: Class updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Classes"
+        "400":
+          description: Invalid class data
+        "404":
+          description: Class not found
     delete:
       summary: Delete a specific class
       parameters:
@@ -205,7 +247,7 @@ paths:
         name: id
         required: true
         schema:
-          type: integer
+          type: string
       responses:
         "204":
           description: Class deleted successfully (no content)
@@ -437,9 +479,6 @@ components:
     Classes:
       type: object
       properties:
-        id:
-          type: integer
-          example: 1
         teacher:
           type: string
           example: "Dr. Smith"
