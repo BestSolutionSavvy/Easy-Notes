@@ -7,6 +7,7 @@ const YAML = require('yamljs');
 const swaggerDocument = YAML.load('./api.yaml');
 
 const notebookRouter = require('./src/routes/notebookRoutes');
+const classesRouter = require('./src/routes/classesRoutes');
 
 mongoose.connect(process.env.MONGO_URI);
 
@@ -16,6 +17,7 @@ app.use(express.json());
 app.use(express.static('public'));
 
 app.use('/notebooks', notebookRouter);
+app.use('/classes', classesRouter);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.listen(3000, () => {

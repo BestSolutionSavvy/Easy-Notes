@@ -198,6 +198,48 @@ paths:
         "400":
           description: Invalid class data
   /classes/{id}:
+    get:
+      summary: Get details of a specific class
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Class found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Classes"
+        "404":
+          description: Class not found
+    put:
+      summary: Update a specific class
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Classes"
+      responses:
+        "200":
+          description: Class updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Classes"
+        "400":
+          description: Invalid class data
+        "404":
+          description: Class not found
     delete:
       summary: Delete a specific class
       parameters:
