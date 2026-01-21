@@ -198,48 +198,6 @@ paths:
         "400":
           description: Invalid class data
   /classes/{id}:
-    get:
-      summary: Get details of a specific class
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-      responses:
-        "200":
-          description: Class found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Classes"
-        "404":
-          description: Class not found
-    put:
-      summary: Update a specific class
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Classes"
-      responses:
-        "200":
-          description: Class updated successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Classes"
-        "400":
-          description: Invalid class data
-        "404":
-          description: Class not found
     delete:
       summary: Delete a specific class
       parameters:
@@ -247,7 +205,7 @@ paths:
           name: id
           required: true
           schema:
-            type: string
+            type: integer
       responses:
         "204":
           description: Class deleted successfully (no content)
@@ -323,29 +281,109 @@ components:
     Notebook:
       type: object
       required:
-        - id
+        - name
+        - subject
+        - owner
+        - type
       properties:
         id:
           type: integer
           example: 1
-        username:
+        name:
           type: string
-          example: "user123"
+          example: "Appunti ASW"
         subject:
           type: string
           example: "ASW"
         date:
           type: string
-          format: date
-          example: "2024-10-01"
+          format: date-time
+          example: "2024-10-01T10:30:00Z"
+        owner:
+          type: string
+          example: "user123"
+        type:
+          type: string
+          example: "lecture"
         last_page:
           type: integer
+          default: 0
           example: 15
+        pages:
+          type: array
+          items:
+            $ref: "#/components/schemas/Page"
+
+    Page:
+      type: object
+      required:
+        - page_number
+        - note_content
+      properties:
+        page_number:
+          type: integer
+          example: 1
+        slide_number:
+          type: integer
+          example: 5
+        id_pdf:
+          type: string
+          example: "pdf_12345"
+        note_content:
+          type: string
+          example: "Contenuto degli appunti della pagina"
+        text_boxes:
+          type: array
+          items:
+            $ref: "#/components/schemas/TextBox"
+        highlights:
+          type: array
+          items:
+            $ref: "#/components/schemas/Highlight"
+
+    TextBox:
+      type: object
+      properties:
+        left:
+          type: number
+          example: 100.5
+        top:
+          type: number
+          example: 200.3
+        width:
+          type: number
+          example: 150.0
+        height:
+          type: number
+          example: 50.0
+        content:
+          type: string
+          example: "Testo della casella"
+
+    Highlight:
+      type: object
+      properties:
+        left:
+          type: number
+          example: 120.5
+        top:
+          type: number
+          example: 180.3
+        width:
+          type: number
+          example: 200.0
+        height:
+          type: number
+          example: 20.0
+        content:
+          type: string
+          example: "Testo evidenziato"
     Note:
       type: object
       required:
         - id
         - notebookId
+        - content
       properties:
         id:
           type: integer
@@ -359,6 +397,9 @@ components:
     Classes:
       type: object
       properties:
+        id:
+          type: integer
+          example: 1
         teacher:
           type: string
           example: "Dr. Smith"
