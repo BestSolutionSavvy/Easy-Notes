@@ -11,6 +11,8 @@ const userRouter = require("./src/routes/userRoutes");
 const classesRouter = require("./src/routes/classesRoutes");
 const pdfRouter = require("./src/routes/pdfRouter");
 
+const isDevelopment = process.argv.includes('--dev');
+
 mongoose.connect(process.env.MONGO_URI, {
   dbName: "easy-notes",
 });
@@ -25,13 +27,13 @@ app.use("/users", userRouter);
 app.use("/classes", classesRouter);
 app.use("/pdfs", pdfRouter);
 
-if (process.env.NODE_ENV == "development") {
-  app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+if (isDevelopment) {
+    app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 }
 
 app.listen(3000, () => {
-  console.log("Server listening on http://localhost:3000");
-  if (process.env.NODE_ENV == "development") {
-    console.log("API docs available at http://localhost:3000/api-docs");
-  }
+    console.log('Server listening on http://localhost:3000');
+    if (isDevelopment) {
+        console.log('API docs available at http://localhost:3000/api-docs');
+    }
 });
