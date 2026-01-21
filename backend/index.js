@@ -10,6 +10,9 @@ const notebookRouter = require('./src/routes/notebookRoutes');
 const userRouter = require('./src/routes/userRoutes');
 const classesRouter = require('./src/routes/classesRoutes');
 
+// Controlla se siamo in modalità sviluppo dal parametro --dev
+const isDevelopment = process.argv.includes('--dev');
+
 mongoose.connect(process.env.MONGO_URI, {
     dbName: 'easy-notes'
 });
@@ -23,13 +26,13 @@ app.use('/notebooks', notebookRouter);
 app.use('/users', userRouter);
 app.use('/classes', classesRouter);
 
-if (process.env.NODE_ENV == 'development') {
+if (isDevelopment) {
     app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 }
 
 app.listen(3000, () => {
     console.log('Server listening on http://localhost:3000');
-    if (process.env.NODE_ENV == 'development') {
+    if (isDevelopment) {
         console.log('API docs available at http://localhost:3000/api-docs');
     }
 });
