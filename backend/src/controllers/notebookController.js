@@ -1,4 +1,4 @@
-const { notebookModel } = require('../models/notebookModel');
+const { notebookModel } = require('../models/notebooksModel');
 
 exports.listNotebooks = (req, res) => {
     notebookModel.find()

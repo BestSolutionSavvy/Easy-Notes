@@ -6,7 +6,7 @@ const swaggerUi = require("swagger-ui-express");
 const YAML = require("yamljs");
 const swaggerDocument = YAML.load("./api.yaml");
 
-const notebookRouter = require("./src/routes/notebookRoutes");
+const notebookRouter = require("./src/routes/notebooksRoutes");
 const userRouter = require("./src/routes/userRoutes");
 const classesRouter = require("./src/routes/classesRoutes");
 const pdfRouter = require("./src/routes/pdfRouter");
