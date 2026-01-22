@@ -9,9 +9,45 @@ import closeIcon from '../assets/close.svg';
 import shortcutIcon from '../assets/shortcut.svg';
 
 const isMenuOpen = ref(false);
+const notebookName = ref('');
+const pdfName = ref('');
+const subjectName = ref('');
 
 const toggleMenu = () => {
     isMenuOpen.value = !isMenuOpen.value;
+};
+
+const createNotebook = async () => {
+    try {
+        const response = await fetch('/api/notebooks', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                name: notebookName.value,
+                subject: subjectName.value,
+                date: new Date().toISOString(),
+                owner: 'user123',
+                type: pdfName.value ? 'with_slides' : 'simple',
+                last_page: 0,
+                pages: [],
+            })
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            console.log('Notebook creato:', data);
+            // Reset form
+            notebookName.value = '';
+            pdfName.value = '';
+            subjectName.value = '';
+        } else {
+            console.error('Errore nella creazione del notebook');
+        }
+    } catch (error) {
+        console.error('Errore:', error);
+    }
 };
 
 interface Props {
@@ -50,14 +86,33 @@ const props = withDefaults(defineProps<Props>(), {
                 </div>
             </div>
             <HeaderButton v-if="variant === 'tools'" :text="'Create Notebook'" :icon="newNotebookIcon">
-                <div class="flex flex-row gap-2 p-2">
-                    <button class="px-4 py-2 bg-gainsboro-100 rounded-md text-sm hover:scale-[1.01] active:scale-[0.99] transition-all duration-200">
-                        Simple
+                <form @submit.prevent="createNotebook" class="flex flex-col gap-3 p-4 min-w-[20rem]">
+                    <div class="flex flex-col gap-1">
+                        <label class="text-sm font-medium text-gray-700">Nome Notebook *</label>
+                        <input v-model="notebookName" type="text" required
+                            class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                            placeholder="Es. Appunti Lezione 1" />
+                    </div>
+                    
+                    <div class="flex flex-col gap-1">
+                        <label class="text-sm font-medium text-gray-700">Nome PDF</label>
+                        <input v-model="pdfName" type="text"
+                            class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                            placeholder="Es. Capitolo_01.pdf (opzionale)" />
+                    </div>
+                    
+                    <div class="flex flex-col gap-1">
+                        <label class="text-sm font-medium text-gray-700">Materia *</label>
+                        <input v-model="subjectName" type="text" required
+                            class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                            placeholder="Es. Matematica" />
+                    </div>
+                    
+                    <button type="submit"
+                        class="mt-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-amber-400 text-white font-medium rounded-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200">
+                        Crea Notebook
                     </button>
-                    <button class="px-4 py-2 bg-gainsboro-100 rounded-md text-sm hover:scale-[1.01] active:scale-[0.99] transition-all duration-200">
-                        With Slides
-                    </button>
-                </div>
+                </form>
             </HeaderButton>
             <HeaderButton v-if="variant === 'tools'" :text="'Open Notebook'" :icon="openNotebookIcon">
                 <div class="flex flex-row gap-2 p-2">

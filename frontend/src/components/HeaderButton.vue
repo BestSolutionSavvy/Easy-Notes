@@ -112,13 +112,13 @@ const props = withDefaults(defineProps<Props>(), {
 @keyframes scale-in-tl {
     0% {
         transform: scale(calc(var(--scale-x)*0.88), calc(var(--scale-y)*0.60));
-        transform-origin: 1% 1%;
+        transform-origin: 0% 0%;
         opacity: 1;
     }
 
     100% {
         transform: scale(1);
-        transform-origin: 1% 1%;
+        transform-origin: 0% 0%;
         opacity: 1;
     }
 }
@@ -126,13 +126,13 @@ const props = withDefaults(defineProps<Props>(), {
 @keyframes scale-out-tl {
     0% {
         transform: scale(1);
-        transform-origin: 1% 1%;
+        transform-origin: 0% 0%;
         opacity: 1;
     }
 
     100% {
         transform: scale(calc(var(--scale-x)*0.88), calc(var(--scale-y)*0.60));
-        transform-origin: 1% 1%;
+        transform-origin: 0% 0%;
         opacity: 1;
     }
 }
