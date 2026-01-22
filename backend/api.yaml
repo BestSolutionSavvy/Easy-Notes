@@ -4,7 +4,7 @@ info:
   version: 1.0.0
   description: API for managing a SPA for notes on PDF.
 servers:
-- url: http://localhost:3000
+- url: http://localhost:3000/api
 paths:
   /notebooks:
     get:
@@ -651,10 +651,10 @@ components:
         date:
           type: string
           format: date-time
-          example: "2024-10-01T10:30:00Z"
+          example: "2026-01-01T10:30:00Z"
         owner:
           type: string
-          example: "user123"
+          example: "user@example.com"
         type:
           type: string
           example: "slide"
@@ -762,7 +762,7 @@ components:
         date:
           type: string
           format: date
-          example: "2024-10-01"
+          example: "2026-01-01"
     SummaryResponse:
       type: object
       properties:

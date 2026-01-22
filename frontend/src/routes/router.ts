@@ -13,7 +13,7 @@ import PdfPage from "../pages/PdfPage.vue";
 import NotePage from "../pages/NotePage.vue";
 import ClassesPage from "../pages/ClassesPage.vue";
 import LecturesPage from "../pages/LecturesPage.vue";
-import NotesPage from "../pages/NotesListPage.vue";
+import NotebooksPage from "../pages/NotebooksPage.vue";
 
 const routes: RouteRecordRaw[] = [
   {
@@ -27,14 +27,15 @@ const routes: RouteRecordRaw[] = [
     },
   },
   {
-    path: "/notes",
+    path: "/notebooks",
     components: {
-      left: NotesPage,
+      left: NotebooksPage,
       right: PdfPage,
     },
     props: {
       right: { id: 0, toolBar: false },
     },
+    meta: { requiresAuth: true },
   },
   {
     path: "/signin",

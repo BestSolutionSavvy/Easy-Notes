@@ -3,8 +3,6 @@ import { ref, computed } from "vue";
 import axios from "axios";
 import type { User } from "../types/user";
 
-axios.defaults.withCredentials = true;
-
 export const useAuthStore = defineStore("auth", () => {
   const user = ref<User | null>(null);
   const isLoading = ref(false);
