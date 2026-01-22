@@ -12,13 +12,16 @@
   "license": "ISC",
   "packageManager": "pnpm@10.25.0",
   "dependencies": {
-    "bcrypt": "^6.0.0",
     "@cerebras/cerebras_cloud_sdk": "^1.64.1",
+    "bcrypt": "^6.0.0",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.1.5",
     "multer": "^2.0.2",
+    "pdf-lib": "^1.17.1",
     "socket.io": "^4.8.3",
     "swagger-ui-express": "^5.0.1",
     "yamljs": "^0.3.0"

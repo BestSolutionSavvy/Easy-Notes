@@ -4,7 +4,7 @@ info:
   version: 1.0.0
   description: API for managing a SPA for notes on PDF.
 servers:
-  - url: http://localhost:3000
+- url: http://localhost:3000/api
 paths:
   /notebooks:
     get:
@@ -39,16 +39,16 @@ paths:
     get:
       summary: Details of a specific notebook for a user
       parameters:
-        - in: path
-          name: email
-          required: true
-          schema:
-            type: string
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
+      - in: path
+        name: email
+        required: true
+        schema:
+          type: string
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
       responses:
         "200":
           description: Notebook found
@@ -61,16 +61,16 @@ paths:
     post:
       summary: Create or update a notebook
       parameters:
-        - in: path
-          name: email
-          required: true
-          schema:
-            type: string
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
+      - in: path
+        name: email
+        required: true
+        schema:
+          type: string
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
       requestBody:
         required: true
         content:
@@ -89,16 +89,16 @@ paths:
     delete:
       summary: Delete a notebook
       parameters:
-        - in: path
-          name: email
-          required: true
-          schema:
-            type: string
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
+      - in: path
+        name: email
+        required: true
+        schema:
+          type: string
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
       responses:
         "204":
           description: Notebook deleted successfully (no content)
@@ -108,11 +108,11 @@ paths:
     get:
       summary: Get all notes for a specific notebook
       parameters:
-        - in: path
-          name: notebookId
-          required: true
-          schema:
-            type: string
+      - in: path
+        name: notebookId
+        required: true
+        schema:
+          type: string
       responses:
         "200":
           description: List of notes for the notebook
@@ -127,11 +127,11 @@ paths:
     post:
       summary: Add a new note to a specific notebook
       parameters:
-        - in: path
-          name: notebookId
-          required: true
-          schema:
-            type: string
+      - in: path
+        name: notebookId
+        required: true
+        schema:
+          type: string
       requestBody:
         required: true
         content:
@@ -151,16 +151,16 @@ paths:
     delete:
       summary: Delete a specific note
       parameters:
-        - in: path
-          name: notebookId
-          required: true
-          schema:
-            type: integer
-        - in: path
-          name: noteId
-          required: true
-          schema:
-            type: integer
+      - in: path
+        name: notebookId
+        required: true
+        schema:
+          type: integer
+      - in: path
+        name: noteId
+        required: true
+        schema:
+          type: integer
       responses:
         "204":
           description: Note deleted successfully (no content)
@@ -201,11 +201,11 @@ paths:
     delete:
       summary: Delete a specific class
       parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: integer
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
       responses:
         "204":
           description: Class deleted successfully (no content)
@@ -215,11 +215,11 @@ paths:
     get:
       summary: Get all PDF for a specific class
       parameters:
-        - in: path
-          name: classesId
-          required: true
-          schema:
-            type: integer
+      - in: path
+        name: classesId
+        required: true
+        schema:
+          type: integer
       responses:
         "200":
           description: List of PDFs for the class
@@ -234,11 +234,11 @@ paths:
     post:
       summary: Add a new PDF to a specific class
       parameters:
-        - in: path
-          name: classesId
-          required: true
-          schema:
-            type: integer
+      - in: path
+        name: classesId
+        required: true
+        schema:
+          type: integer
       requestBody:
         required: true
         content:
@@ -260,16 +260,16 @@ paths:
     delete:
       summary: Delete a specific PDF
       parameters:
-        - in: path
-          name: classesId
-          required: true
-          schema:
-            type: integer
-        - in: path
-          name: pdfId
-          required: true
-          schema:
-            type: integer
+      - in: path
+        name: classesId
+        required: true
+        schema:
+          type: integer
+      - in: path
+        name: pdfId
+        required: true
+        schema:
+          type: integer
       responses:
         "204":
           description: PDF deleted successfully (no content)
@@ -279,12 +279,12 @@ paths:
     get:
       summary: Get the informations of a specific user
       parameters:
-        - in: path
-          name: email
-          required: true
-          schema:
-            type: string
-            example: "user@example.com"
+      - in: path
+        name: email
+        required: true
+        schema:
+          type: string
+          example: "user@example.com"
       responses:
         "200":
           description: User found
@@ -297,12 +297,12 @@ paths:
     put:
       summary: Update the informations of a specific user
       parameters:
-        - in: path
-          name: email
-          required: true
-          schema:
-            type: string
-            example: "user@example.com"
+      - in: path
+        name: email
+        required: true
+        schema:
+          type: string
+          example: "user@example.com"
       requestBody:
         required: true
         content:
@@ -323,12 +323,12 @@ paths:
     delete:
       summary: Delete a specific user
       parameters:
-        - in: path
-          name: email
-          required: true
-          schema:
-            type: string
-            example: "user@example.com"
+      - in: path
+        name: email
+        required: true
+        schema:
+          type: string
+          example: "user@example.com"
       responses:
         "204":
           description: User deleted successfully (no content)
@@ -337,6 +337,7 @@ paths:
   /users/login:
     post:
       summary: Verify user credentials (login)
+      description: Authenticates user and sets an httpOnly cookie with JWT token
       requestBody:
         required: true
         content:
@@ -344,8 +345,8 @@ paths:
             schema:
               type: object
               required:
-                - email
-                - password
+              - email
+              - password
               properties:
                 email:
                   type: string
@@ -355,8 +356,11 @@ paths:
                   example: "securepassword"
       responses:
         "200":
-          description: Login successful
-          content:
+          description: Login successful.
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
             application/json:
               schema:
                 type: object
@@ -373,12 +377,13 @@ paths:
   /users/signup:
     post:
       summary: Create a new user (signup)
+      description: Creates new user and sets an httpOnly cookie with JWT token
       parameters:
-        - in: query
-          name: role
-          required: true
-          schema:
-            $ref: "#/components/schemas/UserRole"
+      - in: query
+        name: role
+        required: true
+        schema:
+          $ref: "#/components/schemas/UserRole"
       requestBody:
         required: true
         content:
@@ -387,13 +392,63 @@ paths:
               $ref: "#/components/schemas/User"
       responses:
         "201":
-          description: User created successfully
+          description: User created successfully.
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UserInfo"
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Signup successful"
+                  user:
+                    $ref: "#/components/schemas/UserInfo"
         "400":
-          description: Weak password
+          description: Weak password or missing required fields
+        "409":
+          description: Email already exists
+  /users/verify:
+    get:
+      summary: Verify JWT token from cookie
+      description: Validates the authToken cookie and returns user information
+      security:
+      - cookieAuth: []
+      responses:
+        "200":
+          description: Token is valid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Token valid"
+                  user:
+                    $ref: "#/components/schemas/UserInfo"
+        "401":
+          description: Invalid or missing token
+        "404":
+          description: User not found
+  /users/logout:
+    post:
+      summary: Logout user
+      description: Clears the authToken cookie
+      responses:
+        "200":
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Logout successful"
   /pdfs/upload:
     post:
       summary: Upload a new PDF file
@@ -404,10 +459,10 @@ paths:
             schema:
               type: object
               required:
-                - pdf
-                - name
-                - type
-                - owner
+              - pdf
+              - name
+              - type
+              - owner
               properties:
                 pdf:
                   type: string
@@ -419,8 +474,8 @@ paths:
                 type:
                   type: string
                   enum:
-                    - class
-                    - note
+                  - class
+                  - note
                   example: "note"
                 owner:
                   type: string
@@ -439,12 +494,12 @@ paths:
     get:
       summary: Get PDF metadata
       parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-          description: PDF document ID
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        description: PDF document ID
       responses:
         "200":
           description: PDF metadata
@@ -457,12 +512,12 @@ paths:
     delete:
       summary: Delete a PDF document
       parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-          description: PDF document ID
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        description: PDF document ID
       responses:
         "204":
           description: PDF deleted successfully
@@ -472,12 +527,18 @@ paths:
     get:
       summary: Download the PDF file
       parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-          description: PDF document ID
+      - in: query
+        name: page
+        schema:
+          type: number
+          example: 1
+        description: A specific page number to download (optional)
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        description: PDF document ID
       responses:
         "200":
           description: PDF file download
@@ -492,12 +553,12 @@ paths:
     put:
       summary: Replace PDF file with a new version
       parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-          description: PDF document ID
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        description: PDF document ID
       requestBody:
         required: true
         content:
@@ -505,7 +566,7 @@ paths:
             schema:
               type: object
               required:
-                - pdf
+              - pdf
               properties:
                 pdf:
                   type: string
@@ -526,13 +587,13 @@ paths:
     get:
       summary: Get all PDFs metadata for a specific owner
       parameters:
-        - in: query
-          name: owner
-          required: true
-          schema:
-            type: string
-            example: "user@example.com"
-          description: User E-mail
+      - in: query
+        name: owner
+        required: true
+        schema:
+          type: string
+          example: "user@example.com"
+        description: User E-mail
       responses:
         "200":
           description: List of PDFs of the owner
@@ -566,14 +627,20 @@ paths:
           description: Invalid input data
 
 components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: authToken
+      description: JWT token stored in httpOnly cookie
   schemas:
     Notebook:
       type: object
       required:
-        - name
-        - subject
-        - owner
-        - type
+      - name
+      - subject
+      - owner
+      - type
       properties:
         name:
           type: string
@@ -584,10 +651,10 @@ components:
         date:
           type: string
           format: date-time
-          example: "2024-10-01T10:30:00Z"
+          example: "2026-01-01T10:30:00Z"
         owner:
           type: string
-          example: "user123"
+          example: "user@example.com"
         type:
           type: string
           example: "slide"
@@ -603,8 +670,8 @@ components:
     Page:
       type: object
       required:
-        - page_number
-        - note_content
+      - page_number
+      - note_content
       properties:
         page_number:
           type: integer
@@ -667,9 +734,9 @@ components:
     Note:
       type: object
       required:
-        - id
-        - notebookId
-        - content
+      - id
+      - notebookId
+      - content
       properties:
         id:
           type: integer
@@ -695,7 +762,7 @@ components:
         date:
           type: string
           format: date
-          example: "2024-10-01"
+          example: "2026-01-01"
     SummaryResponse:
       type: object
       properties:
@@ -720,9 +787,9 @@ components:
     User:
       type: object
       required:
-        - email
-        - password
-        - role
+      - email
+      - password
+      - role
       properties:
         email:
           type: string
@@ -741,8 +808,8 @@ components:
     UserRole:
       type: string
       enum:
-        - student
-        - teacher
+      - student
+      - teacher
       example: student
     UserInfo:
       type: object
@@ -774,8 +841,8 @@ components:
         type:
           type: string
           enum:
-            - class
-            - note
+          - class
+          - note
           example: "note"
         owner:
           type: string

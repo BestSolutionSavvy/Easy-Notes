@@ -1,8 +1,15 @@
 <script setup lang="ts">
+import { onMounted } from 'vue';
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
-import AppHeader from './components/AppHeader.vue';
-import MainStructure from './components/MainStructure.vue';
+import AppHeader from "./components/AppHeader.vue";
+import MainStructure from "./components/MainStructure.vue";
+import { useAuthStore } from './stores/auth';
+
+const authStore = useAuthStore();
+onMounted(async () => {
+  await authStore.verifyToken();
+});
 
 const route = useRoute();
 const headerVariant = computed(() => route.path === '/' ? 'tools' : 'default');

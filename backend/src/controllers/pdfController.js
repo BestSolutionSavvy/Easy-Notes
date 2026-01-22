@@ -1,6 +1,7 @@
 const { pdfModel } = require("../models/pdfsModel");
 const { userModel } = require("../models/usersModel");
 const mongoose = require("mongoose");
+const { PDFDocument } = require("pdf-lib");
 
 let gridFSBucket;
 
@@ -67,9 +68,10 @@ exports.readPdfData = async (req, res) => {
   }
 };
 
-// GET /pdfs/:id/download
+// GET /pdfs/:id/download?page=...
 exports.downloadPdf = async (req, res) => {
   const { id } = req.params;
+  const { page } = req.query;
   try {
     const pdf = await pdfModel.findById(id);
     if (!pdf) {
@@ -79,16 +81,55 @@ exports.downloadPdf = async (req, res) => {
     if (files.length === 0) {
       return res.status(404).json({ message: "File not found in GridFS" });
     }
+    if (!page) {
+      const downloadStream = gridFSBucket.openDownloadStream(pdf.gridFsFileId);
+      res.set("Content-Type", "application/pdf");
+      res.set("Content-Disposition", `attachment; filename="${pdf.name}.pdf"`);
+      downloadStream.pipe(res);
+      downloadStream.on("error", (err) => {
+        console.error("GridFS download error:", err);
+        if (!res.headersSent) {
+          res
+            .status(404)
+            .json({ message: "Error downloading file", error: err.message });
+        }
+      });
+      return;
+    }
+    const pageNum = parseInt(page);
+    if (isNaN(pageNum) || pageNum < 1) {
+      return res.status(400).json({ message: "Invalid page number" });
+    }
+    const chunks = [];
     const downloadStream = gridFSBucket.openDownloadStream(pdf.gridFsFileId);
-    res.set("Content-Type", "application/pdf");
-    res.set("Content-Disposition", `attachment; filename="${pdf.name}.pdf"`);
-    downloadStream.pipe(res);
+    downloadStream.on("data", (chunk) => chunks.push(chunk));
     downloadStream.on("error", (err) => {
       console.error("GridFS download error:", err);
       if (!res.headersSent) {
-        res
-          .status(404)
-          .json({ message: "Error downloading file", error: err.message });
+        res.status(404).json({ message: "Error downloading file", error: err.message });
+      }
+    });
+    
+    downloadStream.on("end", async () => {
+      try {
+        const pdfBuffer = Buffer.concat(chunks);
+        const pdfDoc = await PDFDocument.load(pdfBuffer);
+        const totalPages = pdfDoc.getPageCount();
+        if (pageNum > totalPages) {
+          return res.status(400).json({ 
+            message: `Page ${pageNum} not found. PDF has ${totalPages} pages.` 
+          });
+        }
+        const newPdfDoc = await PDFDocument.create();
+        const [copiedPage] = await newPdfDoc.copyPages(pdfDoc, [pageNum - 1]);
+        newPdfDoc.addPage(copiedPage);
+        const newPdfBytes = await newPdfDoc.save();
+        res.set("Content-Type", "application/pdf");
+        res.set("Content-Disposition", `attachment; filename="${pdf.name}_page${pageNum}.pdf"`);
+        res.send(Buffer.from(newPdfBytes));
+      } catch (err) {
+        console.error("PDF extraction error:", err);
+        res.status(500).json({ message: "Error extracting page", error: err.message });
       }
     });
   } catch (err) {

@@ -7,12 +7,14 @@ interface Props {
   modelValue?: string;
   placeholder?: string;
   type?: 'text' | 'email' | 'password' | 'number';
+  error?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   modelValue: '',
   placeholder: '',
-  type: 'text'
+  type: 'text',
+  error: false
 });
 
 const emit = defineEmits<{
@@ -44,8 +46,13 @@ const togglePasswordVisibility = () => {
       v-model="value"
       :type="inputType"
       :placeholder="placeholder"
-      class="w-full rounded-lg bg-white border-gainsboro-200 border-[1px] border-solid py-[0.75rem] px-[1rem] min-w-[7.5rem] leading-[100%] outline-none text-gray-800 placeholder:opacity-70 focus:border-darkslateblue focus:ring[1px] focus:ring-darkslateblue"
-      :class="{ 'pr-12': type === 'password' }"
+      class="w-full rounded-lg bg-white border-[1px] border-solid py-[0.75rem] px-[1rem] min-w-[7.5rem] leading-[100%] outline-none text-gray-800 placeholder:opacity-70"
+      :class="[
+        { 'pr-12': type === 'password' },
+        error 
+          ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500' 
+          : 'border-gainsboro-200 focus:border-darkslateblue focus:ring-1 focus:ring-darkslateblue'
+      ]"
     />
     
     <button
