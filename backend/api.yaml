@@ -48,7 +48,7 @@ paths:
           name: id
           required: true
           schema:
-            type: integer
+            type: string
       responses:
         "200":
           description: Notebook found
@@ -70,7 +70,7 @@ paths:
           name: id
           required: true
           schema:
-            type: integer
+            type: string
       requestBody:
         required: true
         content:
@@ -98,7 +98,7 @@ paths:
           name: id
           required: true
           schema:
-            type: integer
+            type: string
       responses:
         "204":
           description: Notebook deleted successfully (no content)
@@ -112,7 +112,7 @@ paths:
           name: notebookId
           required: true
           schema:
-            type: integer
+            type: string
       responses:
         "200":
           description: List of notes for the notebook
@@ -131,7 +131,7 @@ paths:
           name: notebookId
           required: true
           schema:
-            type: integer
+            type: string
       requestBody:
         required: true
         content:
@@ -286,9 +286,6 @@ components:
         - owner
         - type
       properties:
-        id:
-          type: integer
-          example: 1
         name:
           type: string
           example: "Appunti ASW"
@@ -304,7 +301,7 @@ components:
           example: "user123"
         type:
           type: string
-          example: "lecture"
+          example: "slide"
         last_page:
           type: integer
           default: 0
