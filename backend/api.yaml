@@ -337,6 +337,7 @@ paths:
   /users/login:
     post:
       summary: Verify user credentials (login)
+      description: Authenticates user and sets an httpOnly cookie with JWT token
       requestBody:
         required: true
         content:
@@ -355,8 +356,11 @@ paths:
                   example: "securepassword"
       responses:
         "200":
-          description: Login successful
-          content:
+          description: Login successful.
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
             application/json:
               schema:
                 type: object
@@ -373,6 +377,7 @@ paths:
   /users/signup:
     post:
       summary: Create a new user (signup)
+      description: Creates new user and sets an httpOnly cookie with JWT token
       parameters:
       - in: query
         name: role
@@ -387,13 +392,63 @@ paths:
               $ref: "#/components/schemas/User"
       responses:
         "201":
-          description: User created successfully
+          description: User created successfully.
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UserInfo"
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Signup successful"
+                  user:
+                    $ref: "#/components/schemas/UserInfo"
         "400":
-          description: Weak password
+          description: Weak password or missing required fields
+        "409":
+          description: Email already exists
+  /users/verify:
+    get:
+      summary: Verify JWT token from cookie
+      description: Validates the authToken cookie and returns user information
+      security:
+      - cookieAuth: []
+      responses:
+        "200":
+          description: Token is valid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Token valid"
+                  user:
+                    $ref: "#/components/schemas/UserInfo"
+        "401":
+          description: Invalid or missing token
+        "404":
+          description: User not found
+  /users/logout:
+    post:
+      summary: Logout user
+      description: Clears the authToken cookie
+      responses:
+        "200":
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Logout successful"
   /pdfs/upload:
     post:
       summary: Upload a new PDF file
@@ -572,6 +627,12 @@ paths:
           description: Invalid input data
 
 components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: authToken
+      description: JWT token stored in httpOnly cookie
   schemas:
     Notebook:
       type: object

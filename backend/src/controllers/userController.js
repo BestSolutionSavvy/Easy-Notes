@@ -1,7 +1,43 @@
 const { userModel } = require("../models/usersModel");
 const bcrypt = require("bcrypt");
+const { generateToken, JWT_MAX_AGE } = require("../config/jwt");
 
 const SALT_ROUNDS = 12;
+
+/**
+ * Helper function to set auth cookie and return sanitized user
+ */
+const setAuthCookie = (res, user) => {
+  const token = generateToken(user);
+  
+  res.cookie('authToken', token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    maxAge: JWT_MAX_AGE
+  });
+  
+  const userResponse = user.toObject();
+  delete userResponse.password;
+  
+  return userResponse;
+};
+
+// GET /users/verify
+exports.verifyToken = async (req, res) => {
+  try {
+    const user = await userModel.findById(req.user.id).select("-password");
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.json({
+      message: "Token valid",
+      user: user,
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
 
 // GET /users/:email
 exports.getUser = (req, res) => {
@@ -85,9 +121,10 @@ exports.login = async (req, res) => {
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
+    const userResponse = setAuthCookie(res, user);
     res.json({
       message: "Login successful",
-      user: user,
+      user: userResponse,
     });
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });
@@ -125,8 +162,23 @@ exports.signup = async (req, res) => {
       role,
     });
     const savedUser = await newUser.save();
-    res.status(201).json(savedUser);
+    const userResponse = setAuthCookie(res, savedUser);
+    res.status(201).json({
+      message: "Signup successful",
+      user: userResponse,
+    });
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });
   }
+};
+
+// POST /users/logout
+exports.logout = (req, res) => {
+  res.cookie('authToken', '', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    maxAge: 0
+  });
+  res.json({ message: "Logout successful" });
 };

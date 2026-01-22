@@ -1,6 +1,13 @@
 <script setup lang="ts">
-import AppHeader from './components/AppHeader.vue';
-import MainStructure from './components/MainStructure.vue';
+import { onMounted } from 'vue';
+import AppHeader from "./components/AppHeader.vue";
+import MainStructure from "./components/MainStructure.vue";
+import { useAuthStore } from './stores/auth';
+
+const authStore = useAuthStore();
+onMounted(async () => {
+  await authStore.verifyToken();
+});
 </script>
 
 <template>
