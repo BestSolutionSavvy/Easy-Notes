@@ -21,10 +21,7 @@ const routes: RouteRecordRaw[] = [
     components: {
       left: PdfPage,
       right: NotePage,
-    },
-    props: {
-      left: { id: 0 },
-    },
+    }
   },
   {
     path: "/notebooks",
@@ -33,7 +30,7 @@ const routes: RouteRecordRaw[] = [
       right: PdfPage,
     },
     props: {
-      right: { id: 0, toolBar: false },
+      right: { preview: true },
     },
     meta: { requiresAuth: true },
   },

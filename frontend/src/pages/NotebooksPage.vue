@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, onMounted } from "vue";
 import { useAuthStore } from "../stores/auth";
+import { usePdfStore } from "../stores/pdf-load";
 import axios from "axios";
 import { formatDate } from "../lib/dateFormatter";
 import RoundIconButton from "../components/AddItemButton.vue";
@@ -12,6 +13,7 @@ import ListElement from "../components/ListElement.vue";
 import type { Notebook } from "../types/notebook";
 
 const authStore = useAuthStore();
+const pdfStore = usePdfStore();
 const notebooks = ref<Notebook[]>([]);
 const isLoading = ref(false);
 const errorMessage = ref("");
@@ -33,6 +35,7 @@ const loadNotebooks = async () => {
 };
 
 onMounted(() => {
+  pdfStore.clearSelectedPdf();
   loadNotebooks();
 });
 
@@ -53,6 +56,19 @@ const notebooksPerSubject = computed(() => {
   });
   return map;
 });
+
+const selectNotebook = (notebook: Notebook) => {
+  if (notebook.pages && notebook.pages.length > 0) {
+    const pdfId = notebook.pages[0]?.id_pdf;
+    if (pdfId) {
+      pdfStore.setSelectedPdf(pdfId, notebook.last_page);
+    } else {
+      console.warn("No id_pdf found in notebook pages");
+    }
+  } else {
+    console.warn("Notebook has no pages:", notebook);
+  }
+};
 
 const deleteNotebook = async (notebook: Notebook) => {
   if (!notebook._id || !authStore.user?.email) return;
@@ -93,7 +109,9 @@ const deleteNotebook = async (notebook: Notebook) => {
             class="w-[30.063rem] h-[0.063rem] relative border-black border-solid border-t-[1px] box-border opacity-[0.5]" />
           <ul class="w-full flex flex-col gap-[0.625rem]">
             <ListElement v-for="(notebook, index) in notebooksPerSubject[subject]" :key="notebook.name"
-              :title="notebook.name" :date="formatDate(notebook.date)" :index="index" :buttons="[
+              :title="notebook.name" :date="formatDate(notebook.date)" :index="index" 
+              @click="selectNotebook(notebook)"
+              :buttons="[
                 {
                   icon: wandIcon,
                   alt: 'AI Summary',
@@ -104,9 +122,7 @@ const deleteNotebook = async (notebook: Notebook) => {
                 {
                   icon: loadIcon,
                   alt: 'Edit Note',
-                  onClick: () => {
-                    // TODO: Edit Note action
-                  },
+                  onClick: () => selectNotebook(notebook),
                 },
                 {
                   icon: trashIcon,

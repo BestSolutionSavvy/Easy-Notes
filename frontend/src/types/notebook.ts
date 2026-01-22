@@ -7,11 +7,11 @@ interface Box {
 }
 
 interface Pages {
-  pageNumber: number;
-  slideNumber: number;
-  pdfId: string;
+  page_number: number;
+  slide_number: number;
+  id_pdf: string;
   content: string;
-  textBoxes: Box[];
+  text_boxes: Box[];
   highlights: Box[];
 }
 
@@ -22,7 +22,7 @@ interface Notebook {
   date: string;
   owner: string;
   type: string;
-  lastPage: number;
+  last_page: number;
   pages: Pages[];
 }
 

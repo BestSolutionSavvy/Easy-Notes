@@ -7,5 +7,8 @@ export default defineConfig({
   plugins: [
     vue(),
     tailwindcss()
-  ]
+  ],
+  optimizeDeps: {
+    exclude: ['fsevents', 'lightningcss']
+  }
 })
