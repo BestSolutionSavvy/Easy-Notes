@@ -16,6 +16,9 @@ const isDevelopment = process.argv.includes('--dev');
 
 mongoose.connect(process.env.MONGO_URI, {
   dbName: "easy-notes",
+  tls: true,
+  tlsAllowInvalidCertificates: false,
+  serverSelectionTimeoutMS: 5000,
 });
 
 const app = express();
