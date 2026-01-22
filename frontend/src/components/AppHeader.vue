@@ -1,12 +1,27 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import Menu from '../pages/Menu.vue';
+import HeaderButton from './HeaderButton.vue';
+import newNotebookIcon from '../assets/new-notebook.svg';
+import openNotebookIcon from '../assets/open-notebook.svg';
+import saveIcon from '../assets/save.svg';
+import closeIcon from '../assets/close.svg';
+import shortcutIcon from '../assets/shortcut.svg';
 
 const isMenuOpen = ref(false);
 
 const toggleMenu = () => {
     isMenuOpen.value = !isMenuOpen.value;
 };
+
+interface Props {
+    variant?: 'default' | 'tools'
+}
+
+const props = withDefaults(defineProps<Props>(), {
+    variant: 'default'
+});
+
 </script>
 
 <template>
@@ -26,6 +41,60 @@ const toggleMenu = () => {
                 class="w-6 h-5 cursor-pointer menu-icon transition-transform duration-300 hover:scale-125"
                 :class="{ 'rotate-180': isMenuOpen }" @click="toggleMenu" />
             <h1 class="text-white text-[1.563rem] font-semibold font-['Inter']">Easy Notes</h1>
+            <div v-if="variant === 'tools'"
+                class="animate-fade-in self-stretch flex-1 overflow-hidden flex items-center justify-center text-[1rem] text-[transparent]">
+                <div
+                    class="h-[1.938rem] w-[18.438rem] rounded-[9999px] bg-gray-200 border-gainsboro border-solid border-[1px] box-border overflow-hidden shrink-0 flex items-center py-[0.75rem] px-[1rem] gap-[0.5rem] min-w-[7.5rem]">
+                    <div class="flex-1 relative leading-[100%] shrink-0">Value</div>
+                    <img src="../assets/search.svg" class="h-[1rem] w-[1rem] relative shrink-0" alt="" />
+                </div>
+            </div>
+            <HeaderButton v-if="variant === 'tools'" :text="'Create Notebook'" :icon="newNotebookIcon">
+                <div class="flex flex-row gap-2 p-2">
+                    <button class="px-4 py-2 bg-gainsboro-100 rounded-md text-sm hover:scale-[1.01] active:scale-[0.99] transition-all duration-200">
+                        Simple
+                    </button>
+                    <button class="px-4 py-2 bg-gainsboro-100 rounded-md text-sm hover:scale-[1.01] active:scale-[0.99] transition-all duration-200">
+                        With Slides
+                    </button>
+                </div>
+            </HeaderButton>
+            <HeaderButton v-if="variant === 'tools'" :text="'Open Notebook'" :icon="openNotebookIcon">
+                <div class="flex flex-row gap-2 p-2">
+                    <button class="px-4 py-2 bg-gainsboro-100 rounded-md text-sm hover:scale-[1.01] active:scale-[0.99] transition-all duration-200">
+                        Simple
+                    </button>
+                    <button class="px-4 py-2 bg-gainsboro-100 rounded-md text-sm hover:scale-[1.01] active:scale-[0.99] transition-all duration-200">
+                        With Slides
+                    </button>
+                </div>
+            </HeaderButton>
+            <HeaderButton v-if="variant === 'tools'" :icon="shortcutIcon">
+                <div class="flex flex-row gap-2 p-2">
+                    <button class="px-4 py-2 bg-gainsboro-100 rounded-md text-sm hover:scale-[1.01] active:scale-[0.99] transition-all duration-200">
+                        Simple
+                    </button>
+                    <button class="px-4 py-2 bg-gainsboro-100 rounded-md text-sm hover:scale-[1.01] active:scale-[0.99] transition-all duration-200">
+                        With Slides
+                    </button>
+                </div>
+            </HeaderButton>
+            <HeaderButton v-if="variant === 'tools'" :text="'Save'" :icon="saveIcon">
+                <div class="flex flex-row gap-2 p-2">
+                    <button class="px-4 py-2 bg-gainsboro-100 rounded-md text-sm hover:scale-[1.01] active:scale-[0.99] transition-all duration-200">
+                        Simple
+                    </button>
+                </div>
+            </HeaderButton>
+            <HeaderButton v-if="variant === 'tools'" :text="'Close'" :icon="closeIcon">
+                <div class="flex flex-row gap-2 p-2">
+                    <button class="px-4 py-2 bg-gainsboro-100 rounded-md text-sm hover:scale-[1.01] active:scale-[0.99] transition-all duration-200">
+                        Simple
+                    </button>
+                </div>
+            </HeaderButton>
+            
+
         </header>
     </div>
 </template>
