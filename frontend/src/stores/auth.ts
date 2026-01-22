@@ -16,7 +16,7 @@ export const useAuthStore = defineStore("auth", () => {
   async function verifyToken(): Promise<boolean> {
     isLoading.value = true;
     try {
-      const response = await axios.get(`api/users/verify`);
+      const response = await axios.get(`/api/users/verify`);
       user.value = response.data.user;
       return true;
     } catch (error) {
@@ -35,7 +35,7 @@ export const useAuthStore = defineStore("auth", () => {
   async function login(email: string, password: string) {
     isLoading.value = true;
     try {
-      const response = await axios.post(`api/users/login`, {
+      const response = await axios.post(`/api/users/login`, {
         email,
         password,
       });
@@ -66,7 +66,7 @@ export const useAuthStore = defineStore("auth", () => {
   ) {
     isLoading.value = true;
     try {
-      const response = await axios.post(`api/users/signup?role=${role}`, {
+      const response = await axios.post(`/api/users/signup?role=${role}`, {
         email,
         password,
         name,
@@ -87,7 +87,7 @@ export const useAuthStore = defineStore("auth", () => {
    */
   async function logout() {
     try {
-      await axios.post(`api/users/logout`);
+      await axios.post(`/api/users/logout`);
       user.value = null;
     } catch (error) {
       user.value = null;
