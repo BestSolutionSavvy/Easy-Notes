@@ -1,6 +1,7 @@
 {
-  "_id": "username",
+  "_id": "email",
   "name": "string",
   "surname": "string",
-  "password": "string"
+  "password": "string",
+  "role": "student | teacher"
 }

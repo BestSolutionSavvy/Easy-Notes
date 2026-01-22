@@ -35,12 +35,12 @@ paths:
                 $ref: "#/components/schemas/Notebook"
         "400":
           description: Invalid notebook data
-  /notebooks/{username}/{id}:
+  /notebooks/{email}/{id}:
     get:
       summary: Details of a specific notebook for a user
       parameters:
         - in: path
-          name: username
+          name: email
           required: true
           schema:
             type: string
@@ -62,7 +62,7 @@ paths:
       summary: Create or update a notebook
       parameters:
         - in: path
-          name: username
+          name: email
           required: true
           schema:
             type: string
@@ -90,7 +90,7 @@ paths:
       summary: Delete a notebook
       parameters:
         - in: path
-          name: username
+          name: email
           required: true
           schema:
             type: string
@@ -275,6 +275,295 @@ paths:
           description: PDF deleted successfully (no content)
         "404":
           description: PDF not found
+  /users/{email}:
+    get:
+      summary: Get the informations of a specific user
+      parameters:
+        - in: path
+          name: email
+          required: true
+          schema:
+            type: string
+            example: "user@example.com"
+      responses:
+        "200":
+          description: User found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserInfo"
+        "404":
+          description: User not found
+    put:
+      summary: Update the informations of a specific user
+      parameters:
+        - in: path
+          name: email
+          required: true
+          schema:
+            type: string
+            example: "user@example.com"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+      responses:
+        "200":
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserInfo"
+        "400":
+          description: Weak password
+        "404":
+          description: User not found
+    delete:
+      summary: Delete a specific user
+      parameters:
+        - in: path
+          name: email
+          required: true
+          schema:
+            type: string
+            example: "user@example.com"
+      responses:
+        "204":
+          description: User deleted successfully (no content)
+        "404":
+          description: User not found
+  /users/login:
+    post:
+      summary: Verify user credentials (login)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  example: "user@example.com"
+                password:
+                  type: string
+                  example: "securepassword"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Login successful"
+                  user:
+                    $ref: "#/components/schemas/UserInfo"
+        "401":
+          description: Invalid credentials
+        "400":
+          description: Missing email or password
+  /users/signup:
+    post:
+      summary: Create a new user (signup)
+      parameters:
+        - in: query
+          name: role
+          required: true
+          schema:
+            $ref: "#/components/schemas/UserRole"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+      responses:
+        "201":
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserInfo"
+        "400":
+          description: Weak password
+  /pdfs/upload:
+    post:
+      summary: Upload a new PDF file
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - pdf
+                - name
+                - type
+                - owner
+              properties:
+                pdf:
+                  type: string
+                  format: binary
+                  description: PDF file to upload
+                name:
+                  type: string
+                  example: "Lecture 1 Notes"
+                type:
+                  type: string
+                  enum:
+                    - class
+                    - note
+                  example: "note"
+                owner:
+                  type: string
+                  example: "user@example.com"
+                  description: User E-mail
+      responses:
+        "201":
+          description: PDF uploaded successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PDFDocument"
+        "400":
+          description: Invalid file or missing fields
+  /pdfs/{id}:
+    get:
+      summary: Get PDF metadata
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: PDF document ID
+      responses:
+        "200":
+          description: PDF metadata
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PDFDocument"
+        "404":
+          description: PDF not found
+    delete:
+      summary: Delete a PDF document
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: PDF document ID
+      responses:
+        "204":
+          description: PDF deleted successfully
+        "404":
+          description: PDF not found
+  /pdfs/{id}/download:
+    get:
+      summary: Download the PDF file
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: PDF document ID
+      responses:
+        "200":
+          description: PDF file download
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: PDF not found
+  /pdfs/{id}/upload:
+    put:
+      summary: Replace PDF file with a new version
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: PDF document ID
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - pdf
+              properties:
+                pdf:
+                  type: string
+                  format: binary
+                  description: New PDF file to upload
+      responses:
+        "200":
+          description: PDF file replaced successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PDFDocument"
+        "400":
+          description: No file uploaded
+        "404":
+          description: PDF not found
+  /pdfs/search:
+    get:
+      summary: Get all PDFs metadata for a specific owner
+      parameters:
+        - in: query
+          name: owner
+          required: true
+          schema:
+            type: string
+            example: "user@example.com"
+          description: User E-mail
+      responses:
+        "200":
+          description: List of PDFs of the owner
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PDFDocument"
+  /summarize:
+    post:
+      summary: Summarize provided text
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text:
+                  type: string
+                  example: "Internet (raramente adattata in interrete[1]) è un'architettura di sistema che permette l'interconnessione tra diverse reti di computer a livello globale (internetwork).[2] Il termine nasce, nell'ambito delle comunicazioni radio in tempo di guerra, come abbreviazione di internet traffic, attestato già nel 1945[3]. Nel significato di interconnessione di terminali e computer appartenenti a reti diverse (internetwork, come acronimo di interconnected networks) si trova nell'RFC 675, Specification of Internet Transmission Control Protocol, pubblicato nel dicembre 1974.[4] Solo dal 1991, sulla base dello specifico protocollo HTTP, si è cominciato a sviluppare il World Wide Web (WWW), successivamente diventato il protocollo predominante, fino a far confondere, nel linguaggio comune, il termine WWW con il termine internet: per questo sempre più spesso quando si incontra il termine internet su letteratura non specialistica, in realtà si intende il WWW, uno dei maggiori mezzi di comunicazione di massa (assieme a radio e televisione),[5][6][7] grazie all'offerta all'utente di una vasta serie di contenuti potenzialmente informativi e di servizi. Internet è l'interconnessione globale tra reti di telecomunicazioni e informatiche di natura e di estensione diversa, resa possibile da una suite di protocolli di rete comune chiamata TCP/IP dal nome dei due protocolli principali, il TCP e l'IP, che costituiscono la lingua comune con cui i computer connessi a Internet (gli host) sono interconnessi e comunicano tra loro a un livello superiore indipendentemente dalla loro sottostante architettura hardware e software, garantendo così l'interoperabilità tra sistemi e sottoreti fisiche diverse. L'avvento e la diffusione di Internet e dei suoi servizi hanno rappresentato una vera e propria rivoluzione tecnologica e socio-culturale dagli inizi degli anni novanta (assieme ad altre invenzioni come i telefoni cellulari e il GPS) nonché uno dei motori dello sviluppo economico mondiale nell'ambito delle Tecnologie dell'Informazione e della Comunicazione (ICT). In quanto rete di telecomunicazione, come diffusione è seconda solo alla rete telefonica generale, anch'essa di diffusione mondiale e ad accesso pubblico, ma ancora più capillare di Internet."
+      responses:
+        "200":
+          description: Summary generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SummaryResponse"
+        "400":
+          description: Invalid input data
 
 components:
   schemas:
@@ -403,6 +692,16 @@ components:
         name:
           type: string
           example: "ASW"
+        date:
+          type: string
+          format: date
+          example: "2024-10-01"
+    SummaryResponse:
+      type: object
+      properties:
+        summary:
+          type: string
+          example: "This is a summarized version of the text."
     PDF:
       type: object
       properties:
@@ -418,3 +717,71 @@ components:
         url:
           type: string
           example: "http://example.com/lecture-notes.pdf"
+    User:
+      type: object
+      required:
+        - email
+        - password
+        - role
+      properties:
+        email:
+          type: string
+          example: "user@example.com"
+        name:
+          type: string
+          example: "John"
+        surname:
+          type: string
+          example: "Doe"
+        password:
+          type: string
+          example: "securepassword"
+        role:
+          $ref: "#/components/schemas/UserRole"
+    UserRole:
+      type: string
+      enum:
+        - student
+        - teacher
+      example: student
+    UserInfo:
+      type: object
+      properties:
+        email:
+          type: string
+          example: "user@example.com"
+        name:
+          type: string
+          example: "John"
+        surname:
+          type: string
+          example: "Doe"
+        role:
+          $ref: "#/components/schemas/UserRole"
+    PDFDocument:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: "507f1f77bcf86cd799439011"
+        name:
+          type: string
+          example: "Lecture 1"
+        date:
+          type: string
+          format: date-time
+          example: "2026-01-01T10:30:00Z"
+        type:
+          type: string
+          enum:
+            - class
+            - note
+          example: "note"
+        owner:
+          type: string
+          example: "user@example.com"
+          description: User E-mail
+        gridFsFileId:
+          type: string
+          example: "507f1f77bcf86cd799439012"
+          description: GridFS file ID

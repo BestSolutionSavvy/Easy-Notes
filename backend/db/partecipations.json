@@ -1,7 +1,6 @@
 {
   "_id": {
     "idClass": "ClassId",
-    "studentUsername": "StudentId"
+    "studentEmail": "StudentId"
   }
 }
-

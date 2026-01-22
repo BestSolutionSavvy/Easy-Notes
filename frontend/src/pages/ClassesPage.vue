@@ -1,32 +1,60 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
+import axios from "axios";
 import ListElement from '../components/ListElement.vue';
 import trashIcon from '../assets/trash.svg';
 import plusIcon from '../assets/plus.svg';
 import AddItemButton from "../components/AddItemButton.vue";
 
-const classes = ref([
-  {
-    title: "Lorem Ipsum class of John Stone",
-    date: "13/11/2025"
-  },
-  {
-    title: "Lorem Ipsum class of John Stone",
-    date: "13/11/2025"
-  },
-  {
-    title: "Lorem Ipsum class of John Stone",
-    date: "13/11/2025"
-  },
-  {
-    title: "Lorem Ipsum class of John Stone",
-    date: "13/11/2025"
-  }
-]);
+interface Class {
+  _id?: string;
+  name: string;
+  teacher: string;
+  date: string;
+}
 
-const handleDelete = (index: number) => {
-  console.log('Delete class:', index);
+const classes = ref<Class[]>([]);
+
+const listClasses = async () => {
+  try {
+    const response = await axios.get('/api/classes');
+    classes.value = response.data;
+  } catch (error) {
+    console.error('Error fetching classes:', error);
+    classes.value = [];
+  }
 };
+
+const formatDate = (dateString: string) => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return date.toLocaleDateString();
+};
+
+const handleDelete = (index: string) => {
+  try {
+    axios.delete(`/api/classes/${index}`).then(() => {
+      listClasses();
+    });
+  } catch (error) {
+    console.error('Error deleting class:', error);
+  }
+};
+
+const createClass = async () => {
+  try {
+    const newClass = {
+      name: 'New Class',
+      teacher: 'Unknown Teacher',
+      date: new Date().toISOString()
+    };
+    await axios.post('/api/classes', newClass);
+  } catch (error) {
+    console.error('Error creating class:', error);
+  }
+};
+
+onMounted(listClasses);
 
 </script>
 <template>
@@ -37,12 +65,16 @@ const handleDelete = (index: number) => {
       <div class="self-stretch flex items-center gap-[0.625rem] text-[1.875rem] text-darkslategray">
         <div class="relative font-semibold">Lorem Ipsum Classes</div>
         <AddItemButton :icon="plusIcon" alt="Add Lecture" :onClick="() => {
-            // !TODO
-          }
+          createClass().then(() => {
+            listClasses();
+          });
+        }
           " />
       </div>
-      <ListElement v-for="(classItem, index) in classes" :key="index" :title="classItem.title" :date="classItem.date"
-        :index="index" :buttons="[{ icon: trashIcon, alt: 'Delete', onClick: () => handleDelete(index) }]" />
+      <ListElement v-for="(classItem, index) in classes" :key="classItem._id || index"
+        :title="`${classItem.name || 'Unknown'} of ${classItem.teacher || 'Unknown'}`"
+        :date="formatDate(classItem.date)" :index="index"
+        :buttons="[{ icon: trashIcon, alt: 'Delete', onClick: () => handleDelete(classItem._id || '') }]" />
     </div>
   </div>
 </template>

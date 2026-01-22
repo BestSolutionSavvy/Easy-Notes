@@ -1,4 +1,6 @@
 {
   "_id": "id",
-  "name": "string"
+  "name": "string",
+  "teacher": "string",
+  "date": "date"
 }
