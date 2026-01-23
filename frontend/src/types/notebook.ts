@@ -10,7 +10,7 @@ interface Pages {
   page_number: number;
   slide_number: number;
   id_pdf: string;
-  content: string;
+  note_content: string;
   text_boxes: Box[];
   highlights: Box[];
 }

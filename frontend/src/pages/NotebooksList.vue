@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, onMounted } from "vue";
 import { useAuthStore } from "../stores/auth";
-import { usePdfStore } from "../stores/pdf-load";
 import axios from "axios";
 import { formatDate } from "../lib/dateFormatter";
 import RoundIconButton from "../components/AddItemButton.vue";
@@ -13,31 +12,35 @@ import ListElement from "../components/ListElement.vue";
 import type { Notebook } from "../types/notebook";
 
 const authStore = useAuthStore();
-const pdfStore = usePdfStore();
 const notebooks = ref<Notebook[]>([]);
 const isLoading = ref(false);
 const errorMessage = ref("");
+
+const emit = defineEmits<{
+  (e: "select-notebook", notebook: Notebook): void;
+}>();
 
 const loadNotebooks = async () => {
   isLoading.value = true;
   errorMessage.value = "";
   try {
     const response = await axios.get(`/api/notebooks`);
-    notebooks.value = response.data.filter(
-      (notebook: Notebook) => notebook.owner === authStore.user?.email
+    const data = Array.isArray(response.data) ? response.data : [];
+    notebooks.value = data.filter(
+      (notebook: Notebook) => notebook.owner === authStore.user?.email,
     );
   } catch (error: any) {
-    errorMessage.value = error.response?.data?.message || "Failed to load notebooks";
-    console.error("Error loading notebooks:", error);
+    if (error.response?.status === 404) {
+      notebooks.value = [];
+    } else {
+      errorMessage.value =
+        error.response?.data?.message || "Failed to load notebooks";
+      console.error("Error loading notebooks:", error);
+    }
   } finally {
     isLoading.value = false;
   }
 };
-
-onMounted(() => {
-  pdfStore.clearSelectedPdf();
-  loadNotebooks();
-});
 
 const subjects = computed(() => {
   const uniqueSubjects = new Set<string>();
@@ -59,12 +62,7 @@ const notebooksPerSubject = computed(() => {
 
 const selectNotebook = (notebook: Notebook) => {
   if (notebook.pages && notebook.pages.length > 0) {
-    const pdfId = notebook.pages[0]?.id_pdf;
-    if (pdfId) {
-      pdfStore.setSelectedPdf(pdfId, notebook.last_page);
-    } else {
-      console.warn("No id_pdf found in notebook pages");
-    }
+    emit("select-notebook", notebook);
   } else {
     console.warn("Notebook has no pages:", notebook);
   }
@@ -83,6 +81,10 @@ const deleteNotebook = async (notebook: Notebook) => {
     console.error("Error deleting notebook:", error);
   }
 };
+
+onMounted(() => {
+  loadNotebooks();
+});
 </script>
 
 <template>
@@ -91,7 +93,7 @@ const deleteNotebook = async (notebook: Notebook) => {
     <div
       class="self-stretch flex-1 rounded-tl-none rounded-tr-num-8 rounded-br-num-8 rounded-bl-none bg-white overflow-hidden flex flex-col items-center justify-center p-[0.625rem] gap-[1.875rem]">
       
-      <div v-if="isLoading" class="text-gray-500">Loading notebooks...</div>
+      <div v-if="isLoading" class="size-5 animate-spin"></div>
       <div v-else-if="errorMessage" class="text-red-500">{{ errorMessage }}</div>
       <div v-else-if="notebooks.length === 0" class="text-gray-400">No notebooks found. Create your first one!</div>
       

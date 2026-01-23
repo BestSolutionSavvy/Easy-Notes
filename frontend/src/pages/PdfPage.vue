@@ -1,97 +1,97 @@
 <script setup lang="ts">
-import { ref, watch, computed } from "vue";
-import { usePdfStore } from "../stores/pdf-load";
-import type { Pdf } from "../types/pdf";
-import VuePdfEmbed from "vue-pdf-embed";
+// import { ref, watch, computed } from "vue";
+// import { usePdfStore } from "../stores/pdf-load";
+// import type { Pdf } from "../types/pdf";
+// import VuePdfEmbed from "vue-pdf-embed";
 
-interface Props {
-  preview?: boolean;
-}
-const props = withDefaults(defineProps<Props>(), {
-  preview: true,
-});
+// interface Props {
+//   preview?: boolean;
+// }
+// const props = withDefaults(defineProps<Props>(), {
+//   preview: true,
+// });
 
-const pdfStore = usePdfStore();
-const pdf = ref<Pdf | null>(null);
-const isLoading = ref(false);
-const error = ref<string | null>(null);
+// const pdfStore = usePdfStore();
+// const pdf = ref<Pdf | null>(null);
+// const isLoading = ref(false);
+// const error = ref<string | null>(null);
 
-const currentPage = ref(1);
-const totalPages = ref(0);
-const scale = ref(1);
-const pdfUrl = ref<string | null>(null);
+// const currentPage = ref(1);
+// const totalPages = ref(0);
+// const scale = ref(1);
+// const pdfUrl = ref<string | null>(null);
 
-const loadCurrentPdf = async () => {
-  const pdfId = pdfStore.selectedPdfId;
-  const page = pdfStore.selectedPageNumber;
-  if (!pdfId) {
-    pdf.value = null;
-    pdfUrl.value = null;
-    return;
-  }
-  isLoading.value = true;
-  error.value = null;
-  try {
-    pdf.value = await pdfStore.loadPdf(pdfId, page ?? undefined);
-    pdfUrl.value = URL.createObjectURL(pdf.value.data);
-    currentPage.value = page ?? 1;
-  } catch (err: any) {
-    error.value = err.response?.data?.message || "Failed to load PDF";
-    pdf.value = null;
-    pdfUrl.value = null;
-  } finally {
-    isLoading.value = false;
-  }
-};
+// const loadCurrentPdf = async () => {
+//   const pdfId = pdfStore.selectedPdfId;
+//   const page = pdfStore.selectedPageNumber;
+//   if (!pdfId) {
+//     pdf.value = null;
+//     pdfUrl.value = null;
+//     return;
+//   }
+//   isLoading.value = true;
+//   error.value = null;
+//   try {
+//     pdf.value = await pdfStore.loadPdf(pdfId, page ?? undefined);
+//     pdfUrl.value = URL.createObjectURL(pdf.value.data);
+//     currentPage.value = page ?? 1;
+//   } catch (err: any) {
+//     error.value = err.response?.data?.message || "Failed to load PDF";
+//     pdf.value = null;
+//     pdfUrl.value = null;
+//   } finally {
+//     isLoading.value = false;
+//   }
+// };
 
-watch(
-  () => [pdfStore.selectedPdfId, pdfStore.selectedPageNumber] as const,
-  () => loadCurrentPdf(),
-  { immediate: true }
-);
+// watch(
+//   () => [pdfStore.selectedPdfId, pdfStore.selectedPageNumber] as const,
+//   () => loadCurrentPdf(),
+//   { immediate: true }
+// );
 
-const handleDocumentRender = ({ numPages }: { numPages: number }) => {
-  totalPages.value = numPages;
-};
+// const handleDocumentRender = ({ numPages }: { numPages: number }) => {
+//   totalPages.value = numPages;
+// };
 
-const previousPage = () => {
-  if (currentPage.value > 1) currentPage.value--;
-};
+// const previousPage = () => {
+//   if (currentPage.value > 1) currentPage.value--;
+// };
 
-const nextPage = () => {
-  if (currentPage.value < totalPages.value) currentPage.value++;
-};
+// const nextPage = () => {
+//   if (currentPage.value < totalPages.value) currentPage.value++;
+// };
 
-const zoomIn = () => {
-  scale.value = Math.min(scale.value + 0.25, 3);
-};
+// const zoomIn = () => {
+//   scale.value = Math.min(scale.value + 0.25, 3);
+// };
 
-const zoomOut = () => {
-  scale.value = Math.max(scale.value - 0.25, 0.5);
-};
+// const zoomOut = () => {
+//   scale.value = Math.max(scale.value - 0.25, 0.5);
+// };
 
-const toggleFullscreen = () => {
-  const element = document.documentElement;
-  if (!document.fullscreenElement) {
-    element.requestFullscreen();
-  } else {
-    document.exitFullscreen();
-  }
-};
+// const toggleFullscreen = () => {
+//   const element = document.documentElement;
+//   if (!document.fullscreenElement) {
+//     element.requestFullscreen();
+//   } else {
+//     document.exitFullscreen();
+//   }
+// };
 
-const downloadPdf = () => {
-  if (!pdf.value) return;
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(pdf.value.data);
-  link.download = pdf.value.name || "document.pdf";
-  link.click();
-};
+// const downloadPdf = () => {
+//   if (!pdf.value) return;
+//   const link = document.createElement("a");
+//   link.href = URL.createObjectURL(pdf.value.data);
+//   link.download = pdf.value.name || "document.pdf";
+//   link.click();
+// };
 
-const scalePercent = computed(() => Math.round(scale.value * 100));
+// const scalePercent = computed(() => Math.round(scale.value * 100));
 </script>
 
 <template>
-  <div
+  <!-- <div
     class="h-full flex-1 w-full relative rounded-tl-[10px] rounded-tr-none rounded-br-none rounded-bl-[10px] bg-gray-100 overflow-hidden shrink-0 flex flex-col items-center justify-center py-[1.875rem] px-[1.25rem] box-border gap-[0.625rem] text-center text-[1.25rem] text-darkslategray font-inter"
   >
     <div
@@ -222,5 +222,5 @@ const scalePercent = computed(() => Math.round(scale.value * 100));
         />
       </div>
     </div>
-  </div>
+  </div> -->
 </template>
