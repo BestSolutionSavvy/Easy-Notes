@@ -21,6 +21,9 @@ const routes: RouteRecordRaw[] = [
     components: {
       left: PdfPage,
       right: NotePage,
+    },
+    props: {
+      left: { preview: false },
     }
   },
   {

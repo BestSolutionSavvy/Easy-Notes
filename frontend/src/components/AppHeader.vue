@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
+import { useAuthStore } from "../stores/auth";
 import Menu from '../pages/Menu.vue';
 import HeaderButton from './HeaderButton.vue';
 import newNotebookIcon from '../assets/new-notebook.svg';
@@ -7,15 +8,41 @@ import openNotebookIcon from '../assets/open-notebook.svg';
 import saveIcon from '../assets/save.svg';
 import closeIcon from '../assets/close.svg';
 import shortcutIcon from '../assets/shortcut.svg';
+import { formatDateTime } from '../lib/dateFormatter';
+import type { Notebook } from '../types/notebook';
+import axios from 'axios';
+
 
 const isMenuOpen = ref(false);
 const notebookName = ref('');
 const pdfName = ref('');
 const subjectName = ref('');
+const notebooks = ref<Notebook[]>([]);
+const isLoading = ref(false);
+const errorMessage = ref("");
+const authStore = useAuthStore();
 
 const toggleMenu = () => {
     isMenuOpen.value = !isMenuOpen.value;
 };
+
+const loadNotebooks = async () => {
+    isLoading.value = true;
+    errorMessage.value = "";
+    try {
+        const response = await axios.get(`/api/notebooks`);
+        notebooks.value = response.data.filter(
+            (notebook: Notebook) => notebook.owner === authStore.user?.email
+        );
+    } catch (error: any) {
+        errorMessage.value = error.response?.data?.message || "Failed to load notebooks";
+        console.error("Error loading notebooks:", error);
+    } finally {
+        isLoading.value = false;
+    }
+};
+
+
 
 const createNotebook = async () => {
     try {
@@ -27,7 +54,7 @@ const createNotebook = async () => {
             body: JSON.stringify({
                 name: notebookName.value,
                 subject: subjectName.value,
-                date: new Date().toISOString(),
+                date: formatDateTime(new Date().toISOString()),
                 owner: 'user123',
                 type: pdfName.value ? 'with_slides' : 'simple',
                 last_page: 0,
@@ -58,6 +85,11 @@ const props = withDefaults(defineProps<Props>(), {
     variant: 'default'
 });
 
+
+onMounted(() => {
+    loadNotebooks();
+});
+
 </script>
 
 <template>
@@ -86,70 +118,141 @@ const props = withDefaults(defineProps<Props>(), {
                 </div>
             </div>
             <HeaderButton v-if="variant === 'tools'" :text="'Create Notebook'" :icon="newNotebookIcon">
-                <form @submit.prevent="createNotebook" class="flex flex-col gap-3 p-4 min-w-[20rem]">
-                    <div class="flex flex-col gap-1">
-                        <label class="text-sm font-medium text-gray-700">Nome Notebook *</label>
+                <form @submit.prevent="createNotebook" class="flex flex-col gap-2 p-3 min-w-[16rem]">
+                    <div class="flex flex-col gap-0.5">
+                        <label class="text-xs text-gray-600">Nome Notebook *</label>
                         <input v-model="notebookName" type="text" required
-                            class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                            placeholder="Es. Appunti Lezione 1" />
+                            class="px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-transparent"
+                            placeholder="Appunti Lezione 1" />
                     </div>
-                    
-                    <div class="flex flex-col gap-1">
-                        <label class="text-sm font-medium text-gray-700">Nome PDF</label>
+
+                    <div class="flex flex-col gap-0.5">
+                        <label class="text-xs text-gray-600">Nome PDF</label>
                         <input v-model="pdfName" type="text"
-                            class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                            placeholder="Es. Capitolo_01.pdf (opzionale)" />
+                            class="px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-transparent"
+                            placeholder="Capitolo_01.pdf" />
                     </div>
-                    
-                    <div class="flex flex-col gap-1">
-                        <label class="text-sm font-medium text-gray-700">Materia *</label>
+
+                    <div class="flex flex-col gap-0.5">
+                        <label class="text-xs text-gray-600">Materia *</label>
                         <input v-model="subjectName" type="text" required
-                            class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                            placeholder="Es. Matematica" />
+                            class="px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-transparent"
+                            placeholder="Matematica" />
                     </div>
-                    
+
                     <button type="submit"
-                        class="mt-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-amber-400 text-white font-medium rounded-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200">
-                        Crea Notebook
+                        class="mt-1 px-3 py-1.5 text-sm bg-gray-800 text-white rounded hover:bg-gray-700 active:bg-gray-900 transition-colors duration-150">
+                        Crea
                     </button>
                 </form>
             </HeaderButton>
             <HeaderButton v-if="variant === 'tools'" :text="'Open Notebook'" :icon="openNotebookIcon">
-                <div class="flex flex-row gap-2 p-2">
-                    <button class="px-4 py-2 bg-gainsboro-100 rounded-md text-sm hover:scale-[1.01] active:scale-[0.99] transition-all duration-200">
-                        Simple
-                    </button>
-                    <button class="px-4 py-2 bg-gainsboro-100 rounded-md text-sm hover:scale-[1.01] active:scale-[0.99] transition-all duration-200">
-                        With Slides
-                    </button>
+                <div v-for="notebook in notebooks" :key="notebook._id"
+                    class="p-2 hover:bg-gainsboro-100 rounded-md cursor-pointer"
+                    @click="$emit('open-notebook', notebook)">
+                    <div class="font-medium text-darkslateblue">{{ notebook.name }}</div>
+                    <div class="text-sm text-gray-500">{{ notebook.subject }}</div>
                 </div>
             </HeaderButton>
             <HeaderButton v-if="variant === 'tools'" :icon="shortcutIcon">
-                <div class="flex flex-row gap-2 p-2">
-                    <button class="px-4 py-2 bg-gainsboro-100 rounded-md text-sm hover:scale-[1.01] active:scale-[0.99] transition-all duration-200">
-                        Simple
-                    </button>
-                    <button class="px-4 py-2 bg-gainsboro-100 rounded-md text-sm hover:scale-[1.01] active:scale-[0.99] transition-all duration-200">
-                        With Slides
-                    </button>
+                <div class="flex flex-col gap-1 p-2 max-w-sm max-h-80 overflow-y-auto">
+                    <div class="flex justify-between items-center py-1.5 border-b border-gray-100">
+                        <kbd
+                            class="px-1.5 py-0.5 text-[10px] font-semibold text-gray-800 bg-gray-100 border border-gray-300 rounded">←
+                            →</kbd>
+                        <span class="text-xs text-gray-700">Naviga pagine</span>
+                    </div>
+                    <div class="flex justify-between items-center py-1.5 border-b border-gray-100">
+                        <kbd
+                            class="px-1.5 py-0.5 text-[10px] font-semibold text-gray-800 bg-gray-100 border border-gray-300 rounded">Enter</kbd>
+                        <span class="text-xs text-gray-700">Inizia modifica</span>
+                    </div>
+                    <div class="flex justify-between items-center py-1.5 border-b border-gray-100">
+                        <kbd
+                            class="px-1.5 py-0.5 text-[10px] font-semibold text-gray-800 bg-gray-100 border border-gray-300 rounded">Esc</kbd>
+                        <span class="text-xs text-gray-700">Esci da modifica</span>
+                    </div>
+                    <div class="flex justify-between items-center py-1.5 border-b border-gray-100">
+                        <kbd
+                            class="px-1.5 py-0.5 text-[10px] font-semibold text-gray-800 bg-gray-100 border border-gray-300 rounded">Ctrl
+                            + F</kbd>
+                        <span class="text-xs text-gray-700">Cerca parola chiave</span>
+                    </div>
+                    <div class="flex justify-between items-center py-1.5 border-b border-gray-100">
+                        <kbd
+                            class="px-1.5 py-0.5 text-[10px] font-semibold text-gray-800 bg-gray-100 border border-gray-300 rounded">Ctrl
+                            + +/-/Wheel</kbd>
+                        <span class="text-xs text-gray-700">Controlli zoom</span>
+                    </div>
+                    <div class="flex justify-between items-center py-1.5 border-b border-gray-100">
+                        <kbd
+                            class="px-1.5 py-0.5 text-[10px] font-semibold text-gray-800 bg-gray-100 border border-gray-300 rounded">Alt
+                            + Drag</kbd>
+                        <span class="text-xs text-gray-700">Pan durante zoom</span>
+                    </div>
+                    <div class="flex justify-between items-center py-1.5 border-b border-gray-100">
+                        <kbd
+                            class="px-1.5 py-0.5 text-[10px] font-semibold text-gray-800 bg-gray-100 border border-gray-300 rounded">Click</kbd>
+                        <span class="text-xs text-gray-700">Rimuovi evidenziazione</span>
+                    </div>
+
+                    <div class="mt-2 pt-1.5 border-t border-gray-300">
+                        <strong class="text-xs font-bold text-gray-800">Durante la modifica:</strong>
+                    </div>
+                    <div class="flex justify-between items-center py-1.5 border-b border-gray-100">
+                        <kbd
+                            class="px-1.5 py-0.5 text-[10px] font-semibold text-gray-800 bg-gray-100 border border-gray-300 rounded">Ctrl
+                            + ← →</kbd>
+                        <span class="text-xs text-gray-700">Naviga scrivendo</span>
+                    </div>
+                    <div class="flex justify-between items-center py-1.5 border-b border-gray-100">
+                        <kbd
+                            class="px-1.5 py-0.5 text-[10px] font-semibold text-gray-800 bg-gray-100 border border-gray-300 rounded">Ctrl
+                            + S</kbd>
+                        <span class="text-xs text-gray-700">Salva note</span>
+                    </div>
+
+                    <div class="mt-2 pt-1.5 border-t border-gray-300">
+                        <strong class="text-xs font-bold text-gray-800">Modalità textbox:</strong>
+                    </div>
+                    <div class="flex justify-between items-center py-1.5 border-b border-gray-100">
+                        <kbd
+                            class="px-1.5 py-0.5 text-[10px] font-semibold text-gray-800 bg-gray-100 border border-gray-300 rounded">Click
+                            + Drag</kbd>
+                        <span class="text-xs text-gray-700">Disegna textbox</span>
+                    </div>
+                    <div class="flex justify-between items-center py-1.5 border-b border-gray-100">
+                        <kbd
+                            class="px-1.5 py-0.5 text-[10px] font-semibold text-gray-800 bg-gray-100 border border-gray-300 rounded">Double
+                            Click</kbd>
+                        <span class="text-xs text-gray-700">Modifica textbox</span>
+                    </div>
+                    <div class="flex justify-between items-center py-1.5">
+                        <kbd
+                            class="px-1.5 py-0.5 text-[10px] font-semibold text-gray-800 bg-gray-100 border border-gray-300 rounded">Click</kbd>
+                        <span class="text-xs text-gray-700">Elimina textbox</span>
+                    </div>
                 </div>
             </HeaderButton>
             <HeaderButton v-if="variant === 'tools'" :text="'Save'" :icon="saveIcon">
                 <div class="flex flex-row gap-2 p-2">
-                    <button class="px-4 py-2 bg-gainsboro-100 rounded-md text-sm hover:scale-[1.01] active:scale-[0.99] transition-all duration-200">
+                    <button
+                        class="px-4 py-2 bg-gainsboro-100 rounded-md text-sm hover:scale-[1.01] active:scale-[0.99] transition-all duration-200">
                         Simple
                     </button>
                 </div>
             </HeaderButton>
-            <HeaderButton v-if="variant === 'tools'" :text="'Close'" :icon="closeIcon">
-                <div class="flex flex-row gap-2 p-2">
-                    <button class="px-4 py-2 bg-gainsboro-100 rounded-md text-sm hover:scale-[1.01] active:scale-[0.99] transition-all duration-200">
-                        Simple
+            <HeaderButton v-if="variant === 'tools'" :text="'Close'" :icon="closeIcon" :direction="'left'">
+                <div class="flex flex-col gap-3 p-3 min-w-[14rem] max-w-sm">
+                    <p class="text-xs text-gray-600">
+                        Sei sicuro di voler chiudere il notebook? Le modifiche non salvate andranno perse.
+                    </p>
+                    <button @click="$emit('close-notebook')"
+                        class="px-3 py-1.5 text-sm bg-gray-800 text-white rounded hover:bg-gray-700 active:bg-gray-900 transition-colors duration-150">
+                        Chiudi Notebook
                     </button>
                 </div>
             </HeaderButton>
-            
-
         </header>
     </div>
 </template>
