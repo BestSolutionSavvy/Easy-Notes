@@ -1,7 +1,34 @@
 {
+  "name": "string",
   "subject": "string",
   "date": "ISODate",
-  "last_page": 0,
+  "owner": "UserId",
   "type": "simple | slide",
-  "ownerEmail": "StudentId"
+  "last_page": 0,
+  "pages": [
+    {
+      "page_number": 0,
+      "slide_number": 0,
+      "id_pdf": "PdfDocumentId",
+      "note_content": "string",
+      "text_boxes": [
+        {
+          "left": 0,
+          "top": 0,
+          "width": 0,
+          "height": 0,
+          "content": "string"
+        }
+      ],
+      "highlights": [
+        {
+          "left": 0,
+          "top": 0,
+          "width": 0,
+          "height": 0,
+          "content": "string"
+        }
+      ]
+    }
+  ]
 }

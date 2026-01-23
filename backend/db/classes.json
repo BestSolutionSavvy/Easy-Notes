@@ -1,6 +1,7 @@
 {
   "_id": "id",
   "name": "string",
-  "teacher": "string",
-  "date": "date"
+  "teacher": "UserId",
+  "date": "date",
+  "pdfs": ["PdfDocumentId"]
 }

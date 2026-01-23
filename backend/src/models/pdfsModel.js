@@ -25,7 +25,6 @@ const pdfSchema = new mongoose.Schema({
   },
 });
 
-// Automatically exclude __v when converting to JSON
 pdfSchema.set("toJSON", {
   transform: function (doc, ret) {
     delete ret.__v;

@@ -22,6 +22,10 @@ const userSchema = new mongoose.Schema({
     required: true,
     enum: ["student", "teacher"],
   },
+  classes: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Class",
+  }],
 });
 
 // Method to get user info without password

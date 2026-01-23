@@ -12,7 +12,11 @@ const classSchema = new mongoose.Schema({
     date: {
         type: Date,
         required: true
-    }
+    },
+    pdfs: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'PdfDocument'
+    }]
 });
 const classModel = mongoose.model('Class', classSchema);
 

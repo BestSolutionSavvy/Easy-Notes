@@ -2,6 +2,9 @@ const express = require("express");
 const router = express.Router();
 const { upload } = require("../config/multer");
 const controller = require("../controllers/pdfController");
+const { authenticateToken } = require("../config/jwt");
+
+router.use(authenticateToken);
 
 router.route("/upload")
     .post(upload.single("pdf"), controller.uploadPdf);

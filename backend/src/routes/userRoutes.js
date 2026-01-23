@@ -9,15 +9,17 @@ router.route("/login")
 router.route("/signup")
     .post(controller.signup);
 
+router.use(authenticateToken);
+
 router.route("/logout")
     .post(controller.logout);
 
 router.route("/verify")
-    .get(authenticateToken, controller.verifyToken);
+    .get(controller.verifyToken);
 
 router.route("/:email")
-    .get(authenticateToken, controller.getUser)
-    .put(authenticateToken, controller.updateUser)
-    .delete(authenticateToken, controller.deleteUser);
+    .get(controller.getUser)
+    .put(controller.updateUser)
+    .delete(controller.deleteUser);
 
 module.exports = router;

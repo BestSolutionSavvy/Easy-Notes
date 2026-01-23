@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES_IN = "7d";
-const JWT_MAX_AGE = 7 * 24 * 60 * 60;
+const JWT_MAX_AGE = 7 * 24 * 60 * 60 * 1000;
 
 /**
  * Generates a JWT token for a user

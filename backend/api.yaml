@@ -104,68 +104,6 @@ paths:
           description: Notebook deleted successfully (no content)
         "404":
           description: Notebook not found
-  /notes/{notebookId}:
-    get:
-      summary: Get all notes for a specific notebook
-      parameters:
-      - in: path
-        name: notebookId
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          description: List of notes for the notebook
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Note"
-        "404":
-          description: Notebook not found
-    post:
-      summary: Add a new note to a specific notebook
-      parameters:
-      - in: path
-        name: notebookId
-        required: true
-        schema:
-          type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Note"
-      responses:
-        "201":
-          description: Note added successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Note"
-        "400":
-          description: Invalid note data
-  /notes/{notebookId}/{noteId}:
-    delete:
-      summary: Delete a specific note
-      parameters:
-      - in: path
-        name: notebookId
-        required: true
-        schema:
-          type: integer
-      - in: path
-        name: noteId
-        required: true
-        schema:
-          type: integer
-      responses:
-        "204":
-          description: Note deleted successfully (no content)
-        "404":
-          description: Note not found
   /classes:
     get:
       summary: Get list of all classes
@@ -211,70 +149,6 @@ paths:
           description: Class deleted successfully (no content)
         "404":
           description: Class not found
-  /pdf/{classesId}:
-    get:
-      summary: Get all PDF for a specific class
-      parameters:
-      - in: path
-        name: classesId
-        required: true
-        schema:
-          type: integer
-      responses:
-        "200":
-          description: List of PDFs for the class
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/PDF"
-        "404":
-          description: Class not found
-    post:
-      summary: Add a new PDF to a specific class
-      parameters:
-      - in: path
-        name: classesId
-        required: true
-        schema:
-          type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/PDF"
-      responses:
-        "201":
-          description: PDF added successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/PDF"
-        "400":
-          description: Invalid PDF data
-        "404":
-          description: Class not found
-  /pdf/{classesId}/{pdfId}:
-    delete:
-      summary: Delete a specific PDF
-      parameters:
-      - in: path
-        name: classesId
-        required: true
-        schema:
-          type: integer
-      - in: path
-        name: pdfId
-        required: true
-        schema:
-          type: integer
-      responses:
-        "204":
-          description: PDF deleted successfully (no content)
-        "404":
-          description: PDF not found
   /users/{email}:
     get:
       summary: Get the informations of a specific user
@@ -627,12 +501,6 @@ paths:
           description: Invalid input data
 
 components:
-  securitySchemes:
-    cookieAuth:
-      type: apiKey
-      in: cookie
-      name: authToken
-      description: JWT token stored in httpOnly cookie
   schemas:
     Notebook:
       type: object
@@ -666,7 +534,6 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Page"
-
     Page:
       type: object
       required:
@@ -693,7 +560,6 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Highlight"
-
     TextBox:
       type: object
       properties:
@@ -712,7 +578,6 @@ components:
         content:
           type: string
           example: "Testo della casella"
-
     Highlight:
       type: object
       properties:
@@ -731,22 +596,6 @@ components:
         content:
           type: string
           example: "Testo evidenziato"
-    Note:
-      type: object
-      required:
-      - id
-      - notebookId
-      - content
-      properties:
-        id:
-          type: integer
-          example: 1
-        notebookId:
-          type: integer
-          example: 1
-        content:
-          type: string
-          example: "This is a note content."
     Classes:
       type: object
       properties:
@@ -763,27 +612,17 @@ components:
           type: string
           format: date
           example: "2026-01-01"
+        pdfs:
+          type: array
+          items:
+            type: string
+            example: "507f1f77bcf86cd799439011"
     SummaryResponse:
       type: object
       properties:
         summary:
           type: string
           example: "This is a summarized version of the text."
-    PDF:
-      type: object
-      properties:
-        id:
-          type: integer
-          example: 1
-        classesId:
-          type: integer
-          example: 1
-        title:
-          type: string
-          example: "Lecture Notes"
-        url:
-          type: string
-          example: "http://example.com/lecture-notes.pdf"
     User:
       type: object
       required:
@@ -805,6 +644,11 @@ components:
           example: "securepassword"
         role:
           $ref: "#/components/schemas/UserRole"
+        classes:
+          type: array
+          items:
+            type: string
+            example: "507f1f77bcf86cd799439013"
     UserRole:
       type: string
       enum:
@@ -825,6 +669,11 @@ components:
           example: "Doe"
         role:
           $ref: "#/components/schemas/UserRole"
+        classes:
+          type: array
+          items:
+            type: string
+            example: "507f1f77bcf86cd799439013"
     PDFDocument:
       type: object
       properties:
