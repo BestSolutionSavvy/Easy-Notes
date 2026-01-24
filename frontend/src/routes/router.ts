@@ -9,21 +9,16 @@ import LogoPage from "../pages/LogoPage.vue";
 import SigninPage from "../pages/SigninPage.vue";
 import SignupPage from "../pages/SignupPage.vue";
 import ProfilePage from "../pages/ProfilePage.vue";
-import PdfPage from "../pages/PdfPage.vue";
-import NotePage from "../pages/NotePage.vue";
 import NotebooksView from "../views/NotebooksView.vue";
 import ClassesView from "../views/ClassesView.vue";
+import HomeView from "../views/HomeView.vue";
 
 const routes: RouteRecordRaw[] = [
   {
     path: "/",
-    components: {
-      left: PdfPage,
-      right: NotePage,
-    },
-    props: {
-      left: { preview: false },
-    },
+    name: "Home",
+    component: HomeView,
+    meta: { requiresAuth: true },
   },
   {
     path: "/home",
