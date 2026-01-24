@@ -10,6 +10,7 @@ import closeIcon from "../assets/close.svg";
 import shortcutIcon from "../assets/shortcut.svg";
 import { formatDateTime } from "../lib/dateFormatter";
 import type { Notebook } from "../types/notebook";
+import { loadNotebooks } from "../lib/notebookUtils";
 import axios from "axios";
 
 interface Props {
@@ -34,23 +35,6 @@ const toggleMenu = () => {
   isMenuOpen.value = !isMenuOpen.value;
 };
 
-// const loadNotebooks = async () => {
-//   isLoading.value = true;
-//   errorMessage.value = "";
-//   try {
-//     const response = await axios.get(`/api/notebooks`);
-//     notebooks.value = response.data.filter(
-//       (notebook: Notebook) => notebook.owner === authStore.user?.email,
-//     );
-//   } catch (error: any) {
-//     errorMessage.value =
-//       error.response?.data?.message || "Failed to load notebooks";
-//     console.error("Error loading notebooks:", error);
-//   } finally {
-//     isLoading.value = false;
-//   }
-// };
-
 const createNotebook = async () => {
   try {
     const response = await fetch("/api/notebooks", {
@@ -71,7 +55,6 @@ const createNotebook = async () => {
 
     if (response.ok) {
       const data = await response.json();
-      console.log("Notebook creato:", data);
       // Reset form
       notebookName.value = "";
       pdfName.value = "";
@@ -84,9 +67,15 @@ const createNotebook = async () => {
   }
 };
 
-onMounted(() => {
-  // loadNotebooks();
+const emit = defineEmits<{
+  (e: "open-notebook", notebook: Notebook): void;
+  (e: "close-notebook"): void;
+}>();
+
+onMounted(async () => {
+  notebooks.value = await loadNotebooks(authStore.user?.email || "");
 });
+
 </script>
 
 <template>

@@ -9,11 +9,16 @@ const overlayRef = ref<HTMLElement | null>(null)
 const position = ref({ top: 0, left: 0 })
 const scale = ref({ x: 0.6, y: 0.05 })
 
+const emit = defineEmits<{
+    (e: 'open-overlay'): void;
+}>();
+
 async function openOverlay() {
     if (buttonRef.value) {
         const rect = buttonRef.value.getBoundingClientRect()
         isClosing.value = false
         open.value = true
+        emit('open-overlay');
         
         await nextTick()
         

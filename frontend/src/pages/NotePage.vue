@@ -1,7 +1,18 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import type { Notebook } from '../types/notebook';
 
 const noteContent = ref('');
+interface Props {
+  notebook?: Notebook | null;
+  currentPage?: number;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  notebook: null,
+  currentPage: 0
+});
+
 </script>
 
 <template>
@@ -10,11 +21,11 @@ const noteContent = ref('');
         <div class="self-stretch overflow-hidden flex items-end py-[0rem] px-[0.625rem]">
             <div class="overflow-hidden flex items-center justify-center gap-[0.312rem]">
                 <img src="../assets/notes.svg" class="w-[1rem] relative max-h-full" alt="" />
-                <b class="relative">Notes for page</b>
+                <b class="relative">Notes for page {{ props.currentPage }}</b>
                 <div class="h-[1.125rem] w-[0.313rem] relative overflow-hidden shrink-0" />
                 <div
                     class="rounded-[5px] [background:linear-gradient(90deg,_#25356e,_#4766d4)] overflow-hidden flex items-center justify-center py-[0.187rem] px-[0.312rem] text-[0.875rem] text-gray-100">
-                    <div class="relative font-medium">1 of 100</div>
+                    <div class="relative font-medium">{{ props.currentPage }} of {{ props.notebook?.pages?.length || 0 }}</div>
                 </div>
             </div>
         </div>
