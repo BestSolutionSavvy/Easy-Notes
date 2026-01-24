@@ -8,10 +8,10 @@ import NotFound from "../pages/NotFound.vue";
 import LogoPage from "../pages/LogoPage.vue";
 import SigninView from "../views/SigninView.vue";
 import SignupView from "../views/SignupView.vue";
-import ProfilePage from "../pages/ProfilePage.vue";
 import NotebooksView from "../views/NotebooksView.vue";
 import ClassesView from "../views/ClassesView.vue";
 import HomeView from "../views/HomeView.vue";
+import ProfileView from "../views/ProfileView.vue";
 
 const routes: RouteRecordRaw[] = [
   {
@@ -46,10 +46,7 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: "/profile",
-    components: {
-      left: LogoPage,
-      right: ProfilePage,
-    },
+    component: ProfileView,
     meta: { requiresAuth: true },
   },
   {
