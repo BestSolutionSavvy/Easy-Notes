@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
+import { useRouter } from "vue-router";
 import axios from "axios";
 import ListElement from '../components/ListElement.vue';
 import plusIcon from '../assets/plus.svg';
@@ -16,6 +17,7 @@ const props = defineProps<{
 }>();
 
 const authStore = useAuthStore();
+const router = useRouter();
 const lectures = ref<PDFDocument[]>([]);
 const fileInputRef = ref<HTMLInputElement | null>(null);
 
@@ -64,8 +66,21 @@ const handleDelete = async (lectureId: string) => {
 };
 
 const handleLoad = (lectureId: string) => {
-  // TODO: Implement load lecture logic
-  console.log('Load lecture:', lectureId);
+  const lecture = lectures.value.find(l => l._id === lectureId);
+  
+  if (!lecture || !props.classItem) {
+    console.error('Lecture or class not found');
+    return;
+  }
+
+  router.push({
+    name: 'Home',
+    query: {
+      notebookName: lecture.name + ' notes',
+      pdfName: lecture.name,
+      subject: props.classItem.name
+    }
+  });
 };
 
 const handleAddLecture = () => {
