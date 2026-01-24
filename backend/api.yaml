@@ -6,9 +6,15 @@ info:
 servers:
 - url: http://localhost:3000/api
 paths:
-  /notebooks:
+  /notebooks/{email}:
     get:
-      summary: List of all notebooks
+      summary: List of all notebooks of a specific user
+      parameters:
+      - in: path
+        name: email
+        required: true
+        schema:
+          type: string
       responses:
         "200":
           description: List of notebooks
@@ -20,6 +26,12 @@ paths:
                   $ref: "#/components/schemas/Notebook"
     post:
       summary: Add a new notebook
+      parameters:
+      - in: path
+        name: email
+        required: true
+        schema:
+          type: string
       requestBody:
         required: true
         content:

@@ -1,11 +1,8 @@
 const { notebookModel } = require('../models/notebooksModel');
 
 exports.listNotebooks = (req, res) => {
-    notebookModel.find()
+    notebookModel.find({owner: req.params.email})
         .then(notebooks => {
-            if (!notebooks || notebooks.length === 0) {
-                return res.status(404).json({ error: 'No notebooks found' });
-            }
             res.json(notebooks);
         })
         .catch(err => res.status(500).json({ error: err.message }));
@@ -15,7 +12,11 @@ exports.createNotebook = (req, res) => {
     if (!req.body) {
         return res.status(400).json({ error: 'Invalid notebook data' });
     }
-    const newNotebook = new notebookModel(req.body);
+    const owner = req.params.email;
+    const newNotebook = new notebookModel({
+        ...req.body,
+        owner: owner
+    });
     newNotebook.save()
         .then(doc => {
             res.status(201).json(doc);

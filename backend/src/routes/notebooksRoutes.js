@@ -5,11 +5,11 @@ const { authenticateToken } = require("../config/jwt");
 
 router.use(authenticateToken);
 
-router.route('/')
+router.route('/:email')
     .get(controller.listNotebooks)
     .post(controller.createNotebook);
 
-router.route('/:username/:id')
+router.route('/:email/:id')
     .get(controller.getNotebookById)
     .post(controller.updateNotebook)
     .delete(controller.deleteNotebook);
