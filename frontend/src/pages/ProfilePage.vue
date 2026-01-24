@@ -96,7 +96,7 @@ onMounted(() => {
 
 <template>
   <div
-    class="self-stretch h-full px-5 py-12 bg-white rounded-tr-[10px] rounded-br-[10px] flex flex-col justify-center items-center overflow-hidden"
+    class="animate-fade-in self-stretch h-full px-5 py-12 bg-white rounded-tr-[10px] rounded-br-[10px] flex flex-col justify-center items-center overflow-hidden"
   >
     <div class="flex flex-col justify-center items-center gap-4">
       <div

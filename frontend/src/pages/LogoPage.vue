@@ -10,7 +10,7 @@ const handleLogoClick = () => {
 
 <template>
   <div
-    class="h-full flex-1 w-full relative rounded-tl-[10px] rounded-tr-none rounded-br-none rounded-bl-[10px] bg-gray-100 overflow-hidden shrink-0 flex flex-col items-center justify-center py-[1.875rem] px-[1.25rem] box-border text-left text-[3rem] text-darkslategray font-inter"
+    class="animate-fade-in h-full flex-1 w-full relative rounded-tl-[10px] rounded-tr-none rounded-br-none rounded-bl-[10px] bg-gray-100 overflow-hidden shrink-0 flex flex-col items-center justify-center py-[1.875rem] px-[1.25rem] box-border text-left text-[3rem] text-darkslategray font-inter"
   >
     <div
       class="w-[35rem] h-[31.625rem] overflow-hidden shrink-0 flex flex-col items-center justify-center gap-[0.187rem]"

@@ -3,7 +3,6 @@ import { computed, ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "../stores/auth";
 import axios from "axios";
-import { formatDate } from "../lib/dateFormatter";
 import RoundIconButton from "../components/AddItemButton.vue";
 import plusIcon from "../assets/plus.svg";
 import wandIcon from "../assets/wand.svg";
@@ -120,7 +119,7 @@ onMounted(() => {
       </div>
       <div
         v-else-if="notebooks.length === 0"
-        class="flex flex-col items-center justify-center gap-4 p-8 max-w-md"
+        class="animate-fade-in flex flex-col items-center justify-center gap-4 p-8 max-w-md"
       >
         <div class="text-6xl">📒</div>
         <div class="text-xl font-semibold text-gray-700">No notebooks yet</div>
@@ -144,25 +143,27 @@ onMounted(() => {
           :key="subject"
           class="w-[31.25rem] overflow-hidden flex flex-col items-center p-[0.312rem] box-border gap-[0.625rem]"
         >
-          <div
-            class="self-stretch flex items-center gap-[0.625rem] text-[1.875rem] text-darkslategray"
-          >
-            <div class="relative font-semibold">{{ subject }}</div>
-            <RoundIconButton
-              :icon="plusIcon"
-              :alt="`Add Notebook for ${subject}`"
-              :onClick="() => switchToHomePage(subject)"
+          <div class="animate-fade-in">
+            <div
+              class="self-stretch flex items-center gap-[0.625rem] text-[1.875rem] text-darkslategray"
+            >
+              <div class="relative font-semibold">{{ subject }}</div>
+              <RoundIconButton
+                :icon="plusIcon"
+                :alt="`Add Notebook for ${subject}`"
+                :onClick="() => switchToHomePage(subject)"
+              />
+            </div>
+            <div
+              class="w-[30.063rem] h-[0.063rem] relative border-black border-solid border-t-[1px] box-border opacity-[0.5]"
             />
           </div>
-          <div
-            class="w-[30.063rem] h-[0.063rem] relative border-black border-solid border-t-[1px] box-border opacity-[0.5]"
-          />
           <ul class="w-full flex flex-col gap-[0.625rem]">
             <ListElement
               v-for="(notebook, index) in notebooksPerSubject[subject]"
               :key="notebook.name"
               :title="notebook.name"
-              :date="formatDate(notebook.date)"
+              :date="notebook.date"
               :index="index"
               @click="selectNotebook(notebook)"
               :buttons="[

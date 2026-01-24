@@ -61,14 +61,18 @@ watch(
       class="self-stretch overflow-hidden flex items-end py-[0rem] px-[0.625rem]"
     >
       <div
-        class="overflow-hidden flex items-center justify-center gap-[0.312rem]"
+        class="animate-fade-in overflow-hidden flex items-center justify-center gap-[0.312rem]"
       >
         <img
           src="../assets/pdf.svg"
           class="w-[1.25rem] relative max-h-full"
           alt=""
         />
-        <b class="relative">{{ pdf?.name || "No PDF" }}</b>
+        <b class="relative">{{
+          props.notebook
+            ? pdf?.name || "..."
+            : "Select a notebook to preview its PDF file"
+        }}</b>
         <div
           class="h-[1.125rem] w-[0.313rem] relative overflow-hidden shrink-0"
         />
@@ -81,7 +85,9 @@ watch(
         v-if="isLoading"
         class="flex flex-col items-center justify-center h-full w-full gap-4"
       >
-        <div class="animate-spin rounded-full h-12 w-12 border-4 border-gainsboro-200 border-t-darkslateblue-100"></div>
+        <div
+          class="animate-spin rounded-full h-12 w-12 border-4 border-gainsboro-200 border-t-darkslateblue-100"
+        ></div>
         <div class="text-gray-500">Loading PDF...</div>
       </div>
       <div
@@ -92,7 +98,7 @@ watch(
       </div>
       <div
         v-else-if="props.notebook && !pdfUrl"
-        class="flex flex-col items-center justify-center h-full w-full gap-4 p-8"
+        class="animate-fade-in flex flex-col items-center justify-center h-full w-full gap-4 p-8"
       >
         <div class="text-6xl">📋</div>
         <div class="text-lg font-medium text-gray-700">No PDF attached</div>
