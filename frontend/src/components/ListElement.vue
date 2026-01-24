@@ -4,7 +4,7 @@ import IconButton from './IconButton.vue';
 export interface ButtonConfig {
   icon: string;
   alt?: string;
-  onClick?: () => void;
+  onClick?: (e?: Event) => void;
 }
 
 interface Props {
@@ -19,6 +19,13 @@ const props = defineProps<Props>();
 const emit = defineEmits<{
   click: []
 }>();
+
+const handleButtonClick = (button: ButtonConfig, event: Event) => {
+  event.stopPropagation();
+  if (button.onClick) {
+    button.onClick(event);
+  }
+};
 </script>
 
 <template>
@@ -36,7 +43,7 @@ const emit = defineEmits<{
     <div class="relative text-[0.813rem] leading-[100%] font-medium">{{ date }}</div>
     <div v-if="buttons && buttons.length > 0" class="overflow-hidden flex items-center gap-[0.625rem]">
       <IconButton v-for="(button, index) in buttons" :key="index" :icon="button.icon" :alt="button.alt"
-        :onClick="button.onClick" />
+        :onClick="(e?: Event) => handleButtonClick(button, e!)" />
     </div>
   </li>
 </template>
