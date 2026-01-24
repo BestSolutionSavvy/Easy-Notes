@@ -26,10 +26,16 @@ const loadCurrentPdf = async () => {
     const lastPage = props.notebook.last_page || 0;
     const pdfId = props.notebook.pages[0]?.id_pdf;
     if (pdfId) {
-      pdf.value = await loadPdf(pdfId, lastPage);
-      pdfUrl.value = URL.createObjectURL(pdf.value.data);
+      try {
+        pdf.value = await loadPdf(pdfId, lastPage);
+        pdfUrl.value = URL.createObjectURL(pdf.value.data);
+      } catch (err: any) {
+        error.value = err.response?.data?.message || "Failed to load PDF";
+        pdf.value = null;
+        pdfUrl.value = null;
+        console.error("Error loading PDF:", err);
+      }
     } else {
-      error.value = "No PDF available for this notebook";
       pdf.value = null;
       pdfUrl.value = null;
     }
@@ -62,7 +68,7 @@ watch(
           class="w-[1.25rem] relative max-h-full"
           alt=""
         />
-        <b class="relative">{{ pdf?.name || "No PDF Selected" }}</b>
+        <b class="relative">{{ pdf?.name || "No PDF" }}</b>
         <div
           class="h-[1.125rem] w-[0.313rem] relative overflow-hidden shrink-0"
         />
@@ -73,8 +79,9 @@ watch(
     >
       <div
         v-if="isLoading"
-        class="flex items-center justify-center h-full w-full"
+        class="flex flex-col items-center justify-center h-full w-full gap-4"
       >
+        <div class="animate-spin rounded-full h-12 w-12 border-4 border-gainsboro-200 border-t-darkslateblue-100"></div>
         <div class="text-gray-500">Loading PDF...</div>
       </div>
       <div
@@ -84,10 +91,14 @@ watch(
         <div class="text-red-500">{{ error }}</div>
       </div>
       <div
-        v-else-if="!pdfUrl"
-        class="flex items-center justify-center h-full w-full"
+        v-else-if="props.notebook && !pdfUrl"
+        class="flex flex-col items-center justify-center h-full w-full gap-4 p-8"
       >
-        <div class="text-gray-400">Select a notebook to view PDF</div>
+        <div class="text-6xl">📋</div>
+        <div class="text-lg font-medium text-gray-700">No PDF attached</div>
+        <div class="text-center text-gray-500 text-sm">
+          This notebook doesn't have an associated PDF file
+        </div>
       </div>
       <div
         v-else

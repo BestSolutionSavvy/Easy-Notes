@@ -19,6 +19,10 @@ const routes: RouteRecordRaw[] = [
     name: "Home",
     component: HomeView,
     meta: { requiresAuth: true },
+    props: (route) => ({
+      notebookId: route.query.notebookId as string | undefined,
+      subject: route.query.subject as string | undefined,
+    }),
   },
   {
     path: "/home",
