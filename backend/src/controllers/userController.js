@@ -61,7 +61,7 @@ exports.getUser = (req, res) => {
 // PUT /users/:email
 exports.updateUser = async (req, res) => {
   const { email } = req.params;
-  const { password, name, surname } = req.body;
+  const { password, name, surname, classes } = req.body;
   if (!email) {
     return res.status(400).json({ message: "email is required" });
   }
@@ -75,12 +75,21 @@ exports.updateUser = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
+    
+    const updateFields = {};
     if (password) {
-      user.password = await bcrypt.hash(password, SALT_ROUNDS);
+      updateFields.password = await bcrypt.hash(password, SALT_ROUNDS);
     }
-    if (name !== undefined) user.name = name;
-    if (surname !== undefined) user.surname = surname;
-    const updatedUser = await user.save();
+    if (name !== undefined) updateFields.name = name;
+    if (surname !== undefined) updateFields.surname = surname;
+    if (classes !== undefined) updateFields.classes = classes;
+    
+    const updatedUser = await userModel.findOneAndUpdate(
+      { email },
+      { $set: updateFields },
+      { new: true, runValidators: true }
+    ).select('-password');
+    
     res.json(updatedUser);
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });

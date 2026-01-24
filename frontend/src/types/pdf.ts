@@ -6,4 +6,13 @@ interface Pdf {
   data: Blob;
 }
 
-export type { Pdf };
+interface PDFDocument {
+  _id: string;
+  name: string;
+  date: string;
+  type: string;
+  owner: string;
+  gridFsFileId: string;
+}
+
+export type { Pdf, PDFDocument };

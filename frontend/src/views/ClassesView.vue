@@ -12,16 +12,18 @@ const selectedClass = ref<any | undefined>(undefined);
 const handleSelectClass = (classItem: any) => {
   selectedClass.value = classItem;
 };
+
+const role = authStore.user?.role;
 </script>
 
 <template>
   <AppHeader :username="authStore.user?.email"/>
   <MainStructure>
     <template #left>
-      <ClassesPage @select-class="handleSelectClass" />
+      <ClassesPage :role="role" @select-class="handleSelectClass"/>
     </template>
     <template #right>
-      <LecturesPage :classItem="selectedClass" />
+      <LecturesPage :role="role" :class-item="selectedClass" />
     </template>
   </MainStructure>
 </template>
