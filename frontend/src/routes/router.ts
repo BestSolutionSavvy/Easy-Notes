@@ -6,8 +6,8 @@ import {
 import { useAuthStore } from "../stores/auth";
 import NotFound from "../pages/NotFound.vue";
 import LogoPage from "../pages/LogoPage.vue";
-import SigninPage from "../pages/SigninPage.vue";
-import SignupPage from "../pages/SignupPage.vue";
+import SigninView from "../views/SigninView.vue";
+import SignupView from "../views/SignupView.vue";
 import ProfilePage from "../pages/ProfilePage.vue";
 import NotebooksView from "../views/NotebooksView.vue";
 import ClassesView from "../views/ClassesView.vue";
@@ -36,17 +36,13 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: "/signin",
-    components: {
-      left: LogoPage,
-      right: SigninPage,
-    },
+    name: "Signin",
+    component: SigninView
   },
   {
     path: "/signup",
-    components: {
-      left: LogoPage,
-      right: SignupPage,
-    },
+    name: "Signup",
+    component: SignupView
   },
   {
     path: "/profile",

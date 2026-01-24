@@ -77,7 +77,7 @@ const handleSignup = async () => {
             type="radio" 
             v-model="user.role" 
             value="student"
-            class="h-[1rem] w-[1rem] relative rounded-full cursor-pointer accent-darkslateblue"
+            class="h-[1rem] w-[1rem] relative rounded-full cursor-pointer accent-darkslateblue-100"
           />
           <span class="flex-1 relative leading-[140%]">Student</span>
         </label>
@@ -86,7 +86,7 @@ const handleSignup = async () => {
             type="radio" 
             v-model="user.role" 
             value="teacher"
-            class="h-[1rem] w-[1rem] relative rounded-full cursor-pointer accent-darkslateblue"
+            class="h-[1rem] w-[1rem] relative rounded-full cursor-pointer accent-darkslateblue-100"
           />
           <span class="flex-1 relative leading-[140%]">Teacher</span>
         </label>
@@ -97,6 +97,11 @@ const handleSignup = async () => {
           {{ errorMessage }}
         </div>
         <SimpleButton text="Sign Up" @click="handleSignup" :disabled="authStore.isLoading" />
+        <div class="relative text-[0.813rem] font-medium text-darkslategray text-center">
+          Already have an account?<br />
+          <RouterLink to="/signin" class="underline text-blue-500 hover:underline font-medium">Sign in</RouterLink>
+          to access your notes!
+        </div>
       </div>
       <div class="w-[2.188rem] flex-1 relative overflow-hidden" />
       <PrivacyLink />

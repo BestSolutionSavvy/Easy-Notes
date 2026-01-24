@@ -54,16 +54,11 @@ const handleSignin = async () => {
       >
         <InputBox v-model="email" type="email" placeholder="E-mail" :error="fieldErrors.email" />
         <InputBox v-model="password" type="password" placeholder="Password" :error="fieldErrors.password" />
-        <RouterLink
-          to="/signup"
-          class="relative text-[0.813rem] font-medium text-darkslategray text-center"
-        >
-          Don't have an account yet?<br /><span
-            class="[text-decoration:underline]"
-            >Sign up</span
-          >
+        <div class="relative text-[0.813rem] font-medium text-darkslategray text-center">
+          Don't have an account yet?<br />
+          <RouterLink to="/signup" class="underline text-blue-500 hover:underline font-medium">Sign up</RouterLink>
           for free to bring your notes everywhere!
-        </RouterLink>
+        </div>
         <div
           class="w-[1.875rem] h-[1.188rem] relative overflow-hidden shrink-0"
         />
