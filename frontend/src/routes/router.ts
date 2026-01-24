@@ -11,9 +11,8 @@ import SignupPage from "../pages/SignupPage.vue";
 import ProfilePage from "../pages/ProfilePage.vue";
 import PdfPage from "../pages/PdfPage.vue";
 import NotePage from "../pages/NotePage.vue";
-import ClassesPage from "../pages/ClassesPage.vue";
-import LecturesPage from "../pages/LecturesPage.vue";
 import NotebooksView from "../views/NotebooksView.vue";
+import ClassesView from "../views/ClassesView.vue";
 
 const routes: RouteRecordRaw[] = [
   {
@@ -60,10 +59,8 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: "/classes",
-    components: {
-      left: ClassesPage,
-      right: LecturesPage,
-    },
+    name: "Classes",
+    component: ClassesView,
     meta: { requiresAuth: true },
   },
   {
