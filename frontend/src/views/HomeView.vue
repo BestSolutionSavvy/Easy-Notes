@@ -1,5 +1,4 @@
 <script setup lang="ts">
-//import { ref } from "vue";
 import AppHeader from "../components/AppHeader.vue";
 import MainStructure from "../components/MainStructure.vue";
 import PdfPage from "../pages/PdfPage.vue";
@@ -31,6 +30,12 @@ const handlePagePrev = () => {
     }
 };
 
+interface Props {
+  notebookId?: string;
+  subject?: string;
+}
+
+const props = defineProps<Props>();
 </script>
 
 <template>

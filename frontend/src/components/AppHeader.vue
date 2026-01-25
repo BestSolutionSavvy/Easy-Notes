@@ -337,17 +337,22 @@ onMounted(async () => {
           </button>
         </div>
       </HeaderButton>
-
-      <div
+      <RouterLink
         v-if="props.username"
-        class="flex-1 w-full relative rounded-[18px] bg-white overflow-hidden shrink-0 flex items-center justify-center py-[0.312rem] px-[0.625rem] box-border gap-[0.312rem] text-center text-[0.875rem] text-orangered font-inter"
+        to="/profile"
+        class="animate-fade-in flex-1 flex items-center justify-end text-[0.875rem] text-orangered-100"
       >
-        <img
-          class="self-stretch w-[1.125rem] relative max-h-full shrink-0"
-          alt=""
-        />
-        <div class="relative font-medium shrink-0">{{ props.username }}</div>
-      </div>
+        <div
+          class="rounded-[18px] bg-white overflow-hidden flex items-center justify-center py-[0.312rem] px-[0.625rem] gap-[0.312rem] cursor-pointer transition-all duration-200 hover:scale-102 active:scale-97 hover:shadow-s"
+        >
+          <img
+            class="w-[1.125rem] relative shrink-0"
+            alt="Username badge icon"
+            src="../assets/profile-badge.svg"
+          />
+          <div class="relative font-medium shrink-0">{{ props.username }}</div>
+        </div>
+      </RouterLink>
     </header>
   </div>
 </template>

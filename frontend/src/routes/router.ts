@@ -6,12 +6,12 @@ import {
 import { useAuthStore } from "../stores/auth";
 import NotFound from "../pages/NotFound.vue";
 import LogoPage from "../pages/LogoPage.vue";
-import SigninPage from "../pages/SigninPage.vue";
-import SignupPage from "../pages/SignupPage.vue";
-import ProfilePage from "../pages/ProfilePage.vue";
+import SigninView from "../views/SigninView.vue";
+import SignupView from "../views/SignupView.vue";
 import NotebooksView from "../views/NotebooksView.vue";
 import ClassesView from "../views/ClassesView.vue";
 import HomeView from "../views/HomeView.vue";
+import ProfileView from "../views/ProfileView.vue";
 
 const routes: RouteRecordRaw[] = [
   {
@@ -19,6 +19,10 @@ const routes: RouteRecordRaw[] = [
     name: "Home",
     component: HomeView,
     meta: { requiresAuth: true },
+    props: (route) => ({
+      notebookId: route.query.notebookId as string | undefined,
+      subject: route.query.subject as string | undefined,
+    }),
   },
   {
     path: "/home",
@@ -32,24 +36,17 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: "/signin",
-    components: {
-      left: LogoPage,
-      right: SigninPage,
-    },
+    name: "Signin",
+    component: SigninView
   },
   {
     path: "/signup",
-    components: {
-      left: LogoPage,
-      right: SignupPage,
-    },
+    name: "Signup",
+    component: SignupView
   },
   {
     path: "/profile",
-    components: {
-      left: LogoPage,
-      right: ProfilePage,
-    },
+    component: ProfileView,
     meta: { requiresAuth: true },
   },
   {

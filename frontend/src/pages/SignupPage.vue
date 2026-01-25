@@ -53,7 +53,7 @@ const handleSignup = async () => {
 
 <template>
   <div
-    class="h-full flex-1 w-full relative rounded-tl-none rounded-tr-[10px] rounded-br-[10px] rounded-bl-none bg-gray-100 overflow-hidden shrink-0 flex flex-col items-center justify-center py-[1.875rem] px-[1.25rem] box-border text-left text-[1rem] text-gray-300 font-inter"
+    class="animate-fade-in h-full flex-1 w-full relative rounded-tl-none rounded-tr-[10px] rounded-br-[10px] rounded-bl-none bg-gray-100 overflow-hidden shrink-0 flex flex-col items-center justify-center py-[1.875rem] px-[1.25rem] box-border text-left text-[1rem] text-gray-300 font-inter"
   >
     <div
       class="w-full flex-1 overflow-hidden flex flex-col items-center justify-center gap-[0.312rem] max-w-full"
@@ -77,7 +77,7 @@ const handleSignup = async () => {
             type="radio" 
             v-model="user.role" 
             value="student"
-            class="h-[1rem] w-[1rem] relative rounded-full cursor-pointer accent-darkslateblue"
+            class="h-[1rem] w-[1rem] relative rounded-full cursor-pointer accent-darkslateblue-100"
           />
           <span class="flex-1 relative leading-[140%]">Student</span>
         </label>
@@ -86,7 +86,7 @@ const handleSignup = async () => {
             type="radio" 
             v-model="user.role" 
             value="teacher"
-            class="h-[1rem] w-[1rem] relative rounded-full cursor-pointer accent-darkslateblue"
+            class="h-[1rem] w-[1rem] relative rounded-full cursor-pointer accent-darkslateblue-100"
           />
           <span class="flex-1 relative leading-[140%]">Teacher</span>
         </label>
@@ -97,6 +97,11 @@ const handleSignup = async () => {
           {{ errorMessage }}
         </div>
         <SimpleButton text="Sign Up" @click="handleSignup" :disabled="authStore.isLoading" />
+        <div class="relative text-[0.813rem] font-medium text-darkslategray text-center">
+          Already have an account?<br />
+          <RouterLink to="/signin" class="underline text-blue-500 hover:underline font-medium">Sign in</RouterLink>
+          to access your notes!
+        </div>
       </div>
       <div class="w-[2.188rem] flex-1 relative overflow-hidden" />
       <PrivacyLink />
