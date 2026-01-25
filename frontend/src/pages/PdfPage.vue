@@ -24,7 +24,6 @@ const error = ref<string | null>(null);
 const scale = ref<number>(1);
 
 const pdfUrl = computed(() => pdfFile.value?.data ? URL.createObjectURL(pdfFile.value.data) : null);
-const currentPdfPage = computed(() => props.notebook?.pages?.[props.currentPage ?? 0]?.slide_number || 1);
 
 const emit = defineEmits<{
   (e: 'page-next'): void;
@@ -32,7 +31,7 @@ const emit = defineEmits<{
 }>();
 
 watch(
-  () => props.notebook?.pages?.[props.currentPage ?? 0]?.id_pdf,
+  () => props.notebook?.pages?.find(p => p.slide_number === (props.currentPage ?? 0))?.id_pdf,
   async (newPdfId) => {
     if (newPdfId && newPdfId !== currentPdfId.value) {
       isLoading.value = true;
@@ -47,10 +46,6 @@ watch(
       } finally {
         isLoading.value = false;
       }
-    } else if (!newPdfId) {
-      pdfFile.value = null;
-      currentPdfId.value = null;
-      error.value = null;
     }
   },
   { immediate: true }
@@ -87,10 +82,10 @@ const handleDocumentRender = ({ numPages }: { numPages: number }) => {
         <div class="text-gray-400">Select a notebook to view PDF</div>
       </div>
       <div v-else class="flex-1 w-full min-h-0 rounded-[10px] bg-white flex items-center justify-center overflow-auto">
-        <VuePdfEmbed :source="pdfUrl" :page="currentPdfPage ?? 1" @loaded="handleDocumentRender" class="max-w-full max-h-full object-contain" />
+        <VuePdfEmbed :source="pdfUrl" :page="currentPage ?? 1" @loaded="handleDocumentRender" class="max-w-full max-h-full object-contain" />
       </div>
       <div class="self-stretch overflow-hidden flex items-center justify-end py-[0rem] px-[0.687rem]">
-        <div class="relative font-medium">{{ currentPdfPage }}/{{ totalPages }}</div>
+        <div class="relative font-medium">{{ currentPage }}/{{ totalPages }}</div>
       </div>
     </div>
     <div
@@ -103,7 +98,7 @@ const handleDocumentRender = ({ numPages }: { numPages: number }) => {
           alt="" />
         <div
           class="rounded-[5px] bg-gray-100 overflow-hidden flex items-center justify-center py-[0.312rem] px-[0.625rem] cursor-pointer transition-all hover:bg-gray-200 hover:shadow-md">
-          <div class="relative">{{ currentPdfPage }}/{{ totalPages }}</div>
+          <div class="relative">{{ currentPage }}/{{ totalPages }}</div>
         </div>
         <img src="../assets/next.svg" @click="$emit('page-next')"
           class="h-[0.875rem] w-[0.5rem] cursor-pointer transition-transform hover:scale-125 hover:brightness-125" />
