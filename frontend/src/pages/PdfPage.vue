@@ -53,6 +53,9 @@ watch(
 
 const handleDocumentRender = ({ numPages }: { numPages: number }) => {
   totalPages.value = numPages;
+  if (props.notebook) {
+    props.notebook.num_pages = numPages;
+  }
 };
 
 </script>
@@ -71,7 +74,7 @@ const handleDocumentRender = ({ numPages }: { numPages: number }) => {
         </div>
       </div>
     </div>
-    <div class="self-stretch flex-1 min-h-0 overflow-hidden flex flex-col items-stretch gap-[0.312rem] text-[0.875rem]">
+    <div class="self-stretch flex-1 overflow-hidden flex flex-col items-start gap-[0.312rem] text-[0.875rem]">
       <div v-if="isLoading" class="flex items-center justify-center h-full w-full">
         <div class="text-gray-500">Loading PDF...</div>
       </div>
@@ -81,8 +84,8 @@ const handleDocumentRender = ({ numPages }: { numPages: number }) => {
       <div v-else-if="!pdfUrl" class="flex items-center justify-center h-full w-full">
         <div class="text-gray-400">Select a notebook to view PDF</div>
       </div>
-      <div v-else class="flex-1 w-full min-h-0 rounded-[10px] bg-white flex items-center justify-center overflow-auto">
-        <VuePdfEmbed :source="pdfUrl" :page="currentPage ?? 1" @loaded="handleDocumentRender" class="max-w-full max-h-full object-contain" />
+      <div v-else class="self-stretch relative rounded-[10px] flex-1 overflow-auto">
+        <VuePdfEmbed :source="pdfUrl" :page="currentPage ?? 1" @loaded="handleDocumentRender" />
       </div>
       <div class="self-stretch overflow-hidden flex items-center justify-end py-[0rem] px-[0.687rem]">
         <div class="relative font-medium">{{ currentPage }}/{{ totalPages }}</div>

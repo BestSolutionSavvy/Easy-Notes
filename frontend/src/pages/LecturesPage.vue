@@ -78,8 +78,7 @@ const handleLoad = (lectureId: string) => {
   router.push({
     name: "Home",
     query: {
-      notebookName: lecture.name + " notes",
-      pdfName: lecture.name,
+      pdfId: lecture._id,
       subject: props.classItem.name,
     },
   });

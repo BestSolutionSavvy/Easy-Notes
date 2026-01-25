@@ -81,10 +81,6 @@ const startEditing = () => {
                 <img src="../assets/notes.svg" class="w-[1rem] relative max-h-full" alt="" />
                 <b class="relative">Notes for page {{ props.currentPage }}</b>
                 <div class="h-[1.125rem] w-[0.313rem] relative overflow-hidden shrink-0" />
-                <div
-                    class="rounded-[5px] [background:linear-gradient(90deg,_#25356e,_#4766d4)] overflow-hidden flex items-center justify-center py-[0.187rem] px-[0.312rem] text-[0.875rem] text-gray-100">
-                    <div class="relative font-medium">{{ props.currentPage }} of {{ props.notebook?.pages?.length || 0 }}</div>
-                </div>
             </div>
         </div>
         <div
