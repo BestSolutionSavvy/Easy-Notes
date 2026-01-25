@@ -542,6 +542,10 @@ components:
           type: integer
           default: 0
           example: 15
+        num_pages:
+          type: integer
+          default: 0
+          example: 20
         pages:
           type: array
           items:

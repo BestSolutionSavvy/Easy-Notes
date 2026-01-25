@@ -23,6 +23,7 @@ interface Notebook {
   owner: string;
   type: string;
   last_page: number;
+  num_pages: number;
   pages: Pages[];
 }
 
