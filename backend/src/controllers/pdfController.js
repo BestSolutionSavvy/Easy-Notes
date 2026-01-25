@@ -16,11 +16,11 @@ exports.uploadPdf = async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ message: "No file uploaded" });
   }
-  const { name, type, owner } = req.body;
-  if (!name || !type || !owner) {
+  const { type, owner } = req.body;
+  if (!type || !owner) {
     return res
       .status(400)
-      .json({ message: "Missing required fields: name, type, owner" });
+      .json({ message: "Missing required fields: type, owner" });
   }
   if (!["class", "note"].includes(type)) {
     return res
@@ -36,6 +36,7 @@ exports.uploadPdf = async (req, res) => {
       uploadStream.on("finish", resolve);
       uploadStream.on("error", reject);
     });
+    const name = req.file.originalname.replace(/\.pdf$/i, "");
     const newPdf = new pdfModel({
       name,
       type,

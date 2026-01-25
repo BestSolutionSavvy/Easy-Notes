@@ -346,7 +346,6 @@ paths:
               type: object
               required:
               - pdf
-              - name
               - type
               - owner
               properties:
@@ -354,9 +353,6 @@ paths:
                   type: string
                   format: binary
                   description: PDF file to upload
-                name:
-                  type: string
-                  example: "Lecture 1 Notes"
                 type:
                   type: string
                   enum:
@@ -417,7 +413,6 @@ paths:
         name: page
         schema:
           type: number
-          example: 1
         description: A specific page number to download (optional)
       - in: path
         name: id
