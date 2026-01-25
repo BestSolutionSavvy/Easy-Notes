@@ -1,8 +1,12 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch, computed, nextTick } from 'vue';
 import type { Notebook } from '../types/notebook';
+import { marked } from 'marked';
 
 const noteContent = ref('');
+const isEditing = ref(false);
+const textareaRef = ref<HTMLTextAreaElement | null>(null);
+
 interface Props {
   notebook?: Notebook | null;
   currentPage?: number;
@@ -12,6 +16,60 @@ const props = withDefaults(defineProps<Props>(), {
   notebook: null,
   currentPage: 0
 });
+
+// Trova la pagina corrente nel notebook
+const currentPageData = computed(() => {
+  if (!props.notebook?.pages) return null;
+  return props.notebook.pages.find(p => p.page_number === props.currentPage);
+});
+
+// Renderizza il contenuto markdown
+const renderedContent = computed(() => {
+  if (!noteContent.value) return '';
+  return marked.parse(noteContent.value);
+});
+
+// Carica il contenuto della nota quando cambia la pagina
+watch([() => props.currentPage, () => props.notebook], () => {
+  noteContent.value = currentPageData.value?.note_content || '';
+  isEditing.value = false;
+}, { immediate: true });
+
+// Funzione per salvare la nota
+const saveNote = () => {
+  if (!props.notebook || !props.notebook.pages) return;
+  
+  isEditing.value = false;
+  
+  // Cerca se esiste già una pagina con questo numero
+  const pageIndex = props.notebook.pages.findIndex(p => p.page_number === props.currentPage);
+  
+  if (pageIndex !== -1) {
+    // Aggiorna la pagina esistente
+    const page = props.notebook.pages[pageIndex];
+    if (page) {
+      page.note_content = noteContent.value;
+    }
+  } else {
+    // Crea una nuova pagina
+    props.notebook.pages.push({
+      page_number: props.currentPage,
+      slide_number: props.currentPage,
+      id_pdf: props.notebook.pages[0]?.id_pdf || '',
+      note_content: noteContent.value,
+      text_boxes: [],
+      highlights: []
+    });
+  }
+};
+
+// Funzione per entrare in modalità editing
+const startEditing = () => {
+  isEditing.value = true;
+  nextTick(() => {
+    textareaRef.value?.focus();
+  });
+};
 
 </script>
 
@@ -31,12 +89,157 @@ const props = withDefaults(defineProps<Props>(), {
         </div>
         <div
             class="self-stretch flex-1 flex flex-col items-start text-left text-[1.5rem] text-gray-500">
+            <!-- Modalità visualizzazione -->
+            <div
+                v-if="!isEditing"
+                @click="startEditing"
+                class="self-stretch flex-1 rounded-[10px] border-gainsboro-100 border-solid border-[1px] py-[0.937rem] px-[1.25rem] text-gray-500 text-[1rem] font-inter leading-normal cursor-pointer hover:bg-gray-50 transition-colors overflow-y-auto markdown-content"
+                :class="{ 'text-gray-400 italic': !noteContent }"
+            >
+                <div v-if="noteContent" v-html="renderedContent"></div>
+                <div v-else>Clicca per aggiungere note...</div>
+            </div>
+            
+            <!-- Modalità editing -->
             <textarea
+                v-else
                 v-model="noteContent"
+                @blur="saveNote"
                 class="self-stretch flex-1 rounded-[10px] border-gainsboro-100 border-solid border-[1px] py-[0.937rem] px-[1.25rem] resize-none focus:outline-none text-gray-500 text-[1rem] font-inter leading-normal"
                 placeholder="Scrivi qui le tue note..."
+                ref="textareaRef"
             ></textarea>
         </div>
     </div>
 </template>
+
+<style scoped>
+.markdown-content :deep(h1) {
+    font-size: 2em;
+    font-weight: 700;
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+    color: #1a1a1a;
+}
+
+.markdown-content :deep(h2) {
+    font-size: 1.5em;
+    font-weight: 700;
+    margin-top: 0.5em;
+    margin-bottom: 0.4em;
+    color: #1a1a1a;
+}
+
+.markdown-content :deep(h3) {
+    font-size: 1.25em;
+    font-weight: 600;
+    margin-top: 0.5em;
+    margin-bottom: 0.3em;
+    color: #2a2a2a;
+}
+
+.markdown-content :deep(h4) {
+    font-size: 1.1em;
+    font-weight: 600;
+    margin-top: 0.4em;
+    margin-bottom: 0.3em;
+    color: #2a2a2a;
+}
+
+.markdown-content :deep(p) {
+    margin-bottom: 0.75em;
+    line-height: 1.6;
+}
+
+.markdown-content :deep(strong) {
+    font-weight: 700;
+    color: #1a1a1a;
+}
+
+.markdown-content :deep(em) {
+    font-style: italic;
+}
+
+.markdown-content :deep(ul) {
+    list-style-type: disc;
+    margin-left: 1.5em;
+    margin-bottom: 0.75em;
+}
+
+.markdown-content :deep(ol) {
+    list-style-type: decimal;
+    margin-left: 1.5em;
+    margin-bottom: 0.75em;
+}
+
+.markdown-content :deep(li) {
+    margin-bottom: 0.25em;
+    line-height: 1.6;
+}
+
+.markdown-content :deep(code) {
+    background-color: #f3f4f6;
+    padding: 0.2em 0.4em;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+    color: #d63384;
+}
+
+.markdown-content :deep(pre) {
+    background-color: #f3f4f6;
+    padding: 1em;
+    border-radius: 5px;
+    overflow-x: auto;
+    margin-bottom: 0.75em;
+}
+
+.markdown-content :deep(pre code) {
+    background-color: transparent;
+    padding: 0;
+    color: #1a1a1a;
+}
+
+.markdown-content :deep(blockquote) {
+    border-left: 4px solid #4766d4;
+    padding-left: 1em;
+    margin-left: 0;
+    margin-bottom: 0.75em;
+    color: #4a5568;
+    font-style: italic;
+}
+
+.markdown-content :deep(a) {
+    color: #4766d4;
+    text-decoration: underline;
+}
+
+.markdown-content :deep(a:hover) {
+    color: #25356e;
+}
+
+.markdown-content :deep(hr) {
+    border: none;
+    border-top: 2px solid #e5e7eb;
+    margin: 1em 0;
+}
+
+.markdown-content :deep(table) {
+    border-collapse: collapse;
+    width: 100%;
+    margin-bottom: 0.75em;
+}
+
+.markdown-content :deep(th),
+.markdown-content :deep(td) {
+    border: 1px solid #e5e7eb;
+    padding: 0.5em;
+    text-align: left;
+}
+
+.markdown-content :deep(th) {
+    background-color: #f3f4f6;
+    font-weight: 600;
+}
+</style>
 

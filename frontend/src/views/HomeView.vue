@@ -16,9 +16,9 @@ const currentPdfPage = ref<number>(0);
 
 const handleOpenNotebook = (notebook: Notebook) => {
     openedNotebook.value = notebook;
-    const pageIndex = notebook.last_page || 0;
+    const pageIndex = notebook.last_page || 1;
     currentNotebookPage.value = Math.min(pageIndex, (notebook.num_pages || 1) - 1);
-    currentPdfPage.value = notebook.pages.find(p => p.page_number === currentNotebookPage.value)?.slide_number || 0;
+    currentPdfPage.value = notebook.pages.find(p => p.page_number === currentNotebookPage.value)?.slide_number || 1;
 };
 
 const handlePageNext = () => {
@@ -64,7 +64,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <AppHeader @open-notebook="handleOpenNotebook" :variant="'tools'" />
+    <AppHeader  @open-notebook="handleOpenNotebook" :variant="'tools'" :currentNotebook="openedNotebook" />
     <MainStructure>
         <template #left>
             <PdfPage :notebook="openedNotebook" :currentPage="currentPdfPage" @page-next="handlePageNext"

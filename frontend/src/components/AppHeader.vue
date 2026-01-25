@@ -16,10 +16,12 @@ import axios from "axios";
 interface Props {
   variant?: "default" | "tools";
   username?: string;
+  currentNotebook?: Notebook | null;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   variant: "default",
+  currentNotebook: null,
 });
 
 const isMenuOpen = ref(false);
@@ -27,8 +29,10 @@ const notebookName = ref("");
 const pdfName = ref("");
 const subjectName = ref("");
 const notebooks = ref<Notebook[]>([]);
-const isLoading = ref(false);
-const errorMessage = ref("");
+const classes = ref<string[]>([]);
+const isSaving = ref(false);
+const saveSuccess = ref(false);
+const pdfPerClass = ref<Record<string, Notebook[]>>({});
 const authStore = useAuthStore();
 
 const toggleMenu = () => {
@@ -67,6 +71,31 @@ const createNotebook = async () => {
   }
 };
 
+const saveNotebook = async () => {
+  console.log("Save notebook triggered");
+  if (!props.currentNotebook || isSaving.value) return;
+  console.log("Saving notebook:", props.currentNotebook);
+  
+  isSaving.value = true;
+  saveSuccess.value = false;
+  
+  try {
+    const response = await axios.post(`/api/notebooks/${authStore.user?.email}/${props.currentNotebook._id}`, props.currentNotebook);
+    if (response.status.toString().startsWith("2")) {
+      saveSuccess.value = true;
+      setTimeout(() => {
+        saveSuccess.value = false;
+      }, 2000);
+    } else {
+      console.error("Errore nel salvataggio del notebook");
+    }
+  } catch (error) {
+    console.error("Errore:", error);
+  } finally {
+    isSaving.value = false;
+  }
+};
+
 const emit = defineEmits<{
   (e: "open-notebook", notebook: Notebook): void;
   (e: "close-notebook"): void;
@@ -74,6 +103,24 @@ const emit = defineEmits<{
 
 onMounted(async () => {
   notebooks.value = await loadNotebooks(authStore.user?.email || "");
+  const allClasses = await axios
+    .get(`/api/classes`)
+    .then((response) => response.data)
+    .catch((error) => {
+      console.error("Errore nel caricamento delle classi:", error);
+      return [];
+    });
+  const userClassesId =  await axios
+    .get(`/api/users/${authStore.user?.email}`)
+    .then((response) => response.data.classes)
+    .catch((error) => {
+      console.error("Errore nel caricamento delle classi:", error);
+      return [];
+    });
+
+  classes.value = allClasses
+    .filter((cls: any) => userClassesId.includes(cls._id));
+  console.log("User classes:", classes.value);
 });
 
 </script>
@@ -309,13 +356,23 @@ onMounted(async () => {
           </div>
         </div>
       </HeaderButton>
-      <HeaderButton v-if="variant === 'tools'" :text="'Save'" :icon="saveIcon">
-        <div class="flex flex-row gap-2 p-2">
-          <button
-            class="px-4 py-2 bg-gainsboro-100 rounded-md text-sm hover:scale-[1.01] active:scale-[0.99] transition-all duration-200"
-          >
-            Simple
-          </button>
+      <HeaderButton v-if="variant === 'tools'" :text="'Save'" :icon="saveIcon" @open-overlay="saveNotebook">
+        <div class="flex flex-col items-center justify-center p-4 min-w-[8rem]">
+          <!-- Loading -->
+          <div v-if="isSaving" class="flex flex-col items-center gap-2">
+            <div class="w-8 h-8 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
+            <span class="text-sm text-gray-600">Salvataggio...</span>
+          </div>
+          
+          <!-- Success -->
+          <div v-else-if="saveSuccess" class="flex flex-col items-center gap-2 animate-fade-in">
+            <div class="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center">
+              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+              </svg>
+            </div>
+            <span class="text-sm text-green-600 font-medium">Salvato!</span>
+          </div>
         </div>
       </HeaderButton>
       <HeaderButton
