@@ -4,7 +4,11 @@ import MainStructure from "../components/MainStructure.vue";
 import PdfPage from "../pages/PdfPage.vue";
 import NotePage from "../pages/NotePage.vue";
 import { onMounted, ref } from "vue";
-import type { Notebook} from "../types/notebook";
+import type { Notebook } from "../types/notebook";
+import { useRoute } from "vue-router";
+import axios from "axios";
+
+const route = useRoute();
 
 const openedNotebook = ref<Notebook | null>(null);
 const currentNotebookPage = ref<number>(0);
@@ -46,19 +50,25 @@ const handlePagePrev = () => {
     }
 };
 
-interface Props {
-  notebookId?: string;
-  subject?: string;
-}
-
-const props = defineProps<Props>();
+onMounted(() => {
+    // se ci sono delle cose nella query string, apri il notebook specificato
+    const notebookId = route.query.notebookId as string | undefined;
+    console.log("notebookId from query:", notebookId);
+    if (notebookId) {
+        axios.get(`/api/notebooks/id/${notebookId}`).then(response => {
+            console.log("Opened notebook from query:", response.data);
+            handleOpenNotebook(response.data);
+        });
+    }
+});
 </script>
 
 <template>
     <AppHeader @open-notebook="handleOpenNotebook" :variant="'tools'" />
     <MainStructure>
         <template #left>
-            <PdfPage :notebook="openedNotebook" :currentPage="currentPdfPage" @page-next="handlePageNext" @page-prev="handlePagePrev" />
+            <PdfPage :notebook="openedNotebook" :currentPage="currentPdfPage" @page-next="handlePageNext"
+                @page-prev="handlePagePrev" />
         </template>
         <template #right>
             <NotePage :notebook="openedNotebook" :currentPage="currentNotebookPage" />
