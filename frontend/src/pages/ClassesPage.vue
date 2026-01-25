@@ -58,12 +58,6 @@ const isSubscribed = (classId: string): boolean => {
   return subscribedClassIds.value.includes(classId);
 };
 
-const formatDate = (dateString: string) => {
-  if (!dateString) return "";
-  const date = new Date(dateString);
-  return date.toLocaleDateString();
-};
-
 const handleDelete = (index: string) => {
   try {
     axios.delete(`/api/classes/${index}`).then(() => {
@@ -172,7 +166,7 @@ onMounted(async () => {
         v-for="(classItem, index) in filteredClasses"
         :key="classItem._id || index"
         :title="`${classItem.name || 'Unknown'} of ${classItem.teacher || 'Unknown'}`"
-        :date="formatDate(classItem.date)"
+        :date="classItem.date"
         :index="index"
         :buttons="
           props.role === 'teacher'
