@@ -26,6 +26,11 @@ const scale = ref<number>(1);
 const pdfUrl = computed(() => pdfFile.value?.data ? URL.createObjectURL(pdfFile.value.data) : null);
 const currentPdfPage = computed(() => props.notebook?.pages?.[props.currentPage ?? 0]?.slide_number || 1);
 
+const emit = defineEmits<{
+  (e: 'page-next'): void;
+  (e: 'page-prev'): void;
+}>();
+
 watch(
   () => props.notebook?.pages?.[props.currentPage ?? 0]?.id_pdf,
   async (newPdfId) => {
@@ -93,14 +98,14 @@ const handleDocumentRender = ({ numPages }: { numPages: number }) => {
     <div
       class="rounded-[10px] [background:linear-gradient(90deg,_#1b264f,_#3e57b5)] overflow-hidden flex items-center py-[0rem] px-[0.625rem] text-[0.75rem] text-gray-700">
       <div class="overflow-hidden flex items-center justify-center p-[0.625rem] gap-[0.437rem]">
-        <img src="../assets/back.svg"
+        <img src="../assets/back.svg" @click="$emit('page-prev')"
           class="h-[0.875rem] w-[0.5rem] cursor-pointer transition-transform hover:scale-125 hover:brightness-125"
           alt="" />
         <div
           class="rounded-[5px] bg-gray-100 overflow-hidden flex items-center justify-center py-[0.312rem] px-[0.625rem] cursor-pointer transition-all hover:bg-gray-200 hover:shadow-md">
           <div class="relative">{{ currentPdfPage }}/{{ totalPages }}</div>
         </div>
-        <img src="../assets/next.svg"
+        <img src="../assets/next.svg" @click="$emit('page-next')"
           class="h-[0.875rem] w-[0.5rem] cursor-pointer transition-transform hover:scale-125 hover:brightness-125" />
       </div>
       <div class="overflow-hidden flex items-center justify-center p-[0.625rem] gap-[0.437rem]">
