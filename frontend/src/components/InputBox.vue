@@ -54,8 +54,8 @@ const togglePasswordVisibility = () => {
         { 'pr-12': type === 'password' },
         { 'opacity-60 cursor-not-allowed': disabled },
         error 
-          ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500' 
-          : 'border-gainsboro-200 focus:border-darkslateblue focus:ring-1 focus:ring-darkslateblue'
+          ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-inset focus:ring-red-500' 
+          : 'border-gainsboro-200 focus:border-darkslateblue focus:ring-1 focus:ring-inset focus:ring-darkslateblue'
       ]"
     />
     
