@@ -10,6 +10,10 @@ const notebookSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    id_pdf: {
+                type: String,
+                required: false
+    },
     date: {
         type: Date,
         default: Date.now
@@ -30,6 +34,10 @@ const notebookSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
+    num_pdf_pages: {
+        type: Number,
+        default: 0
+    },
     pages: [
         {
             page_number: {
@@ -38,10 +46,6 @@ const notebookSchema = new mongoose.Schema({
             },
             slide_number: {
                 type: Number,
-                required: false
-            },
-            id_pdf: {
-                type: String,
                 required: false
             },
             note_content: {

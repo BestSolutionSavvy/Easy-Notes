@@ -9,7 +9,6 @@ interface Box {
 interface Pages {
   page_number: number;
   slide_number: number;
-  id_pdf: string;
   note_content: string;
   text_boxes: Box[];
   highlights: Box[];
@@ -20,10 +19,11 @@ interface Notebook {
   name: string;
   subject: string;
   date: string;
+  id_pdf: string;
   owner: string;
   type: string;
   last_page: number;
-  num_pages: number;
+  num_notebook_pages: number;
   pages: Pages[];
 }
 

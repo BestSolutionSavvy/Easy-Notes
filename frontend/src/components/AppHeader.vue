@@ -16,12 +16,13 @@ interface Props {
   variant?: "default" | "tools";
   username?: string;
   currentNotebook?: Notebook | null;
-  currentNotebookPage: number;
+  currentNotebookPage?: number;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   variant: "default",
   currentNotebook: null,
+  currentNotebookPage: 0,
 });
 
 const isMenuOpen = ref(false);
@@ -54,8 +55,9 @@ const saveNotebook = async () => {
     "subject": props.currentNotebook.subject,
     "owner": authStore.user?.email || "unknown",
     "type": props.currentNotebook.type || "simple",
+    "id_pdf": props.currentNotebook.id_pdf || "",
     "date": props.currentNotebook.date,
-    "num_pages": props.currentNotebook.num_pages || 0,
+    "num_notebook_pages": props.currentNotebook.num_notebook_pages || 0,
     "pages": props.currentNotebook.pages || [],
     "last_page": props.currentNotebook.last_page
   }

@@ -533,11 +533,14 @@ components:
         type:
           type: string
           example: "slide"
+        id_pdf:
+          type: string
+          example: "pdf_12345"
         last_page:
           type: integer
           default: 0
-          example: 15
-        num_pages:
+          example: 5
+        num_notebook_pages:
           type: integer
           default: 0
           example: 20
@@ -553,13 +556,10 @@ components:
       properties:
         page_number:
           type: integer
-          example: 1
+          example: 5
         slide_number:
           type: integer
           example: 5
-        id_pdf:
-          type: string
-          example: "pdf_12345"
         note_content:
           type: string
           example: "Contenuto degli appunti della pagina"

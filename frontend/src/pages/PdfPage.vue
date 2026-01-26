@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import type { Notebook } from '../types/notebook';
 import { loadPdf } from '../lib/pdfLoad';
 import type { Pdf } from '../types/pdf';
@@ -17,7 +17,6 @@ const props = withDefaults(defineProps<Props>(), {
 
 
 const pdfFile = ref<Pdf | null>(null);
-const currentPdfId = ref<string | null>(null);
 const totalPages = ref<number>(0);
 const isLoading = ref<boolean>(false);
 const error = ref<string | null>(null);
@@ -30,33 +29,22 @@ const emit = defineEmits<{
   (e: 'page-prev'): void;
 }>();
 
-watch(
-  () => props.notebook?.pages?.find(p => p.slide_number === (props.currentPage ?? 0))?.id_pdf,
-  async (newPdfId) => {
-    if (newPdfId && newPdfId !== currentPdfId.value) {
-      isLoading.value = true;
-      error.value = null;
-      try {
-        pdfFile.value = await loadPdf(newPdfId);
-        currentPdfId.value = newPdfId;
-      } catch (e) {
-        error.value = e instanceof Error ? e.message : 'Failed to load PDF';
-        pdfFile.value = null;
-        console.error("PDF loading error:", e);
-      } finally {
-        isLoading.value = false;
-      }
-    }
-  },
-  { immediate: true }
-);
-
 const handleDocumentRender = ({ numPages }: { numPages: number }) => {
   totalPages.value = numPages;
   if (props.notebook) {
-    props.notebook.num_pages = numPages;
+    props.notebook.num_notebook_pages = numPages;
   }
 };
+
+onMounted(async () => {
+  try {
+    console.log('Loading PDF for notebook', props.notebook);
+    pdfFile.value = await loadPdf(props.notebook?.id_pdf || '');
+  } catch (err) {
+    error.value = 'Failed to load PDF';
+    console.error('Error loading PDF:', err);
+  }
+});
 
 </script>
 

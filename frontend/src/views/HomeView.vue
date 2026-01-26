@@ -20,13 +20,13 @@ const currentPdfPage = ref<number>(0);
 const handleOpenNotebook = (notebook: Notebook) => {
     openedNotebook.value = notebook;
     const pageIndex = notebook.last_page || 1;
-    currentNotebookPage.value = Math.min(pageIndex, (notebook.num_pages || 1) - 1);
+    currentNotebookPage.value = pageIndex;
     currentPdfPage.value = notebook.pages.find(p => p.page_number === currentNotebookPage.value)?.slide_number || 1;
 };
 
 const handlePageNext = () => {
     if (openedNotebook.value && openedNotebook.value.pages) {
-        const maxPage = openedNotebook.value.num_pages;
+        const maxPage = openedNotebook.value.num_notebook_pages;
         if (currentNotebookPage.value < maxPage) {
             currentNotebookPage.value++;
             const page = openedNotebook.value.pages.find(p => p.page_number === currentNotebookPage.value);
@@ -79,11 +79,11 @@ onMounted(() => {
                 name: pdfData.name + " notes",
                 subject: subject,
                 owner: authStore.user?.email || "unknown",
+                id_pdf: pdfId,
                 type: "slide",
                 date: new Date().toISOString(),
-                num_pages: 100,
+                num_notebook_pages: 100,
                 pages: [{
-                    id_pdf: pdfId,
                     page_number: 1,
                     slide_number: 1,
                     note_content: "",
@@ -101,9 +101,10 @@ onMounted(() => {
             name: subject + " notes",
             subject: subject,
             owner: authStore.user?.email || "unknown",
+            id_pdf: "",
             type: "simple",
             date: new Date().toISOString(),
-            num_pages: 100,
+            num_notebook_pages: 100,
             pages: [],
             last_page: 1
         };

@@ -55,7 +55,6 @@ const saveNote = () => {
     props.notebook.pages.push({
       page_number: props.currentPage,
       slide_number: props.currentPage,
-      id_pdf: props.notebook.pages[0]?.id_pdf || '',
       note_content: noteContent.value,
       text_boxes: [],
       highlights: []
