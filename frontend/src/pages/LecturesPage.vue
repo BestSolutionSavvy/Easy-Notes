@@ -111,8 +111,8 @@ const handleFileSelect = async (event: Event) => {
       pdfs: updatedPdfs,
     });
 
-    // Refresh lectures
-    await fetchLectures();
+    // Add the new lecture to the list immediately
+    lectures.value.push(response.data);
 
     // Reset file input
     if (target) target.value = "";
