@@ -26,6 +26,12 @@ const handleOpenNotebook = (notebook: Notebook) => {
     currentPdfPage.value = notebook.pages.find(p => p.page_number === currentNotebookPage.value)?.slide_number || 1;
 };
 
+const handleCloseNotebook = () => {
+    openedNotebook.value = null;
+    currentNotebookPage.value = 0;
+    currentPdfPage.value = 0;
+};
+
 const handlePageNext = () => {
     if (openedNotebook.value && openedNotebook.value.pages) {
         const maxPage = openedNotebook.value.num_notebook_pages;
@@ -123,7 +129,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <AppHeader @open-notebook="handleOpenNotebook" :variant="'tools'" :currentNotebook="openedNotebook"
+    <AppHeader @open-notebook="handleOpenNotebook" @close-notebook="handleCloseNotebook" :variant="'tools'" :currentNotebook="openedNotebook"
         :currentNotebookPage="currentNotebookPage" />
     <MainStructure>
         <template #left>
@@ -131,12 +137,22 @@ onUnmounted(() => {
                 @page-next="handlePageNext" @page-prev="handlePagePrev" />
             <NotePage v-else-if="openedNotebook?.type === 'simple'" :notebook="openedNotebook"
                 :currentPage="currentNotebookPage" />
+            <div v-else class="h-full flex-1 w-full rounded-tl-[10px] rounded-bl-[10px] flex flex-col items-center justify-center gap-4 p-8">
+                <img src="../assets/pdf.svg" class="w-24 h-24 opacity-30" alt="" />
+                <h2 class="text-2xl font-bold text-gray-400">Nessun PDF aperto</h2>
+                <p class="text-gray-500 text-center max-w-md">Apri un notebook con PDF dalle opzioni dell'header per visualizzare le slide</p>
+            </div>
         </template>
         <template #right>
             <NotePage v-if="openedNotebook?.type === 'slide'" :notebook="openedNotebook"
                 :currentPage="currentNotebookPage" />
             <NotePage v-else-if="openedNotebook?.type === 'simple'" :notebook="openedNotebook"
                 :currentPage="currentNotebookPage + 1" />
+            <div v-else class="h-full flex-1 w-full rounded-tr-[10px] rounded-br-[10px] flex flex-col items-center justify-center gap-4 p-8">
+                <img src="../assets/notes.svg" class="w-24 h-24 opacity-30" alt="" />
+                <h2 class="text-2xl font-bold text-gray-400">Nessun notebook aperto</h2>
+                <p class="text-gray-500 text-center max-w-md">Crea un nuovo notebook o aprine uno esistente per iniziare a prendere appunti</p>
+            </div>
         </template>
     </MainStructure>
 </template>
