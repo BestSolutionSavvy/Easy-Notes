@@ -5,7 +5,7 @@ const { authenticateToken } = require("../config/jwt");
 
 router.use(authenticateToken);
 
-router.route('/')
-    .post(controller.summarizeText);
+router.route('/:notebookId')
+    .post(controller.summarizeNotebook);
 
 module.exports = router;

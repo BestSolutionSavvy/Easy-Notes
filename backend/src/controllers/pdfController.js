@@ -2,16 +2,8 @@ const { pdfModel } = require("../models/pdfsModel");
 const { userModel } = require("../models/usersModel");
 const { notebookModel } = require("../models/notebooksModel");
 const classModel = require("../models/classesModel");
-const mongoose = require("mongoose");
 const { PDFDocument } = require("pdf-lib");
-
-let gridFSBucket;
-
-mongoose.connection.once("open", () => {
-  gridFSBucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, {
-    bucketName: "pdfs",
-  });
-});
+const { getGridFSBucket } = require("../config/gridfs");
 
 // POST /pdfs/upload - Upload a new PDF file with metadata
 exports.uploadPdf = async (req, res) => {
@@ -30,6 +22,7 @@ exports.uploadPdf = async (req, res) => {
       .json({ message: "Invalid type. Must be 'class' or 'note'" });
   }
   try {
+    const gridFSBucket = getGridFSBucket();
     const uploadStream = gridFSBucket.openUploadStream(req.file.originalname, {
       contentType: req.file.mimetype,
     });
@@ -80,6 +73,7 @@ exports.downloadPdf = async (req, res) => {
     if (!pdf) {
       return res.status(404).json({ message: "PDF not found" });
     }
+    const gridFSBucket = getGridFSBucket();
     const files = await gridFSBucket.find({ _id: pdf.gridFsFileId }).toArray();
     if (files.length === 0) {
       return res.status(404).json({ message: "File not found in GridFS" });
@@ -151,6 +145,7 @@ exports.updatePdf = async (req, res) => {
     if (!pdf) {
       return res.status(404).json({ message: "PDF not found" });
     }
+    const gridFSBucket = getGridFSBucket();
     await gridFSBucket.delete(pdf.gridFsFileId);
     const uploadStream = gridFSBucket.openUploadStream(req.file.originalname, {
       contentType: req.file.mimetype,
@@ -192,6 +187,7 @@ exports.deletePdf = async (req, res) => {
       });
     }
 
+    const gridFSBucket = getGridFSBucket();
     await gridFSBucket.delete(pdf.gridFsFileId);
     await pdfModel.findByIdAndDelete(id);
     res.status(204).json({
