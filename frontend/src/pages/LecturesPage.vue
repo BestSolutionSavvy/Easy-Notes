@@ -39,12 +39,6 @@ const fetchLectures = async () => {
   }
 };
 
-const formatDate = (dateString: string) => {
-  if (!dateString) return "";
-  const date = new Date(dateString);
-  return date.toLocaleDateString();
-};
-
 const handleDelete = async (lectureId: string) => {
   if (!props.classItem?._id) return;
 
@@ -181,7 +175,7 @@ watch(
         v-for="(lecture, index) in lectures"
         :key="lecture._id"
         :title="lecture.name"
-        :date="formatDate(lecture.date)"
+        :date="classItem?.date || ''"
         :index="index"
         :buttons="
           props.role === 'teacher'
