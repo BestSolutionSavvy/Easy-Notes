@@ -38,7 +38,6 @@ const handleDocumentRender = ({ numPages }: { numPages: number }) => {
 
 onMounted(async () => {
   try {
-    console.log('Loading PDF for notebook', props.notebook);
     pdfFile.value = await loadPdf(props.notebook?.id_pdf || '');
   } catch (err) {
     error.value = 'Failed to load PDF';

@@ -65,12 +65,9 @@ const saveNotebook = async () => {
   try {
     let response;
     if (props.currentNotebook._id && props.currentNotebook._id !== "") {
-      // Aggiorna notebook esistente
       response = await axios.post(`/api/notebooks/${authStore.user?.email}/${props.currentNotebook._id}`, props.currentNotebook);
     } else {
-      // Crea nuovo notebook
       response = await axios.post(`/api/notebooks/${authStore.user?.email}`, newNotebook);
-      // Aggiorna l'_id del notebook con quello restituito dal server
       if (response.data._id) {
         props.currentNotebook._id = response.data._id;
       }
@@ -159,14 +156,12 @@ onMounted(async () => {
       </h1>
       <div v-if="variant === 'tools'"
         class="animate-fade-in self-stretch flex-1 overflow-hidden flex items-center justify-center text-[1rem] gap-3">
-        <!-- Barra di ricerca -->
         <div
           class="h-[1.938rem] w-[18.438rem] rounded-[9999px] bg-gray-200 border-gainsboro border-solid border-[1px] box-border overflow-hidden shrink-0 flex items-center py-[0.75rem] px-[1rem] gap-[0.5rem] min-w-[7.5rem]">
           <div class="flex-1 relative leading-[100%] shrink-0 text-gray-500">Value</div>
           <img src="../assets/search.svg" class="h-[1rem] w-[1rem] relative shrink-0" alt="" />
         </div>
-
-        <!-- Campo nome notebook (se aperto) -->
+        
         <div v-if="props.currentNotebook" class="flex items-center">
           <!-- Modalità visualizzazione nome -->
           <div v-if="!isEditingName" @click="startEditingName"

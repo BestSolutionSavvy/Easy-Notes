@@ -17,44 +17,41 @@ const props = withDefaults(defineProps<Props>(), {
   currentPage: 0
 });
 
-// Trova la pagina corrente nel notebook
 const currentPageData = computed(() => {
   if (!props.notebook?.pages) return null;
   return props.notebook.pages.find(p => p.page_number === props.currentPage);
 });
 
-// Renderizza il contenuto markdown
 const renderedContent = computed(() => {
   if (!noteContent.value) return '';
   return marked.parse(noteContent.value);
 });
 
-// Carica il contenuto della nota quando cambia la pagina
-watch([() => props.currentPage, () => props.notebook], () => {
+watch([() => props.currentPage, () => props.notebook], (_newVal, oldVal) => {
+  if (isEditing.value && oldVal && oldVal[0] !== undefined) {
+    const oldPageNumber = oldVal[0] as number;
+    saveNote(oldPageNumber);
+  }
   noteContent.value = currentPageData.value?.note_content || '';
   isEditing.value = false;
 }, { immediate: true });
 
-// Funzione per salvare la nota
-const saveNote = () => {
+const saveNote = (pageNumber?: number) => {
   if (!props.notebook || !props.notebook.pages) return;
   
   isEditing.value = false;
-  
-  // Cerca se esiste già una pagina con questo numero
-  const pageIndex = props.notebook.pages.findIndex(p => p.page_number === props.currentPage);
+  const targetPage = pageNumber !== undefined ? pageNumber : props.currentPage;
+  const pageIndex = props.notebook.pages.findIndex(p => p.page_number === targetPage);
   
   if (pageIndex !== -1) {
-    // Aggiorna la pagina esistente
     const page = props.notebook.pages[pageIndex];
     if (page) {
       page.note_content = noteContent.value;
     }
-  } else {
-    // Crea una nuova pagina
+  } else if (noteContent.value.trim()) {
     props.notebook.pages.push({
-      page_number: props.currentPage,
-      slide_number: props.currentPage,
+      page_number: targetPage,
+      slide_number: targetPage,
       note_content: noteContent.value,
       text_boxes: [],
       highlights: []
@@ -62,7 +59,6 @@ const saveNote = () => {
   }
 };
 
-// Funzione per entrare in modalità editing
 const startEditing = () => {
   isEditing.value = true;
   nextTick(() => {
@@ -99,7 +95,7 @@ const startEditing = () => {
             <textarea
                 v-else
                 v-model="noteContent"
-                @blur="saveNote"
+                @blur="saveNote()"
                 class="self-stretch flex-1 rounded-[10px] border-gainsboro-100 border-solid border-[1px] py-[0.937rem] px-[1.25rem] resize-none focus:outline-none text-gray-500 text-[1rem] font-inter leading-normal"
                 placeholder="Scrivi qui le tue note..."
                 ref="textareaRef"

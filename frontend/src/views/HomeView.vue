@@ -9,6 +9,8 @@ import { useRoute } from "vue-router";
 import axios from "axios";
 import { useAuthStore } from "../stores/auth";
 
+defineOptions({ inheritAttrs: false })
+
 const authStore = useAuthStore();
 
 const route = useRoute();
@@ -121,7 +123,8 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <AppHeader @open-notebook="handleOpenNotebook" :variant="'tools'" :currentNotebook="openedNotebook" :currentNotebookPage="currentNotebookPage" />
+    <AppHeader @open-notebook="handleOpenNotebook" :variant="'tools'" :currentNotebook="openedNotebook"
+        :currentNotebookPage="currentNotebookPage" />
     <MainStructure>
         <template #left>
             <PdfPage v-if="openedNotebook?.type === 'slide'" :notebook="openedNotebook" :currentPage="currentPdfPage"
