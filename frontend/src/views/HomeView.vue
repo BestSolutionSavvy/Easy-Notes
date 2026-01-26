@@ -139,8 +139,8 @@ onUnmounted(() => {
                 :currentPage="currentNotebookPage" />
             <div v-else class="h-full flex-1 w-full rounded-tl-[10px] rounded-bl-[10px] flex flex-col items-center justify-center gap-4 p-8">
                 <img src="../assets/pdf.svg" class="w-24 h-24 opacity-30" alt="" />
-                <h2 class="text-2xl font-bold text-gray-400">Nessun PDF aperto</h2>
-                <p class="text-gray-500 text-center max-w-md">Apri un notebook con PDF dalle opzioni dell'header per visualizzare le slide</p>
+                <h2 class="text-2xl font-bold text-gray-400">No PDF opened</h2>
+                <p class="text-gray-500 text-center max-w-md">Open a notebook with PDF from the header options to view slides</p>
             </div>
         </template>
         <template #right>
@@ -150,8 +150,8 @@ onUnmounted(() => {
                 :currentPage="currentNotebookPage + 1" />
             <div v-else class="h-full flex-1 w-full rounded-tr-[10px] rounded-br-[10px] flex flex-col items-center justify-center gap-4 p-8">
                 <img src="../assets/notes.svg" class="w-24 h-24 opacity-30" alt="" />
-                <h2 class="text-2xl font-bold text-gray-400">Nessun notebook aperto</h2>
-                <p class="text-gray-500 text-center max-w-md">Crea un nuovo notebook o aprine uno esistente per iniziare a prendere appunti</p>
+                <h2 class="text-2xl font-bold text-gray-400">No notebook opened</h2>
+                <p class="text-gray-500 text-center max-w-md">Create a new notebook or open an existing one to start taking notes</p>
             </div>
         </template>
     </MainStructure>
