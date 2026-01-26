@@ -91,13 +91,7 @@ onMounted(() => {
                 type: "slide",
                 date: new Date().toISOString(),
                 num_notebook_pages: 100,
-                pages: [{
-                    page_number: 1,
-                    slide_number: 1,
-                    note_content: "",
-                    text_boxes: [],
-                    highlights: []
-                }],
+                pages: [],
                 last_page: 1
             };
             handleOpenNotebook(newNotebook);
@@ -129,18 +123,20 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <AppHeader @open-notebook="handleOpenNotebook" @close-notebook="handleCloseNotebook" :variant="'tools'" :currentNotebook="openedNotebook"
-        :currentNotebookPage="currentNotebookPage" />
+    <AppHeader @open-notebook="handleOpenNotebook" @close-notebook="handleCloseNotebook" :variant="'tools'"
+        :currentNotebook="openedNotebook" :currentNotebookPage="currentNotebookPage" />
     <MainStructure>
         <template #left>
             <PdfPage v-if="openedNotebook?.type === 'slide'" :notebook="openedNotebook" :currentPage="currentPdfPage"
                 @page-next="handlePageNext" @page-prev="handlePagePrev" />
             <NotePage v-else-if="openedNotebook?.type === 'simple'" :notebook="openedNotebook"
                 :currentPage="currentNotebookPage" />
-            <div v-else class="h-full flex-1 w-full rounded-tl-[10px] rounded-bl-[10px] flex flex-col items-center justify-center gap-4 p-8">
+            <div v-else
+                class="h-full flex-1 w-full rounded-tl-[10px] rounded-bl-[10px] flex flex-col items-center justify-center gap-4 p-8">
                 <img src="../assets/pdf.svg" class="w-24 h-24 opacity-30" alt="" />
                 <h2 class="text-2xl font-bold text-gray-400">No PDF opened</h2>
-                <p class="text-gray-500 text-center max-w-md">Open a notebook with PDF from the header options to view slides</p>
+                <p class="text-gray-500 text-center max-w-md">Open a notebook with PDF from the header options to view
+                    slides</p>
             </div>
         </template>
         <template #right>
@@ -148,10 +144,12 @@ onUnmounted(() => {
                 :currentPage="currentNotebookPage" />
             <NotePage v-else-if="openedNotebook?.type === 'simple'" :notebook="openedNotebook"
                 :currentPage="currentNotebookPage + 1" />
-            <div v-else class="h-full flex-1 w-full rounded-tr-[10px] rounded-br-[10px] flex flex-col items-center justify-center gap-4 p-8">
+            <div v-else
+                class="h-full flex-1 w-full rounded-tr-[10px] rounded-br-[10px] flex flex-col items-center justify-center gap-4 p-8">
                 <img src="../assets/notes.svg" class="w-24 h-24 opacity-30" alt="" />
                 <h2 class="text-2xl font-bold text-gray-400">No notebook opened</h2>
-                <p class="text-gray-500 text-center max-w-md">Create a new notebook or open an existing one to start taking notes</p>
+                <p class="text-gray-500 text-center max-w-md">Create a new notebook or open an existing one to start
+                    taking notes</p>
             </div>
         </template>
     </MainStructure>
