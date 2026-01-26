@@ -3,6 +3,7 @@ import { onMounted, ref } from "vue";
 import { useAuthStore } from "../stores/auth";
 import Menu from "../pages/Menu.vue";
 import HeaderButton from "./HeaderButton.vue";
+import ShortcutsList from "./ShortcutsList.vue";
 import newNotebookIcon from "../assets/new-notebook.svg";
 import openNotebookIcon from "../assets/open-notebook.svg";
 import saveIcon from "../assets/save.svg";
@@ -154,20 +155,29 @@ onMounted(async () => {
       <h1 class="text-white text-[1.563rem] font-semibold font-['Inter']">
         Easy Notes
       </h1>
+      <div v-if="variant === 'tools'" class="flex items-center gap-3">
+        <div class="relative group">
+          <input 
+            type="text" 
+            placeholder="Search in your notes..."
+            class="w-80 h-10 pl-10 pr-4 bg-white/90 backdrop-blur-sm rounded-lg border-2 border-white/50 focus:border-white focus:outline-none focus:ring-2 focus:ring-white/30 text-gray-700 placeholder-gray-400 text-sm font-medium transition-all duration-200 hover:bg-white shadow-sm hover:shadow-md"
+          />
+          <div class="absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+            <svg class="w-5 h-5 text-gray-400 group-focus-within:text-orange-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
       <div v-if="variant === 'tools'"
         class="animate-fade-in self-stretch flex-1 overflow-hidden flex items-center justify-center text-[1rem] gap-3">
-        <div
-          class="h-[1.938rem] w-[18.438rem] rounded-[9999px] bg-gray-200 border-gainsboro border-solid border-[1px] box-border overflow-hidden shrink-0 flex items-center py-[0.75rem] px-[1rem] gap-[0.5rem] min-w-[7.5rem]">
-          <div class="flex-1 relative leading-[100%] shrink-0 text-gray-500">Value</div>
-          <img src="../assets/search.svg" class="h-[1rem] w-[1rem] relative shrink-0" alt="" />
-        </div>
-        
-        <div v-if="props.currentNotebook" class="flex items-center">
+        <div v-if="props.currentNotebook"
+          class="flex items-center absolute left-1/2 transform -translate-x-1/2 max-w-[500px]">
           <!-- Modalità visualizzazione nome -->
           <div v-if="!isEditingName" @click="startEditingName"
-            class="h-[1.938rem] px-4 rounded-[9999px] bg-white border-gray-300 border-solid border-[1px] flex items-center gap-2 cursor-pointer hover:bg-gray-50 transition-colors">
-            <span class="font-medium text-gray-700">{{ props.currentNotebook.name }}</span>
-            <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            class="h-11 px-6 rounded-lg bg-white border-gray-300 border-solid flex items-center gap-3 cursor-pointer hover:bg-gray-50 hover:border-gray-400 transition-all shadow-sm hover:shadow-md max-w-full">
+            <span class="font-semibold text-gray-800 text-base truncate">{{ props.currentNotebook.name }}</span>
+            <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z">
               </path>
@@ -178,7 +188,7 @@ onMounted(async () => {
           <div v-else class="flex items-center gap-2">
             <input v-model="editedNotebookName" @keydown.enter="saveNotebookName" @keydown.esc="cancelEditingName"
               @blur="saveNotebookName" type="text"
-              class="h-[1.938rem] px-4 rounded-[9999px] bg-white border-blue-400 border-solid border-2 focus:outline-none focus:border-blue-500 text-gray-700 font-medium min-w-[200px]"
+              class="h-11 px-6 rounded-lg bg-white border-blue-400 border-solid border-2 focus:outline-none focus:border-blue-500 text-gray-800 font-semibold text-base min-w-[250px] max-w-[450px]"
               autofocus />
           </div>
         </div>
@@ -219,85 +229,8 @@ onMounted(async () => {
           <div class="text-sm text-gray-500">{{ notebook.subject }}</div>
         </div>
       </HeaderButton>
-      <HeaderButton v-if="variant === 'tools'" :icon="shortcutIcon">
-        <div class="flex flex-col gap-1 p-2 max-w-sm max-h-80 overflow-y-auto">
-          <div class="flex justify-between items-center py-1.5 border-b border-gray-100">
-            <kbd
-              class="px-1.5 py-0.5 text-[10px] font-semibold text-gray-800 bg-gray-100 border border-gray-300 rounded">←
-              →</kbd>
-            <span class="text-xs text-gray-700">Naviga pagine</span>
-          </div>
-          <div class="flex justify-between items-center py-1.5 border-b border-gray-100">
-            <kbd
-              class="px-1.5 py-0.5 text-[10px] font-semibold text-gray-800 bg-gray-100 border border-gray-300 rounded">Enter</kbd>
-            <span class="text-xs text-gray-700">Inizia modifica</span>
-          </div>
-          <div class="flex justify-between items-center py-1.5 border-b border-gray-100">
-            <kbd
-              class="px-1.5 py-0.5 text-[10px] font-semibold text-gray-800 bg-gray-100 border border-gray-300 rounded">Esc</kbd>
-            <span class="text-xs text-gray-700">Esci da modifica</span>
-          </div>
-          <div class="flex justify-between items-center py-1.5 border-b border-gray-100">
-            <kbd
-              class="px-1.5 py-0.5 text-[10px] font-semibold text-gray-800 bg-gray-100 border border-gray-300 rounded">Ctrl
-              + F</kbd>
-            <span class="text-xs text-gray-700">Cerca parola chiave</span>
-          </div>
-          <div class="flex justify-between items-center py-1.5 border-b border-gray-100">
-            <kbd
-              class="px-1.5 py-0.5 text-[10px] font-semibold text-gray-800 bg-gray-100 border border-gray-300 rounded">Ctrl
-              + +/-/Wheel</kbd>
-            <span class="text-xs text-gray-700">Controlli zoom</span>
-          </div>
-          <div class="flex justify-between items-center py-1.5 border-b border-gray-100">
-            <kbd
-              class="px-1.5 py-0.5 text-[10px] font-semibold text-gray-800 bg-gray-100 border border-gray-300 rounded">Alt
-              + Drag</kbd>
-            <span class="text-xs text-gray-700">Pan durante zoom</span>
-          </div>
-          <div class="flex justify-between items-center py-1.5 border-b border-gray-100">
-            <kbd
-              class="px-1.5 py-0.5 text-[10px] font-semibold text-gray-800 bg-gray-100 border border-gray-300 rounded">Click</kbd>
-            <span class="text-xs text-gray-700">Rimuovi evidenziazione</span>
-          </div>
-
-          <div class="mt-2 pt-1.5 border-t border-gray-300">
-            <strong class="text-xs font-bold text-gray-800">Durante la modifica:</strong>
-          </div>
-          <div class="flex justify-between items-center py-1.5 border-b border-gray-100">
-            <kbd
-              class="px-1.5 py-0.5 text-[10px] font-semibold text-gray-800 bg-gray-100 border border-gray-300 rounded">Ctrl
-              + ← →</kbd>
-            <span class="text-xs text-gray-700">Naviga scrivendo</span>
-          </div>
-          <div class="flex justify-between items-center py-1.5 border-b border-gray-100">
-            <kbd
-              class="px-1.5 py-0.5 text-[10px] font-semibold text-gray-800 bg-gray-100 border border-gray-300 rounded">Ctrl
-              + S</kbd>
-            <span class="text-xs text-gray-700">Salva note</span>
-          </div>
-
-          <div class="mt-2 pt-1.5 border-t border-gray-300">
-            <strong class="text-xs font-bold text-gray-800">Modalità textbox:</strong>
-          </div>
-          <div class="flex justify-between items-center py-1.5 border-b border-gray-100">
-            <kbd
-              class="px-1.5 py-0.5 text-[10px] font-semibold text-gray-800 bg-gray-100 border border-gray-300 rounded">Click
-              + Drag</kbd>
-            <span class="text-xs text-gray-700">Disegna textbox</span>
-          </div>
-          <div class="flex justify-between items-center py-1.5 border-b border-gray-100">
-            <kbd
-              class="px-1.5 py-0.5 text-[10px] font-semibold text-gray-800 bg-gray-100 border border-gray-300 rounded">Double
-              Click</kbd>
-            <span class="text-xs text-gray-700">Modifica textbox</span>
-          </div>
-          <div class="flex justify-between items-center py-1.5">
-            <kbd
-              class="px-1.5 py-0.5 text-[10px] font-semibold text-gray-800 bg-gray-100 border border-gray-300 rounded">Click</kbd>
-            <span class="text-xs text-gray-700">Elimina textbox</span>
-          </div>
-        </div>
+      <HeaderButton v-if="variant === 'tools'" :icon="shortcutIcon" :direction="'left'">
+        <ShortcutsList />
       </HeaderButton>
       <HeaderButton v-if="variant === 'tools'" :text="'Save'" :icon="saveIcon" @open-overlay="saveNotebook">
         <div class="flex flex-col items-center justify-center p-4 min-w-[8rem]">
