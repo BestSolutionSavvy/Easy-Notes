@@ -1,5 +1,7 @@
 const { pdfModel } = require("../models/pdfsModel");
 const { userModel } = require("../models/usersModel");
+const { notebookModel } = require("../models/notebooksModel");
+const classModel = require("../models/classesModel");
 const mongoose = require("mongoose");
 const { PDFDocument } = require("pdf-lib");
 
@@ -110,15 +112,15 @@ exports.downloadPdf = async (req, res) => {
         res.status(404).json({ message: "Error downloading file", error: err.message });
       }
     });
-    
+
     downloadStream.on("end", async () => {
       try {
         const pdfBuffer = Buffer.concat(chunks);
         const pdfDoc = await PDFDocument.load(pdfBuffer);
         const totalPages = pdfDoc.getPageCount();
         if (pageNum > totalPages) {
-          return res.status(400).json({ 
-            message: `Page ${pageNum} not found. PDF has ${totalPages} pages.` 
+          return res.status(400).json({
+            message: `Page ${pageNum} not found. PDF has ${totalPages} pages.`
           });
         }
         const newPdfDoc = await PDFDocument.create();
@@ -177,9 +179,24 @@ exports.deletePdf = async (req, res) => {
     if (!pdf) {
       return res.status(404).json({ message: "PDF not found" });
     }
+    const notebookWithPdf = await notebookModel.findOne({ id_pdf: id });
+    if (notebookWithPdf) {
+      return res.status(200).json({
+        message: "PDF not deleted: it is still referenced by a notebook"
+      });
+    }
+    const classWithPdf = await classModel.findOne({ pdfs: id });
+    if (classWithPdf) {
+      return res.status(200).json({
+        message: "PDF not deleted: it is still referenced by a class"
+      });
+    }
+
     await gridFSBucket.delete(pdf.gridFsFileId);
     await pdfModel.findByIdAndDelete(id);
-    res.status(204).send();
+    res.status(204).json({
+      message: "PDF deleted successfully"
+    });
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });
   }

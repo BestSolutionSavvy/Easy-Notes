@@ -86,6 +86,7 @@ const deleteNotebook = async (notebook: Notebook) => {
     await axios.delete(
       `/api/notebooks/${authStore.user.email}/${notebook._id}`,
     );
+    await axios.delete(`/api/pdfs/${notebook.id_pdf}`);
     notebooks.value = notebooks.value.filter((n) => n._id !== notebook._id);
   } catch (error: any) {
     alert(error.response?.data?.message || "Failed to delete notebook");
