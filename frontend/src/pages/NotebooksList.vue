@@ -79,11 +79,7 @@ const onLoadNotebook = (subject: string, notebook?: Notebook) => {
 };
 
 const onSelectNotebook = (notebook: Notebook) => {
-  if (notebook.pages && notebook.pages.length > 0) {
-    emit("select-notebook", notebook);
-  } else {
-    console.warn("Notebook has no pages:", notebook);
-  }
+  emit("select-notebook", notebook);
 };
 
 const onDeleteNotebook = async (notebook: Notebook) => {
