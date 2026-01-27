@@ -1,5 +1,6 @@
 const classesModel = require('../models/classesModel');
 const { pdfModel } = require('../models/pdfsModel');
+const { userModel } = require('../models/usersModel');
 
 exports.listClasses = (req, res) => {
     classesModel.find()
@@ -61,6 +62,10 @@ exports.deleteClass = async (req, res) => {
         if (classPdfs && classPdfs.length > 0) {
             await pdfModel.deleteMany({ _id: { $in: classPdfs } });
         }
+        await userModel.updateMany(
+            { classes: classId },
+            { $pull: { classes: classId } }
+        );
         await classesModel.findByIdAndDelete(classId);
         res.status(204).send();
     } catch (err) {
