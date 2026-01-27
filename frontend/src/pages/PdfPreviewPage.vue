@@ -4,6 +4,7 @@ import type { Pdf } from "../types/pdf";
 import VuePdfEmbed from "vue-pdf-embed";
 import type { Notebook } from "../types/notebook";
 import { loadPdf } from "../lib/pdfLoad";
+import { calculateFitToContainerScale } from "../lib/pdfScale";
 
 interface Props {
   notebook?: Notebook;
@@ -14,6 +15,8 @@ const pdf = ref<Pdf | null>(null);
 const isLoading = ref(false);
 const error = ref<string | null>(null);
 const pdfUrl = ref<string | null>(null);
+const pdfWidth = ref<number>(0);
+const pdfHeight = ref<number>(0);
 
 const loadCurrentPdf = async () => {
   if (
@@ -44,6 +47,23 @@ const loadCurrentPdf = async () => {
     pdf.value = null;
     pdfUrl.value = null;
   }
+};
+
+const handleDocumentRender = async (data: any) => {
+  const numPages = data.numPages;
+  const requestedPage = props.notebook?.last_page || 1;
+  const pageNumber = Math.min(Math.max(requestedPage, 1), numPages);
+  
+  const page = await data.getPage(pageNumber);
+  const viewport = page.getViewport({ scale: 1 })
+  const scale = calculateFitToContainerScale(
+    viewport.width,
+    viewport.height,
+    45, // 45vw
+    60  // 60vh
+  );
+  pdfHeight.value = viewport.height * scale / 100;
+  pdfWidth.value = viewport.width * scale / 100;
 };
 
 watch(
@@ -83,8 +103,11 @@ watch(
           This notebook doesn't have an associated PDF file
         </div>
       </div>
-      <div v-else class="self-stretch relative rounded-[10px] flex-1 overflow-auto">
-        <VuePdfEmbed :source="pdfUrl" />
+      <div v-else class="w-[45vw] h-[60vh] relative overflow-auto flex items-center justify-center">
+        <div class="pdf-wrapper relative">
+          <VuePdfEmbed :width="pdfWidth" :height="pdfHeight" :source="pdfUrl" :text-layer="true"
+            @loaded="handleDocumentRender" />
+        </div>
       </div>
     </div>
     <div
