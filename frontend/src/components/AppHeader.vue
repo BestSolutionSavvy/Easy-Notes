@@ -114,7 +114,10 @@ const emit = defineEmits<{
 }>();
 
 onMounted(async () => {
-  notebooks.value = await loadNotebooks(authStore.user?.email || "");
+  if (!authStore.user?.email) {
+    return;
+  }
+  notebooks.value = await loadNotebooks(authStore.user.email);
   const allClasses = await axios
     .get(`/api/classes`)
     .then((response) => response.data)
