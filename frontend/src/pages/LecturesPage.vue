@@ -42,6 +42,13 @@ const fetchLectures = async () => {
 const handleDelete = async (lectureId: string) => {
   if (!props.classItem?._id) return;
 
+  const lecture = lectures.value.find(l => l._id === lectureId);
+  const lectureName = lecture?.name || "this lecture";
+  
+  if (!confirm(`Are you sure you want to delete "${lectureName}"?`)) {
+    return;
+  }
+
   try {
 
     // Remove PDF ID from class's pdfs array

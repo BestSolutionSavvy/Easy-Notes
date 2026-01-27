@@ -76,7 +76,12 @@ router.beforeEach(async (to, _from, next) => {
     if (!isValid) {
       next("/signin");
     } else {
-      next();
+      // Redirect teachers from home to classes
+      if ((to.path === "/" || to.path === "/home") && authStore.user?.role === "teacher") {
+        next("/classes");
+      } else {
+        next();
+      }
     }
   } else {
     next();
