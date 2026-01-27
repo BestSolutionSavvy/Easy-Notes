@@ -14,4 +14,7 @@ router.route('/:id')
     .put(controller.updateClass)
     .delete(controller.deleteClass);
 
+router.route('/:id/lecture')
+    .post(controller.uploadPdfToClass);
+
 module.exports = router;

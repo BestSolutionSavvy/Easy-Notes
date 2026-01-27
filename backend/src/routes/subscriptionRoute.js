@@ -6,7 +6,6 @@ const { authenticateToken } = require("../config/jwt");
 router.use(authenticateToken);
 
 router.post("/subscribe", controller.subscribe);
-router.delete("/subscribe", controller.unsubscribe);
-router.post("/test", controller.testNotification);
+router.post("/unsubscribe", controller.unsubscribe);
 
 module.exports = router;

@@ -1,43 +1,42 @@
-console.log('Service Worker loaded');
-
-self.addEventListener('push', event => {
-    console.log('Push event received:', event);
-    
-    let data;
-    try {
-        data = event.data.json();
-        console.log('Push data:', data);
-    } catch (e) {
-        console.error('Error parsing push data:', e);
-        data = {
-            title: 'Notification',
-            body: event.data ? event.data.text() : 'New notification'
-        };
-    }
-
-    const options = {
-        body: data.body,
-        icon: '/favicon.ico',
-        badge: '/favicon.ico',
-        vibrate: [200, 100, 200],
-        tag: 'easy-notes-notification',
-        requireInteraction: false
+self.addEventListener("push", (event) => {
+  let data;
+  try {
+    data = event.data.json();
+  } catch (e) {
+    const textData = event.data ? event.data.text() : "New notification";
+    data = {
+      title: "Notification",
+      body: textData,
     };
-
-    console.log('Showing notification:', data.title, options);
-
-    event.waitUntil(
-        self.registration.showNotification(data.title, options)
-            .then(() => console.log('Notification shown successfully'))
-            .catch(err => console.error('Error showing notification:', err))
-    );
+  }
+  const options = {
+    body: data.body,
+    icon: "/favicon.ico",
+    badge: "/favicon.ico",
+    vibrate: [200, 100, 200],
+    tag: "easy-notes-notification",
+    requireInteraction: true,
+    silent: false,
+    data: data.data || {},  // Store custom data from backend
+  };
+  event.waitUntil(
+    self.registration
+      .showNotification(data.title, options)
+      .catch((err) => console.error("Error showing notification:", err)),
+  );
 });
 
-self.addEventListener('notificationclick', event => {
-    console.log('Notification clicked:', event);
-    event.notification.close();
-    
-    event.waitUntil(
-        clients.openWindow('/')
-    );
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const notificationData = event.notification.data || {};
+  let targetUrl = self.registration.scope;
+  if (notificationData.type === "NEW_PDF") {
+    targetUrl = new URL("/classes", self.registration.scope).href;
+  } else if (notificationData.url) {
+    targetUrl = new URL(notificationData.url, self.registration.scope).href;
+  }
+  event.waitUntil(
+    clients.openWindow(targetUrl)
+      .catch((err) => console.error("Error handling notification click:", err))
+  );
 });

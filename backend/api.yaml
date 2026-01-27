@@ -4,17 +4,17 @@ info:
   version: 1.0.0
   description: API for managing a SPA for notes on PDF.
 servers:
-  - url: http://localhost:3000/api
+- url: http://localhost:3000/api
 paths:
   /notebooks/{email}:
     get:
       summary: List of all notebooks of a specific user
       parameters:
-        - in: path
-          name: email
-          required: true
-          schema:
-            type: string
+      - in: path
+        name: email
+        required: true
+        schema:
+          type: string
       responses:
         "200":
           description: List of notebooks
@@ -27,11 +27,11 @@ paths:
     post:
       summary: Add a new notebook
       parameters:
-        - in: path
-          name: email
-          required: true
-          schema:
-            type: string
+      - in: path
+        name: email
+        required: true
+        schema:
+          type: string
       requestBody:
         required: true
         content:
@@ -51,16 +51,16 @@ paths:
     get:
       summary: Details of a specific notebook for a user
       parameters:
-        - in: path
-          name: email
-          required: true
-          schema:
-            type: string
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
+      - in: path
+        name: email
+        required: true
+        schema:
+          type: string
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
       responses:
         "200":
           description: Notebook found
@@ -73,16 +73,16 @@ paths:
     post:
       summary: Create or update a notebook
       parameters:
-        - in: path
-          name: email
-          required: true
-          schema:
-            type: string
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
+      - in: path
+        name: email
+        required: true
+        schema:
+          type: string
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
       requestBody:
         required: true
         content:
@@ -101,16 +101,16 @@ paths:
     delete:
       summary: Delete a notebook
       parameters:
-        - in: path
-          name: email
-          required: true
-          schema:
-            type: string
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
+      - in: path
+        name: email
+        required: true
+        schema:
+          type: string
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
       responses:
         "204":
           description: Notebook deleted successfully (no content)
@@ -151,26 +151,58 @@ paths:
     delete:
       summary: Delete a specific class
       parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: integer
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
       responses:
         "204":
           description: Class deleted successfully (no content)
+        "404":
+          description: Class not found
+  /classes/{id}/lecture:
+    post:
+      summary: Add a new lecture PDF to a class
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - pdfId
+              properties:
+                pdfId:
+                  type: string
+                  example: "507f1f77bcf86cd799439011"
+      responses:
+        "201":
+          description: Lecture added successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Classes"
+        "400":
+          description: Invalid PDF ID
         "404":
           description: Class not found
   /users/{email}:
     get:
       summary: Get the informations of a specific user
       parameters:
-        - in: path
-          name: email
-          required: true
-          schema:
-            type: string
-            example: "user@example.com"
+      - in: path
+        name: email
+        required: true
+        schema:
+          type: string
+          example: "user@example.com"
       responses:
         "200":
           description: User found
@@ -183,12 +215,12 @@ paths:
     put:
       summary: Update the informations of a specific user
       parameters:
-        - in: path
-          name: email
-          required: true
-          schema:
-            type: string
-            example: "user@example.com"
+      - in: path
+        name: email
+        required: true
+        schema:
+          type: string
+          example: "user@example.com"
       requestBody:
         required: true
         content:
@@ -209,12 +241,12 @@ paths:
     delete:
       summary: Delete a specific user
       parameters:
-        - in: path
-          name: email
-          required: true
-          schema:
-            type: string
-            example: "user@example.com"
+      - in: path
+        name: email
+        required: true
+        schema:
+          type: string
+          example: "user@example.com"
       responses:
         "204":
           description: User deleted successfully (no content)
@@ -231,8 +263,8 @@ paths:
             schema:
               type: object
               required:
-                - email
-                - password
+              - email
+              - password
               properties:
                 email:
                   type: string
@@ -265,11 +297,11 @@ paths:
       summary: Create a new user (signup)
       description: Creates new user and sets an httpOnly cookie with JWT token
       parameters:
-        - in: query
-          name: role
-          required: true
-          schema:
-            $ref: "#/components/schemas/UserRole"
+      - in: query
+        name: role
+        required: true
+        schema:
+          $ref: "#/components/schemas/UserRole"
       requestBody:
         required: true
         content:
@@ -302,7 +334,7 @@ paths:
       summary: Verify JWT token from cookie
       description: Validates the authToken cookie and returns user information
       security:
-        - cookieAuth: []
+      - cookieAuth: []
       responses:
         "200":
           description: Token is valid
@@ -345,9 +377,9 @@ paths:
             schema:
               type: object
               required:
-                - pdf
-                - type
-                - owner
+              - pdf
+              - type
+              - owner
               properties:
                 pdf:
                   type: string
@@ -356,8 +388,8 @@ paths:
                 type:
                   type: string
                   enum:
-                    - class
-                    - note
+                  - class
+                  - note
                   example: "note"
                 owner:
                   type: string
@@ -376,12 +408,12 @@ paths:
     get:
       summary: Get PDF metadata
       parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-          description: PDF document ID
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        description: PDF document ID
       responses:
         "200":
           description: PDF metadata
@@ -394,12 +426,12 @@ paths:
     delete:
       summary: Delete a PDF document
       parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-          description: PDF document ID
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        description: PDF document ID
       responses:
         "200":
           description: PDF not deleted it is still referenced by a notebook or class
@@ -411,17 +443,17 @@ paths:
     get:
       summary: Download the PDF file
       parameters:
-        - in: query
-          name: page
-          schema:
-            type: number
-          description: A specific page number to download (optional)
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-          description: PDF document ID
+      - in: query
+        name: page
+        schema:
+          type: number
+        description: A specific page number to download (optional)
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        description: PDF document ID
       responses:
         "200":
           description: PDF file download
@@ -436,12 +468,12 @@ paths:
     put:
       summary: Replace PDF file with a new version
       parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-          description: PDF document ID
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        description: PDF document ID
       requestBody:
         required: true
         content:
@@ -449,7 +481,7 @@ paths:
             schema:
               type: object
               required:
-                - pdf
+              - pdf
               properties:
                 pdf:
                   type: string
@@ -470,13 +502,13 @@ paths:
     get:
       summary: Get all PDFs metadata for a specific owner
       parameters:
-        - in: query
-          name: owner
-          required: true
-          schema:
-            type: string
-            example: "user@example.com"
-          description: User E-mail
+      - in: query
+        name: owner
+        required: true
+        schema:
+          type: string
+          example: "user@example.com"
+        description: User E-mail
       responses:
         "200":
           description: List of PDFs of the owner
@@ -490,11 +522,11 @@ paths:
     post:
       summary: Summarize provided text
       parameters:
-        - in: path
-          name: notebookId
-          required: true
-          schema:
-            type: string
+      - in: path
+        name: notebookId
+        required: true
+        schema:
+          type: string
       responses:
         "200":
           description: Summary generated successfully
@@ -504,16 +536,69 @@ paths:
                 $ref: "#/components/schemas/SummaryResponse"
         "400":
           description: Invalid input data
+  /push/subscribe:
+    post:
+      summary: Subscribe to push notifications
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - endpoint
+              - keys
+              properties:
+                endpoint:
+                  type: string
+                  example: "https://fcm.googleapis.com/fcm/send/abc123..."
+                keys:
+                  type: object
+                  required:
+                  - p256dh
+                  - auth
+                  properties:
+                    p256dh:
+                      type: string
+                      example: "BNcX..."
+                    auth:
+                      type: string
+                      example: "8xY..."
+      responses:
+        "201":
+          description: Subscription successful
+        "400":
+          description: Invalid subscription data
+  /push/unsubscribe:
+    post:
+      summary: Unsubscribe from push notifications
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - endpoint
+              properties:
+                endpoint:
+                  type: string
+                  example: "https://fcm.googleapis.com/fcm/send/abc123..."
+      responses:
+        "200":
+          description: Unsubscription successful
+        "400":
+          description: Invalid unsubscription data
 
 components:
   schemas:
     Notebook:
       type: object
       required:
-        - name
-        - subject
-        - owner
-        - type
+      - name
+      - subject
+      - owner
+      - type
       properties:
         name:
           type: string
@@ -549,8 +634,8 @@ components:
     Page:
       type: object
       required:
-        - page_number
-        - note_content
+      - page_number
+      - note_content
       properties:
         page_number:
           type: integer
@@ -635,9 +720,9 @@ components:
     User:
       type: object
       required:
-        - email
-        - password
-        - role
+      - email
+      - password
+      - role
       properties:
         email:
           type: string
@@ -661,8 +746,8 @@ components:
     UserRole:
       type: string
       enum:
-        - student
-        - teacher
+      - student
+      - teacher
       example: student
     UserInfo:
       type: object
@@ -699,8 +784,8 @@ components:
         type:
           type: string
           enum:
-            - class
-            - note
+          - class
+          - note
           example: "note"
         owner:
           type: string

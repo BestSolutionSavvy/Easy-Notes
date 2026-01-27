@@ -50,8 +50,6 @@ export async function enablePush() {
 
         // Check if already subscribed
         let sub = await reg.pushManager.getSubscription();
-        
-        // If not subscribed, create new subscription
         if (!sub) {
             const applicationServerKey = urlBase64ToUint8Array(vapidKey);
             sub = await reg.pushManager.subscribe({
@@ -59,14 +57,42 @@ export async function enablePush() {
                 applicationServerKey: applicationServerKey as BufferSource
             });
         }
-
-        // Send subscription to backend using axios (includes auth token automatically)
         await axios.post('/api/push/subscribe', sub);
-        
-        console.log('Push notifications enabled successfully');
         return true;
     } catch (error) {
         console.error('Error enabling push notifications:', error);
+        return false;
+    }
+}
+
+export async function disablePush() {
+    try {
+        // Check if service workers are supported
+        if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+            console.error('Push notifications are not supported');
+            return false;
+        }
+
+        // Get service worker registration
+        const reg = await navigator.serviceWorker.getRegistration();
+        if (!reg) {
+            console.warn('No service worker registered');
+            return false;
+        }
+
+        // Get current subscription
+        const sub = await reg.pushManager.getSubscription();
+        if (!sub) {
+            console.warn('No active subscription found');
+            return false;
+        }
+
+        // Unsubscribe from push notifications
+        await sub.unsubscribe();
+        await axios.post('/api/push/unsubscribe', { endpoint: sub.endpoint });
+        return true;
+    } catch (error) {
+        console.error('Error disabling push notifications:', error);
         return false;
     }
 }

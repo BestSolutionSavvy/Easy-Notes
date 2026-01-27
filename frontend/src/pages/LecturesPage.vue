@@ -115,7 +115,7 @@ const handleFileSelect = async (event: Event) => {
 
     // Add PDF ID to class's pdfs array
     const updatedPdfs = [...(props.classItem.pdfs || []), uploadedPdfId];
-    await axios.put(`/api/classes/${props.classItem._id}`, {
+    await axios.post(`/api/classes/${props.classItem._id}/lecture`, {
       pdfs: updatedPdfs,
     });
 
