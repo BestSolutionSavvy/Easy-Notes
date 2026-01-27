@@ -12,6 +12,7 @@ const userRouter = require("./src/routes/userRoutes");
 const classesRouter = require("./src/routes/classesRoutes");
 const pdfRouter = require("./src/routes/pdfRouter");
 const summarizeRouter = require('./src/routes/summarizeRoutes');
+const subscriptionRouter = require('./src/routes/subscriptionRoute');
 
 const isDevelopment = process.argv.includes('--dev');
 
@@ -36,6 +37,7 @@ app.use("/api/users", userRouter);
 app.use("/api/classes", classesRouter);
 app.use("/api/pdfs", pdfRouter);
 app.use('/api/summarize', summarizeRouter);
+app.use('/api/push', subscriptionRouter);
 
 if (isDevelopment) {
     app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));

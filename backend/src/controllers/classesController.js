@@ -1,5 +1,6 @@
 const classesModel = require('../models/classesModel');
 const { pdfModel } = require('../models/pdfsModel');
+const { subscriptionModel, sendNotification } = require('../models/subscriptionModel');
 const { userModel } = require('../models/usersModel');
 
 exports.listClasses = (req, res) => {
@@ -49,6 +50,41 @@ exports.updateClass = (req, res) => {
             res.json(updatedClass);
         })
         .catch(err => res.status(500).json({ error: err.message }));
+}
+
+exports.uploadPdfToClass = async (req, res) => {
+    const classId = req.params.id;
+    if (!req.file) {
+        return res.status(400).json({ error: 'No file uploaded' });
+    }
+    try {
+        const classDoc = await classesModel.findById(classId);
+        if (!classDoc) {
+            return res.status(404).json({ error: 'Class not found' });
+        }
+        const newPdf = new pdfModel({
+            name: req.file.originalname.replace(/\.pdf$/i, ''),
+            type: 'class',
+            owner: classDoc.teacher,
+            gridFsFileId: req.file.id,
+        });
+        const savedPdf = await newPdf.save();
+        classDoc.pdfs.push(savedPdf._id);
+        await classDoc.save();
+        // send notification to users about new PDF upload
+        const userIds = await userModel.find({ classes: classId }).select('_id');
+        const notificationPromises = userIds.map(user => {
+            return sendNotification(user.email, {
+                title: 'New PDF Uploaded',
+                body: `A new PDF "${savedPdf.name}" has been uploaded to your class.`,
+            });
+        });
+        await Promise.all(notificationPromises);
+        res.status(201).json(savedPdf);
+    }
+    catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 }
 
 exports.deleteClass = async (req, res) => {
