@@ -5,10 +5,15 @@ import notesIcon from '../assets/post-it-blue.svg';
 import classesIcon from '../assets/classes.svg';
 import profileIcon from '../assets/profile.svg';
 import logo from '../assets/logo.png';
+import { useAuthStore } from '../stores/auth';
+import { computed } from 'vue';
 
 const emit = defineEmits<{
     closeMenu: []
 }>();
+
+const authStore = useAuthStore();
+const isTeacher = computed(() => authStore.isLoggedIn && authStore.user?.role === 'teacher');
 </script>
 <template>
     <div
@@ -23,8 +28,8 @@ const emit = defineEmits<{
         </div>
         <div
             class="self-stretch flex-1 rounded-lg bg-white box-border flex flex-col items-center py-[1.875rem] px-[0.687rem] gap-[0.937rem] text-[1rem] text-darkslateblue">
-            <MenuItem title="Home" :icon="homeIcon" @click="emit('closeMenu')" />
-            <MenuItem title="Notebooks" :icon="notesIcon" @click="emit('closeMenu')" />
+            <MenuItem v-if="!isTeacher" title="Home" :icon="homeIcon" @click="emit('closeMenu')" />
+            <MenuItem v-if="!isTeacher" title="Notebooks" :icon="notesIcon" @click="emit('closeMenu')" />
             <MenuItem title="Classes" :icon="classesIcon" @click="emit('closeMenu')" />
             <MenuItem title="Profile" :icon="profileIcon" @click="emit('closeMenu')" />
         </div>
