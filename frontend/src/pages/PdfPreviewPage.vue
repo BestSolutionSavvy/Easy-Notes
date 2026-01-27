@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { ref, watch } from "vue";
 import type { Pdf } from "../types/pdf";
 import VuePdfEmbed from "vue-pdf-embed";
 import type { Notebook } from "../types/notebook";
