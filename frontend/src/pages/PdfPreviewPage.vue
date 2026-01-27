@@ -19,28 +19,19 @@ const pdfWidth = ref<number>(0);
 const pdfHeight = ref<number>(0);
 
 const loadCurrentPdf = async () => {
-  if (
-    props.notebook &&
-    props.notebook.pages &&
-    props.notebook.pages.length > 0
-  ) {
+  if (props.notebook && props.notebook.id_pdf) {
     isLoading.value = true;
     error.value = null;
-    const lastPage = props.notebook.last_page || 0;
+    const lastPage = props.notebook.last_page || 1;
     const pdfId = props.notebook.id_pdf;
-    if (pdfId) {
-      try {
-        pdf.value = await loadPdf(pdfId, lastPage);
-        pdfUrl.value = URL.createObjectURL(pdf.value.data);
-      } catch (err: any) {
-        error.value = err.response?.data?.message || "Failed to load PDF";
-        pdf.value = null;
-        pdfUrl.value = null;
-        console.error("Error loading PDF:", err);
-      }
-    } else {
+    try {
+      pdf.value = await loadPdf(pdfId, lastPage);
+      pdfUrl.value = URL.createObjectURL(pdf.value.data);
+    } catch (err: any) {
+      error.value = err.response?.data?.message || "Failed to load PDF";
       pdf.value = null;
       pdfUrl.value = null;
+      console.error("Error loading PDF:", err);
     }
     isLoading.value = false;
   } else {
