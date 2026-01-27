@@ -20,6 +20,7 @@ const currentNotebookPage = ref<number>(0);
 const currentPdfPage = ref<number>(0);
 
 const handleOpenNotebook = (notebook: Notebook) => {
+    handleCloseNotebook();
     openedNotebook.value = notebook;
     const pageIndex = notebook.last_page || 1;
     currentNotebookPage.value = pageIndex;
@@ -61,16 +62,40 @@ const handlePagePrev = () => {
     }
 };
 
+const isTyping = (): boolean => {
+    const activeElement = document.activeElement;
+    if (!activeElement) return false;
+    
+    const tagName = activeElement.tagName.toLowerCase();
+    const isEditable = activeElement.getAttribute('contenteditable') === 'true';
+    
+    return (
+        tagName === 'input' ||
+        tagName === 'textarea' ||
+        isEditable
+    );
+};
+
 const handleKeydown = (event: KeyboardEvent) => {
-    if (event.key === "ArrowRight") {
-        handlePageNext();
-    } else if (event.key === "ArrowLeft") {
-        handlePagePrev();
+    if (isTyping() && !event.ctrlKey && !event.metaKey && !event.altKey) {
+        return;
+    }
+    
+    if (!isTyping()) {
+        if (event.key === "ArrowRight") {
+            event.preventDefault();
+            handlePageNext();
+            return;
+        }
+        if (event.key === "ArrowLeft") {
+            event.preventDefault();
+            handlePagePrev();
+            return;
+        }
     }
 };
 
 onMounted(() => {
-    // se ci sono delle cose nella query string, apri il notebook specificato
     const notebookId = route.query.notebookId as string | undefined;
     const subject = route.query.subject as string | undefined;
     const pdfId = route.query.pdfId as string | undefined;
@@ -112,12 +137,10 @@ onMounted(() => {
         };
         handleOpenNotebook(newNotebook);
     }
-    // Aggiungi event listener per le frecce
     window.addEventListener("keydown", handleKeydown);
 });
 
 onUnmounted(() => {
-    // Rimuovi event listener quando il componente viene distrutto
     window.removeEventListener("keydown", handleKeydown);
 });
 </script>

@@ -7,12 +7,23 @@ import wandIcon from "../assets/wand.svg";
 import loadIcon from "../assets/load.svg";
 import trashIcon from "../assets/trash.svg";
 import ListElement from "../components/ListElement.vue";
+import ConfirmModal from "../components/ConfirmModal.vue";
+import SummaryModal from "../components/SummaryModal.vue";
 import type { Notebook } from "../types/notebook";
 
 const authStore = useAuthStore();
 const notebooks = ref<Notebook[]>([]);
 const isLoading = ref(false);
 const errorMessage = ref("");
+
+// Modal states
+const showDeleteModal = ref(false);
+const showErrorModal = ref(false);
+const showSummaryModal = ref(false);
+const modalMessage = ref("");
+const modalTitle = ref("");
+const notebookToDelete = ref<Notebook | null>(null);
+const summaryContent = ref("");
 
 const emit = defineEmits<{
   (e: "select-notebook", notebook: Notebook): void;
@@ -68,18 +79,20 @@ const onLoadNotebook = (subject: string, notebook?: Notebook) => {
 };
 
 const onSelectNotebook = (notebook: Notebook) => {
-  if (notebook.pages && notebook.pages.length > 0) {
-    emit("select-notebook", notebook);
-  } else {
-    console.warn("Notebook has no pages:", notebook);
-  }
+  emit("select-notebook", notebook);
 };
 
 const onDeleteNotebook = async (notebook: Notebook) => {
   if (!notebook._id || !authStore.user?.email) return;
-  if (!confirm(`Are you sure you want to delete "${notebook.name}"?`)) {
-    return;
-  }
+  notebookToDelete.value = notebook;
+  showDeleteModal.value = true;
+};
+
+const confirmDeleteNotebook = async () => {
+  showDeleteModal.value = false;
+  const notebook = notebookToDelete.value;
+  if (!notebook?._id || !authStore.user?.email) return;
+
   try {
     await axios.delete(
       `/api/notebooks/${authStore.user.email}/${notebook._id}`,
@@ -87,21 +100,46 @@ const onDeleteNotebook = async (notebook: Notebook) => {
     await axios.delete(`/api/pdfs/${notebook.id_pdf}`);
     notebooks.value = notebooks.value.filter((n) => n._id !== notebook._id);
   } catch (error: any) {
-    alert(error.response?.data?.message || "Failed to delete notebook");
+    modalTitle.value = "Delete Error";
+    modalMessage.value =
+      error.response?.data?.message || "Failed to delete notebook";
+    showErrorModal.value = true;
     console.error("Error deleting notebook:", error);
+  } finally {
+    notebookToDelete.value = null;
   }
+};
+
+const cancelDelete = () => {
+  showDeleteModal.value = false;
+  notebookToDelete.value = null;
 };
 
 const onSummarizeNotebook = async (notebook: Notebook) => {
   if (!notebook._id || !authStore.user?.email) return;
   try {
     const response = await axios.post(`/api/summarize/${notebook._id}`);
-    // TODO: notify user in a better way
-    console.log(response.data.summary.choices[0].message.content);
+    summaryContent.value = response.data.summary.choices[0].message.content;
+    modalTitle.value = `Summary: ${notebook.name}`;
+    showSummaryModal.value = true;
   } catch (error: any) {
-    alert(error.response?.data?.message || "Failed to summarize notebook");
+    modalTitle.value = "Summarize Error";
+    modalMessage.value =
+      error.response?.data?.message || "Failed to summarize notebook";
+    showErrorModal.value = true;
     console.error("Error summarizing notebook:", error);
   }
+};
+
+const closeSummaryModal = () => {
+  showSummaryModal.value = false;
+  summaryContent.value = "";
+};
+
+const closeErrorModal = () => {
+  showErrorModal.value = false;
+  modalMessage.value = "";
+  modalTitle.value = "";
 };
 
 onMounted(() => {
@@ -200,5 +238,30 @@ onMounted(() => {
         </li>
       </ul>
     </div>
+    <ConfirmModal
+      :isOpen="showDeleteModal"
+      title="Delete Notebook"
+      :message="`Are you sure you want to delete &quot;${notebookToDelete?.name}&quot;? This action cannot be undone.`"
+      confirmText="Delete"
+      cancelText="Cancel"
+      variant="delete"
+      @confirm="confirmDeleteNotebook"
+      @cancel="cancelDelete"
+    />
+    <ConfirmModal
+      :isOpen="showErrorModal"
+      :title="modalTitle"
+      :message="modalMessage"
+      confirmText="OK"
+      variant="default"
+      @confirm="closeErrorModal"
+      @cancel="closeErrorModal"
+    />
+    <SummaryModal
+      :isOpen="showSummaryModal"
+      :title="modalTitle"
+      :content="summaryContent"
+      @close="closeSummaryModal"
+    />
   </div>
 </template>

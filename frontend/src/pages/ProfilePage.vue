@@ -5,6 +5,7 @@ import { useAuthStore } from "../stores/auth";
 import axios from "axios";
 import InputBox from "../components/InputBox.vue";
 import SimpleButton from "../components/SimpleButton.vue";
+import ConfirmModal from "../components/ConfirmModal.vue";
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -18,6 +19,8 @@ const successMessage = ref("");
 const isModifying = ref(false);
 const isDeleting = ref(false);
 const isEditMode = ref(false);
+const isLoggingOut = ref(false);
+const showDeleteModal = ref(false);
 
 const passwordPlaceholder = computed(() => {
   return isEditMode.value ? "New Password (or leave empty)" : "********";
@@ -69,10 +72,12 @@ const handleModify = async () => {
 
 const handleDeleteAccount = async () => {
   if (!authStore.user?.email) return;
-  const confirmed = confirm(
-    "Are you sure you want to delete your account? This action cannot be undone.",
-  );
-  if (!confirmed) return;
+  showDeleteModal.value = true;
+};
+
+const confirmDelete = async () => {
+  showDeleteModal.value = false;
+  if (!authStore.user?.email) return;
   isDeleting.value = true;
   try {
     await axios.delete(`/api/users/${authStore.user.email}`);
@@ -82,6 +87,21 @@ const handleDeleteAccount = async () => {
     errorMessage.value =
       error.response?.data?.message || "Failed to delete account";
     isDeleting.value = false;
+  }
+};
+
+const cancelDelete = () => {
+  showDeleteModal.value = false;
+};
+
+const handleLogout = async () => {
+  isLoggingOut.value = true;
+  try {
+    await authStore.logout();
+    router.push("/signin");
+  } catch (error: any) {
+    errorMessage.value = "Failed to logout";
+    isLoggingOut.value = false;
   }
 };
 
@@ -151,7 +171,13 @@ onMounted(() => {
           ></SimpleButton>
         </div>
       </div>
-      <div class="mt-20">
+      <div class="mt-20 flex flex-col gap-3">
+        <SimpleButton
+          text="Logout"
+          variant="default"
+          @click="handleLogout"
+          :disabled="isLoggingOut"
+        ></SimpleButton>
         <SimpleButton
           text="Delete Account"
           variant="delete"
@@ -160,5 +186,16 @@ onMounted(() => {
         ></SimpleButton>
       </div>
     </div>
+    
+    <ConfirmModal
+      :isOpen="showDeleteModal"
+      title="Delete Account"
+      message="Are you sure you want to delete your account? This will permanently delete your account, all your classes, and all associated PDFs. This action cannot be undone."
+      confirmText="Delete Account"
+      cancelText="Cancel"
+      variant="delete"
+      @confirm="confirmDelete"
+      @cancel="cancelDelete"
+    />
   </div>
 </template>

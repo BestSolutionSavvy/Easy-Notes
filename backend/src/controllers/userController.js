@@ -1,6 +1,11 @@
 const { userModel } = require("../models/usersModel");
+const classModel = require("../models/classesModel");
+const { pdfModel } = require("../models/pdfsModel");
+const { notebookModel } = require("../models/notebooksModel");
 const bcrypt = require("bcrypt");
 const { generateToken, JWT_MAX_AGE } = require("../config/jwt");
+const mongoose = require("mongoose");
+const { getGridFSBucket } = require("../config/gridfs");
 
 const SALT_ROUNDS = 12;
 
@@ -102,17 +107,60 @@ exports.deleteUser = async (req, res) => {
   if (!email) {
     return res.status(400).json({ message: "email is required" });
   }
-  userModel
-    .findOneAndDelete({ email })
-    .then((user) => {
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    const user = await userModel.findOneAndDelete({ email }).session(session);
+    if (!user) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(404).json({ message: "User not found" });
+    }
+    const userClasses = await classModel.find({ teacher: email }).session(session);
+    const classIds = userClasses.map(c => c._id);
+    if (classIds.length > 0) {
+      const classes = await classModel.find({ _id: { $in: classIds } }).session(session);
+      const pdfIds = [];
+      classes.forEach(cls => {
+        if (cls.pdfs && cls.pdfs.length > 0) {
+          pdfIds.push(...cls.pdfs);
+        }
+      });
+      if (pdfIds.length > 0) {
+        const pdfsToDelete = await pdfModel.find({ _id: { $in: pdfIds } }).session(session);
+        const gridFSBucket = getGridFSBucket();
+        for (const pdf of pdfsToDelete) {
+          const notebookWithPdf = await notebookModel.findOne({ id_pdf: pdf._id.toString() }).session(session);
+          if (notebookWithPdf) {
+            console.log(`PDF ${pdf._id} not deleted: referenced by notebook ${notebookWithPdf._id}`);
+            continue;
+          }
+          const classWithPdf = await classModel.findOne({ 
+            pdfs: pdf._id,
+            _id: { $nin: classIds }
+          }).session(session);
+          if (classWithPdf) {
+            console.log(`PDF ${pdf._id} not deleted: referenced by class ${classWithPdf._id}`);
+            continue;
+          }
+          try {
+            await gridFSBucket.delete(pdf.gridFsFileId);
+          } catch (err) {
+            console.error(`Error deleting GridFS file ${pdf.gridFsFileId}:`, err.message);
+          }
+          await pdfModel.findByIdAndDelete(pdf._id).session(session);
+        }
       }
-      res.status(204).send();
-    })
-    .catch((err) => {
-      res.status(500).json({ message: "Server error", error: err.message });
-    });
+      await classModel.deleteMany({ _id: { $in: classIds } }).session(session);
+    }
+    await session.commitTransaction();
+    session.endSession();
+    res.status(204).send();
+  } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
 };
 
 // POST /users/login
