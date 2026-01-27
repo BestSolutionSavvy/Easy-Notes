@@ -6,6 +6,7 @@ export interface ButtonConfig {
   icon: string;
   alt?: string;
   background?: string;
+  isLoading?: boolean;
   onClick?: (e?: Event) => void;
 }
 
@@ -58,6 +59,7 @@ const handleButtonClick = (button: ButtonConfig, event: Event) => {
         :icon="button.icon"
         :alt="button.alt"
         :background="button.background"
+        :isLoading="button.isLoading"
         :onClick="(e?: Event) => handleButtonClick(button, e!)"
       />
     </div>

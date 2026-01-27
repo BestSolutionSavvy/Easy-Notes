@@ -91,7 +91,12 @@ exports.summarizeNotebook = async (req, res) => {
             model: 'llama3.1-8b'
         });
 
-        res.json({ summary: completionCreateResponse });
+        const summaryText = completionCreateResponse.choices[0].message.content;
+        const fileName = `${notebook.name.replace(/[^a-z0-9]/gi, '_')}_summary.txt`;
+        
+        res.setHeader('Content-Type', 'text/plain');
+        res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+        res.send(summaryText);
     } catch (error) {
         console.error('Error summarizing notebook:', error);
         res.status(500).json({ error: 'Error summarizing notebook', details: error.message });

@@ -6,9 +6,9 @@ import axios from "axios";
 import wandIcon from "../assets/wand.svg";
 import loadIcon from "../assets/load.svg";
 import trashIcon from "../assets/trash.svg";
+import downloadIcon from "../assets/download-file.svg";
 import ListElement from "../components/ListElement.vue";
 import ConfirmModal from "../components/ConfirmModal.vue";
-import SummaryModal from "../components/SummaryModal.vue";
 import type { Notebook } from "../types/notebook";
 
 const authStore = useAuthStore();
@@ -19,11 +19,11 @@ const errorMessage = ref("");
 // Modal states
 const showDeleteModal = ref(false);
 const showErrorModal = ref(false);
-const showSummaryModal = ref(false);
 const modalMessage = ref("");
 const modalTitle = ref("");
 const notebookToDelete = ref<Notebook | null>(null);
-const summaryContent = ref("");
+const summarizingNotebooks = ref<Set<string>>(new Set());
+const summariesReady = ref<Map<string, Blob>>(new Map());
 
 const emit = defineEmits<{
   (e: "select-notebook", notebook: Notebook): void;
@@ -117,23 +117,40 @@ const cancelDelete = () => {
 
 const onSummarizeNotebook = async (notebook: Notebook) => {
   if (!notebook._id || !authStore.user?.email) return;
+  
+  // Se il summary è già pronto, scarica il file
+  if (summariesReady.value.has(notebook._id)) {
+    const blob = summariesReady.value.get(notebook._id)!;
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${notebook.name.replace(/[^a-z0-9]/gi, '_')}_summary.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+    summariesReady.value.delete(notebook._id);
+    return;
+  }
+  
+  // Altrimenti genera il summary
+  summarizingNotebooks.value.add(notebook._id);
   try {
-    const response = await axios.post(`/api/summarize/${notebook._id}`);
-    summaryContent.value = response.data.summary.choices[0].message.content;
-    modalTitle.value = `Summary: ${notebook.name}`;
-    showSummaryModal.value = true;
+    const response = await axios.post(`/api/summarize/${notebook._id}`, {}, {
+      responseType: 'blob'
+    });
+    
+    const blob = new Blob([response.data], { type: 'text/plain' });
+    summariesReady.value.set(notebook._id, blob);
   } catch (error: any) {
     modalTitle.value = "Summarize Error";
     modalMessage.value =
       error.response?.data?.message || "Failed to summarize notebook";
     showErrorModal.value = true;
     console.error("Error summarizing notebook:", error);
+  } finally {
+    summarizingNotebooks.value.delete(notebook._id!);
   }
-};
-
-const closeSummaryModal = () => {
-  showSummaryModal.value = false;
-  summaryContent.value = "";
 };
 
 const closeErrorModal = () => {
@@ -213,9 +230,10 @@ onMounted(() => {
               @click="onSelectNotebook(notebook)"
               :buttons="[
                 {
-                  icon: wandIcon,
-                  alt: 'AI Summary',
+                  icon: summarizingNotebooks.has(notebook._id!) ? '' : (summariesReady.has(notebook._id!) ? downloadIcon : wandIcon),
+                  alt: summariesReady.has(notebook._id!) ? 'Download Summary' : 'AI Summary',
                   background: 'bg-orangered-100',
+                  isLoading: summarizingNotebooks.has(notebook._id!),
                   onClick: () => {
                     onSummarizeNotebook(notebook);
                   },
@@ -256,12 +274,6 @@ onMounted(() => {
       variant="default"
       @confirm="closeErrorModal"
       @cancel="closeErrorModal"
-    />
-    <SummaryModal
-      :isOpen="showSummaryModal"
-      :title="modalTitle"
-      :content="summaryContent"
-      @close="closeSummaryModal"
     />
   </div>
 </template>
