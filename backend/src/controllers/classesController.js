@@ -1,4 +1,5 @@
 const classesModel = require('../models/classesModel');
+const { pdfModel } = require('../models/pdfsModel');
 
 exports.listClasses = (req, res) => {
     classesModel.find()
@@ -49,14 +50,20 @@ exports.updateClass = (req, res) => {
         .catch(err => res.status(500).json({ error: err.message }));
 }
 
-exports.deleteClass = (req, res) => {
+exports.deleteClass = async (req, res) => {
     const classId = req.params.id;
-    classesModel.findByIdAndDelete(classId)
-        .then(deletedClass => {
-            if (!deletedClass) {
-                return res.status(404).json({ error: 'Class not found' });
-            }
-            res.status(204).send();
-        })
-        .catch(err => res.status(500).json({ error: err.message }));
+    try {
+        const classDoc = await classesModel.findById(classId);
+        if (!classDoc) {
+            return res.status(404).json({ error: 'Class not found' });
+        }
+        const classPdfs = classDoc.pdfs;
+        if (classPdfs && classPdfs.length > 0) {
+            await pdfModel.deleteMany({ _id: { $in: classPdfs } });
+        }
+        await classesModel.findByIdAndDelete(classId);
+        res.status(204).send();
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 }
