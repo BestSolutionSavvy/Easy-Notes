@@ -26,6 +26,7 @@ const scale = ref<number>(100);
 const basePageWidth = ref<number>(0);
 const basePageHeight = ref<number>(0);
 const isPostItMode = ref<boolean>(false);
+const isHighlightMode = ref<boolean>(false);
 const editingPostItIndex = ref<number | null>(null);
 const isDragging = ref<boolean>(false);
 const dragStartX = ref<number>(0);
@@ -50,6 +51,10 @@ const currentPageData = computed(() => {
 
 const currentTextBoxes = computed(() => {
   return currentPageData.value?.text_boxes || [];
+});
+
+const currentHighlights = computed(() => {
+  return currentPageData.value?.highlights || [];
 });
 
 const pdfUrl = computed(() => pdfFile.value?.data ? URL.createObjectURL(pdfFile.value.data) : null);
@@ -86,9 +91,20 @@ const fitToContainer = () => {
 
 const togglePostItMode = () => {
   isPostItMode.value = !isPostItMode.value;
+  if (isPostItMode.value) {
+    isHighlightMode.value = false;
+  }
+};
+
+const toggleHighlightMode = () => {
+  isHighlightMode.value = !isHighlightMode.value;
+  if (isHighlightMode.value) {
+    isPostItMode.value = false;
+  }
 };
 
 const handlePdfClick = (event: MouseEvent) => {
+  // Solo post-it usa il drag, highlight usa la selezione di testo
   if (!isPostItMode.value || !props.notebook) return;
   event.preventDefault();
   event.stopPropagation();
@@ -115,6 +131,61 @@ const handlePdfMouseMove = (event: MouseEvent) => {
 };
 
 const handlePdfMouseUp = (event: MouseEvent) => {
+  if (isHighlightMode.value && props.notebook) {
+    const selection = window.getSelection();
+    if (selection && selection.rangeCount > 0 && selection.toString().trim().length > 0) {
+      const range = selection.getRangeAt(0);
+      const rects = range.getClientRects();
+      
+      if (rects.length > 0) {
+        const pdfWrapper = document.querySelector('.pdf-wrapper') as HTMLElement;
+        if (!pdfWrapper) return;
+        
+        const pdfRect = pdfWrapper.getBoundingClientRect();
+        const scaleFactor = scale.value / 100;
+        
+        let pageData = props.notebook.pages?.find(p => p.slide_number === props.currentPage);
+        if (!pageData) {
+          pageData = {
+            page_number: props.currentPage || 1,
+            slide_number: props.currentPage || 1,
+            note_content: '',
+            text_boxes: [],
+            highlights: []
+          };
+          if (!props.notebook.pages) {
+            props.notebook.pages = [];
+          }
+          props.notebook.pages.push(pageData);
+        }
+        
+        if (!pageData.highlights) {
+          pageData.highlights = [];
+        }
+        
+        // Unisci i rettangoli per riga
+        const mergedRects = mergeRects(Array.from(rects) as DOMRect[], pdfRect, scaleFactor);
+        
+        // Aggiungi gli highlight uniti
+        for (const rect of mergedRects) {
+          const newHighlight = {
+            left: rect.left,
+            top: rect.top,
+            width: rect.width,
+            height: rect.height,
+            content: selection.toString()
+          };
+          
+          pageData.highlights.push(newHighlight);
+        }
+        
+        selection.removeAllRanges();
+      }
+    }
+    return;
+  }
+  
+  // Gestione post-it con drag
   if (!isDragging.value || !props.notebook) return;
   event.preventDefault();
   
@@ -125,14 +196,6 @@ const handlePdfMouseUp = (event: MouseEvent) => {
   if (!box || box.width < 30 || box.height < 20) {
     return;
   }
-  
-  const newPostIt = {
-    left: box.left,
-    top: box.top,
-    width: box.width,
-    height: box.height,
-    content: ''
-  };
   
   // Trova o crea la pagina corrente
   let pageData = props.notebook.pages?.find(p => p.slide_number === props.currentPage);
@@ -150,13 +213,23 @@ const handlePdfMouseUp = (event: MouseEvent) => {
     props.notebook.pages.push(pageData);
   }
   
-  if (!pageData.text_boxes) {
-    pageData.text_boxes = [];
+  if (isPostItMode.value) {
+    const newPostIt = {
+      left: box.left,
+      top: box.top,
+      width: box.width,
+      height: box.height,
+      content: ''
+    };
+    
+    if (!pageData.text_boxes) {
+      pageData.text_boxes = [];
+    }
+    
+    pageData.text_boxes.push(newPostIt);
+    editingPostItIndex.value = pageData.text_boxes.length - 1;
+    isPostItMode.value = false;
   }
-  
-  pageData.text_boxes.push(newPostIt);
-  
-  editingPostItIndex.value = pageData.text_boxes.length - 1;
 };
 
 const updatePostItContent = (index: number, content: string) => {
@@ -174,6 +247,71 @@ const deletePostIt = (index: number) => {
   }
 };
 
+const deleteHighlight = (index: number) => {
+  if (!currentPageData.value) return;
+  if (!currentPageData.value.highlights) return;
+  currentPageData.value.highlights.splice(index, 1);
+};
+
+const mergeRects = (rects: DOMRect[], pdfRect: DOMRect, scaleFactor: number) => {
+  if (rects.length === 0) return [];
+  
+  // Converti tutti i rect in coordinate relative al PDF
+  const normalizedRects = Array.from(rects).map(rect => ({
+    left: (rect.left - pdfRect.left) / scaleFactor,
+    top: (rect.top - pdfRect.top) / scaleFactor,
+    right: (rect.right - pdfRect.left) / scaleFactor,
+    bottom: (rect.bottom - pdfRect.top) / scaleFactor,
+    width: rect.width / scaleFactor,
+    height: rect.height / scaleFactor
+  }));
+  
+  // Raggruppa i rect per righe (basandosi sulla sovrapposizione verticale)
+  const rows: typeof normalizedRects[] = [];
+  
+  for (const rect of normalizedRects) {
+    // Trova una riga esistente che si sovrappone verticalmente
+    let foundRow = false;
+    for (const row of rows) {
+      const rowTop = Math.min(...row.map(r => r.top));
+      const rowBottom = Math.max(...row.map(r => r.bottom));
+      
+      // Controlla se c'è sovrapposizione verticale (con una piccola tolleranza)
+      const tolerance = 2; // pixel di tolleranza
+      if (
+        (rect.top >= rowTop - tolerance && rect.top <= rowBottom + tolerance) ||
+        (rect.bottom >= rowTop - tolerance && rect.bottom <= rowBottom + tolerance) ||
+        (rect.top <= rowTop && rect.bottom >= rowBottom)
+      ) {
+        row.push(rect);
+        foundRow = true;
+        break;
+      }
+    }
+    
+    if (!foundRow) {
+      rows.push([rect]);
+    }
+  }
+  
+  // Unisci i rect di ogni riga in un unico rettangolo
+  const mergedRects = rows.map(row => {
+    const left = Math.min(...row.map(r => r.left));
+    const top = Math.min(...row.map(r => r.top));
+    const right = Math.max(...row.map(r => r.right));
+    const bottom = Math.max(...row.map(r => r.bottom));
+    
+    return {
+      left,
+      top,
+      width: right - left,
+      height: bottom - top
+    };
+  });
+  
+  return mergedRects;
+};
+
 onMounted(async () => {
   try {
     pdfFile.value = await loadPdf(props.notebook?.id_pdf || '');
@@ -182,7 +320,6 @@ onMounted(async () => {
     console.error('Error loading PDF:', err);
   }
   
-  // Aggiungi listener globali per il drag
   document.addEventListener('mousemove', handlePdfMouseMove);
   document.addEventListener('mouseup', handlePdfMouseUp);
 });
@@ -193,12 +330,6 @@ onUnmounted(() => {
 });
 
 </script>
-
-<style scoped>
-.post-it-cursor {
-  cursor: crosshair;
-}
-</style>
 
 <template>
   <div
@@ -232,9 +363,27 @@ onUnmounted(() => {
         >
           <VuePdfEmbed :width="pdfWidth" :height="pdfHeight" :source="pdfUrl" :page="currentPage ?? 1" :text-layer="true" @loaded="handleDocumentRender" />
           
-          <!-- Preview del box durante il dragging -->
+          <!-- Highlights -->
           <div
-            v-if="dragBox"
+            v-for="(highlight, index) in currentHighlights"
+            :key="'highlight-' + index"
+            class="absolute bg-yellow-300/40 border border-yellow-400/60 group cursor-pointer"
+            :style="{
+              left: `${highlight.left * scale / 100}px`,
+              top: `${highlight.top * scale / 100}px`,
+              width: `${highlight.width * scale / 100}px`,
+              height: `${highlight.height * scale / 100}px`
+            }"
+            @click="deleteHighlight(index)"
+          >
+            <div class="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity bg-red-500 text-white text-xs px-1 rounded-bl">
+              ✕
+            </div>
+          </div>
+          
+          <!-- Preview del box durante il dragging (solo per post-it) -->
+          <div
+            v-if="dragBox && isPostItMode"
             class="absolute border-2 border-blue-500 bg-blue-100/30 pointer-events-none"
             :style="{
               left: `${dragBox.left * scale / 100}px`,
@@ -247,7 +396,7 @@ onUnmounted(() => {
           <!-- Post-it notes -->
           <PostIt
             v-for="(postIt, index) in currentTextBoxes"
-            :key="index"
+            :key="'postit-' + index"
             :content="postIt.content"
             :left="postIt.left"
             :top="postIt.top"
@@ -294,16 +443,31 @@ onUnmounted(() => {
           class="h-[1rem] w-[1rem] cursor-pointer transition-transform hover:scale-125 hover:brightness-125" alt="" />
       </div>
       <div class="overflow-hidden flex items-start p-[0.625rem] gap-[0.937rem]">
-        <img src="../assets/highlight.svg"
-          class="h-[1rem] w-[1.063rem] cursor-pointer transition-transform hover:scale-125 hover:brightness-125"
-          alt="" />
-        <img src="../assets/post-it-white.svg" @click="togglePostItMode"
-          :class="isPostItMode ? 'ring-2 ring-blue-400 rounded' : ''"
-          class="h-[0.875rem] w-[0.875rem] cursor-pointer transition-transform hover:scale-125 hover:brightness-125"
-          alt="" />
-        <img src="../assets/download.svg"
-          class="h-[0.938rem] w-[0.875rem] cursor-pointer transition-transform hover:scale-125 hover:brightness-125"
-          alt="" />
+        <div 
+          @click="toggleHighlightMode"
+          class="flex items-center justify-center p-[0.25rem] rounded transition-all cursor-pointer">
+          <svg width="17" height="16" viewBox="0 0 17 16" fill="none" xmlns="http://www.w3.org/2000/svg"
+            class="h-[1rem] w-[1.063rem] transition-transform hover:scale-125">
+            <path d="M9.84375 9.84375L14.7937 3.12188L13.8781 2.20625L7.15625 7.15625L9.84375 9.84375ZM4 10V7.75938C4 7.28125 4.225 6.83437 4.60938 6.55312L13.1438 0.2625C13.375 0.090625 13.6563 0 13.9438 0C14.3 0 14.6406 0.140625 14.8938 0.39375L16.6063 2.10625C16.8594 2.35938 17 2.7 17 3.05938C17 3.34688 16.9094 3.62812 16.7375 3.85938L10.45 12.3906C10.1687 12.775 9.71875 13 9.24375 13H7.00313L6.20937 13.7937C5.81875 14.1844 5.18437 14.1844 4.79375 13.7937L3.20937 12.2094C2.81875 11.8188 2.81875 11.1844 3.20937 10.7937L4 10ZM0.21875 14.5719L1.83438 12.9563L4.04063 15.1625L3.425 15.7781C3.28437 15.9187 3.09375 15.9969 2.89375 15.9969L0.75 16C0.334375 16 0 15.6656 0 15.25V15.1031C0 14.9031 0.078125 14.7125 0.21875 14.5719Z" 
+              :fill="isHighlightMode ? '#FBBF24' : '#FEFEFE'" 
+              class="transition-colors duration-300" />
+          </svg>
+        </div>
+        <div 
+          @click="togglePostItMode"
+          class="flex items-center justify-center p-[0.25rem] rounded transition-all cursor-pointer">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"
+            class="h-[0.875rem] w-[0.875rem] transition-transform hover:scale-125">
+            <path d="M2 14C0.896875 14 0 13.1031 0 12V2C0 0.896875 0.896875 0 2 0H12C13.1031 0 14 0.896875 14 2V8.67188C14 9.20312 13.7906 9.7125 13.4156 10.0875L10.0844 13.4156C9.70938 13.7906 9.2 14 8.66875 14H2ZM12.1719 8.5H9.25C8.83437 8.5 8.5 8.83437 8.5 9.25V12.1719L12.1719 8.5Z" 
+              :fill="isPostItMode ? '#52CBF7' : '#FEFEFE'" 
+              class="transition-colors duration-300" />
+          </svg>
+        </div>
+        <div class="flex items-center justify-center p-[0.25rem] rounded transition-all">
+          <img src="../assets/download.svg"
+            class="h-[0.938rem] w-[0.875rem] cursor-pointer transition-transform hover:scale-125 hover:brightness-125"
+            alt="" />
+        </div>
       </div>
     </div>
   </div>
