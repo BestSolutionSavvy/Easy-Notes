@@ -2,6 +2,7 @@
 import { onMounted, ref, computed } from "vue";
 import axios from "axios";
 import ListElement from "../components/ListElement.vue";
+import ConfirmModal from "../components/ConfirmModal.vue";
 import InputBox from "../components/InputBox.vue";
 import SimpleButton from "../components/SimpleButton.vue";
 import trashIcon from "../assets/trash.svg";
@@ -27,7 +28,9 @@ const classes = ref<Class[]>([]);
 const subscribedClassIds = ref<string[]>([]);
 const teachersData = ref<Record<string, User>>({});
 const showCreateModal = ref(false);
+const showDeleteModal = ref(false);
 const newClassName = ref("");
+const classToDelete = ref<Class | null>(null);
 
 const filteredClasses = computed(() => {
   if (props.role === "teacher") {
@@ -92,20 +95,29 @@ const isSubscribed = (classId: string): boolean => {
 };
 
 const handleDelete = (index: string) => {
-  const classToDelete = classes.value.find(c => c._id === index);
-  const className = classToDelete?.name || "this class";
+  const classItem = classes.value.find(c => c._id === index);
+  if (!classItem) return;
   
-  if (!confirm(`Are you sure you want to delete "${className}"?`)) {
-    return;
-  }
+  classToDelete.value = classItem;
+  showDeleteModal.value = true;
+};
+
+const confirmDelete = async () => {
+  showDeleteModal.value = false;
+  if (!classToDelete.value?._id) return;
   
   try {
-    axios.delete(`/api/classes/${index}`).then(() => {
-      listClasses();
-    });
+    await axios.delete(`/api/classes/${classToDelete.value._id}`);
+    await listClasses();
+    classToDelete.value = null;
   } catch (error) {
     console.error("Error deleting class:", error);
   }
+};
+
+const cancelDelete = () => {
+  showDeleteModal.value = false;
+  classToDelete.value = null;
 };
 
 const openCreateModal = () => {
@@ -292,6 +304,16 @@ onMounted(async () => {
         </div>
       </div>
     </div>
+    <ConfirmModal
+      :isOpen="showDeleteModal"
+      title="Delete Class"
+      :message="`Are you sure you want to delete &quot;${classToDelete?.name}&quot;? This action cannot be undone.`"
+      confirmText="Delete"
+      cancelText="Cancel"
+      variant="delete"
+      @confirm="confirmDelete"
+      @cancel="cancelDelete"
+    />
   </div>
 </template>
 

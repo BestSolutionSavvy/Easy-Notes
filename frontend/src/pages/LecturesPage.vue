@@ -3,6 +3,7 @@ import { ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
 import ListElement from "../components/ListElement.vue";
+import ConfirmModal from "../components/ConfirmModal.vue";
 import plusIcon from "../assets/plus.svg";
 import trashIcon from "../assets/trash.svg";
 import loadIcon from "../assets/load.svg";
@@ -20,6 +21,8 @@ const authStore = useAuthStore();
 const router = useRouter();
 const lectures = ref<PDFDocument[]>([]);
 const fileInputRef = ref<HTMLInputElement | null>(null);
+const showDeleteModal = ref(false);
+const lectureToDelete = ref<PDFDocument | null>(null);
 
 const fetchLectures = async () => {
   if (!props.classItem?.pdfs || props.classItem.pdfs.length === 0) {
@@ -40,28 +43,36 @@ const fetchLectures = async () => {
   }
 };
 
-const handleDelete = async (lectureId: string) => {
-  if (!props.classItem?._id) return;
-
+const handleDelete = (lectureId: string) => {
   const lecture = lectures.value.find((l) => l._id === lectureId);
-  const lectureName = lecture?.name || "this lecture";
+  if (!lecture) return;
+  
+  lectureToDelete.value = lecture;
+  showDeleteModal.value = true;
+};
 
-  if (!confirm(`Are you sure you want to delete "${lectureName}"?`)) {
-    return;
-  }
+const confirmDelete = async () => {
+  showDeleteModal.value = false;
+  if (!props.classItem?._id || !lectureToDelete.value?._id) return;
 
   try {
     const updatedPdfs = (props.classItem.pdfs || []).filter(
-      (id) => id !== lectureId,
+      (id) => id !== lectureToDelete.value!._id,
     );
     await axios.put(`/api/classes/${props.classItem._id}`, {
       pdfs: updatedPdfs,
     });
-    await axios.delete(`/api/pdfs/${lectureId}`);
-    lectures.value = lectures.value.filter((l) => l._id !== lectureId);
+    await axios.delete(`/api/pdfs/${lectureToDelete.value._id}`);
+    lectures.value = lectures.value.filter((l) => l._id !== lectureToDelete.value!._id);
+    lectureToDelete.value = null;
   } catch (error) {
     console.error("Error deleting lecture:", error);
   }
+};
+
+const cancelDelete = () => {
+  showDeleteModal.value = false;
+  lectureToDelete.value = null;
 };
 
 const handleLoad = (lectureId: string) => {
@@ -211,6 +222,16 @@ watch(
       />
       </div>
     </div>
+    <ConfirmModal
+      :isOpen="showDeleteModal"
+      title="Delete Lecture"
+      :message="`Are you sure you want to delete &quot;${lectureToDelete?.name}&quot;? This action cannot be undone.`"
+      confirmText="Delete"
+      cancelText="Cancel"
+      variant="delete"
+      @confirm="confirmDelete"
+      @cancel="cancelDelete"
+    />
   </div>
 </template>
 
