@@ -15,25 +15,19 @@ const shortcutSections: ShortcutSection[] = [
       { key: '← →', description: 'Naviga pagine' },
       { key: 'Enter', description: 'Inizia modifica' },
       { key: 'Esc', description: 'Esci da modifica' },
-      { key: 'Ctrl + F', description: 'Cerca parola chiave' },
-      { key: 'Ctrl + +/-/Wheel', description: 'Controlli zoom' },
-      { key: 'Alt + Drag', description: 'Pan durante zoom' },
-      { key: 'Click', description: 'Rimuovi evidenziazione' }
+      { key: 'Ctrl + S', description: 'Salva note' }
     ]
   },
   {
     title: 'Durante la modifica',
     shortcuts: [
       { key: 'Ctrl + ← →', description: 'Naviga scrivendo' },
-      { key: 'Ctrl + S', description: 'Salva note' }
     ]
   },
   {
     title: 'Modalità textbox',
     shortcuts: [
       { key: 'Click + Drag', description: 'Disegna textbox' },
-      { key: 'Double Click', description: 'Modifica textbox' },
-      { key: 'Click', description: 'Elimina textbox' }
     ]
   }
 ];

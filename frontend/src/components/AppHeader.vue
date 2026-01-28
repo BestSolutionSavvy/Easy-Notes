@@ -113,6 +113,16 @@ const emit = defineEmits<{
   (e: "close-notebook"): void;
 }>();
 
+const toggleSave = () => {
+  if (!isSaving.value) {
+    saveButtonRef.value?.openOverlay();
+  }
+}
+
+defineExpose({
+  toggleSave
+})
+
 onMounted(async () => {
   if (!authStore.user?.email) {
     return;
@@ -159,19 +169,6 @@ onMounted(async () => {
         <h1 class="text-white text-[1.563rem] font-semibold font-['Inter'] px-2">
           Easy Notes
         </h1>
-        <div v-if="variant === 'tools' && props.currentNotebook" class="flex items-center gap-3 px-4">
-          <div class="relative group">
-            <input type="text" placeholder="Search in your notes..."
-              class="w-80 h-[1.875rem] pl-10 pr-4 bg-gray-100 rounded-[5px] focus:outline-none focus:ring-2 focus:ring-gray-300 text-gray-700 placeholder-gray-400 font-medium transition-all duration-200 hover:bg-gray-200" />
-            <div class="absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-              <svg class="w-4 h-4 text-gray-400 group-focus-within:text-gray-600 transition-colors" fill="none"
-                stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-              </svg>
-            </div>
-          </div>
-        </div>
       </div>
 
       <div v-if="variant === 'tools' && props.currentNotebook"

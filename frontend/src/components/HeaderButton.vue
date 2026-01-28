@@ -80,7 +80,8 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 defineExpose({
-    closeOverlay
+    closeOverlay,
+    openOverlay
 });
 
 </script>
