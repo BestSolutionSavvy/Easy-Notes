@@ -355,7 +355,7 @@ onUnmounted(() => {
       <div v-else-if="!pdfUrl" class="flex items-center justify-center h-full w-full">
         <div class="text-gray-400">Select a notebook to view PDF</div>
       </div>
-      <div v-else class="w-[45vw] h-[60vh] relative overflow-auto flex items-center justify-center">
+      <div v-else class="w-[45vw] h-[60vh] relative overflow-auto flex justify-center">
         <div 
           class="pdf-wrapper relative" 
           :class="{ 'post-it-cursor': isPostItMode }" 
