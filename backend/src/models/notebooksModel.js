@@ -30,11 +30,7 @@ const notebookSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
-    num_pages: {
-        type: Number,
-        default: 0
-    },
-    num_pdf_pages: {
+    num_notebook_pages: {
         type: Number,
         default: 0
     },

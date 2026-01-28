@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, watch, computed, nextTick } from 'vue';
+import { ref, watch, computed, nextTick, onMounted } from 'vue';
 import type { Notebook } from '../types/notebook';
 import { marked } from 'marked';
+
 
 const isEditing = ref(false);
 const textareaRef = ref<HTMLTextAreaElement | null>(null);
@@ -74,6 +75,10 @@ const stopEditing = () => {
 defineExpose({
   startEditing,
   stopEditing
+});
+
+onMounted(() => {
+  noteContent.value = currentPageData.value?.note_content || '';
 });
 
 </script>
