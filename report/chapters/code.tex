@@ -1,2 +1,114 @@
 \chapter{Code}
-Solo aspetti rilevanti.
+
+% Definizione colori per syntax highlighting
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+% Definizione del linguaggio JavaScript per listings
+\lstdefinelanguage{JavaScript}{
+    keywords={break, case, catch, continue, debugger, default, delete, do, else, finally, for, function, if, in, instanceof, new, return, switch, this, throw, try, typeof, var, void, while, with, const, let, class, extends, export, import, super, async, await},
+    morecomment=[l]{//},
+    morecomment=[s]{/*}{*/},
+    morestring=[b]',
+    morestring=[b]",
+    sensitive=true
+}
+
+% Configurazione per JavaScript
+\lstdefinestyle{javascript}{
+    language=JavaScript,
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{blue},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+
+% Configurazione per HTML
+\lstdefinestyle{html}{
+    language=HTML,
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{blue},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2,
+    morekeywords={DOCTYPE,html,head,title,body,div,span,script, template, MainStructure, AppHeader, PdfPage, NotePage, v-if, v-else-if, v-else, :notebook, :currentPage, @page-next, @page-prev}
+}
+
+\section{Struttura delle pagine e dei componenti}
+Per avere una struttura il più possibile inetrcambibile, modulare e coerente tra le pagine, abbiamo deciso di realizzare le pagine come una sorta di quaderno aperto, avendo così all'interno due parti: \textbf{left} e \textbf{right} oltre che sopra a tutto l'header. In questo modo, l'utente non avrà difficoltà a trovare le funzionalità principali dell'applicazione, che saranno sempre nello stesso punto e soprattutto, nel caso si vogliano aggiungere nuove pagine, basterà replicare la struttura e cambiare solo il contenuto delle due sezioni principali.
+
+Sotto viene proposto un esempio di codice, in particolare della pagina home:
+\begin{lstlisting}[style=html, caption=Struttura Vue della pagina Home]
+<template>
+    <AppHeader ref="headerRef" @open-notebook="handleOpenNotebook" @close-notebook="handleCloseNotebook"
+        :variant="'tools'" :currentNotebook="openedNotebook" :currentNotebookPage="currentNotebookPage" />
+    <MainStructure>
+        <template #left>
+            <PdfPage v-if="openedNotebook?.type === 'slide'" :notebook="openedNotebook" :currentPage="currentPdfPage"
+                @page-next="handlePageNext" @page-prev="handlePagePrev" />
+            <NotePage ref="notePageLeftRef" v-else-if="openedNotebook?.type === 'simple'" :notebook="openedNotebook"
+                :currentPage="currentNotebookPage" />
+            <div v-else
+                class="h-full flex-1 w-full rounded-tl-[10px] rounded-bl-[10px] flex flex-col items-center justify-center gap-4 p-8">
+                <img src="../assets/pdf.svg" class="w-24 h-24 opacity-30" alt="" />
+                <h2 class="text-2xl font-bold text-gray-400">No PDF opened</h2>
+                <p class="text-gray-500 text-center max-w-md">Open a notebook with PDF from the header options to view
+                    slides</p>
+            </div>
+        </template>
+        <template #right>
+            <NotePage ref="notePageRightRef" v-if="openedNotebook?.type === 'slide'" :notebook="openedNotebook"
+                :currentPage="currentNotebookPage" />
+            <NotePage ref="notePageRightRef" v-else-if="openedNotebook?.type === 'simple'" :notebook="openedNotebook"
+                :currentPage="currentNotebookPage + 1" />
+            <div v-else
+                class="h-full flex-1 w-full rounded-tr-[10px] rounded-br-[10px] flex flex-col items-center justify-center gap-4 p-8">
+                <img src="../assets/notes.svg" class="w-24 h-24 opacity-30" alt="" />
+                <h2 class="text-2xl font-bold text-gray-400">No notebook opened</h2>
+                <p class="text-gray-500 text-center max-w-md">Create a new notebook or open an existing one to start
+                    taking notes</p>
+            </div>
+        </template>
+    </MainStructure>
+</template>
+\end{lstlisting}
+
+\section{Riassunto delle note tramite API esterna}
+All'interno della nostra app è possibile riassumere le proprie note grazie all'integrazione con un'API esterna che, utilizzanto llama3.1-8b, riassume il testo fornito. Il testo viene prima estratto sia dai pdf che dalle note, poi inviato all'API che restituisce il riassunto salvandolo anche nel database.
+
+Qui di seguito un esempio di codice che mostra come viene effettuata la chiamata all'API per ottenere il riassunto delle note:
+
+\begin{lstlisting}[style=javascript, caption=Funzione per gestire le note]
+
+\end{lstlisting}
+
+\section{Notifiche push}
+Le notifiche push sono state implementate utilizzando la libreria \texttt{web-push} di Node.js. Questa libreria consente di inviare notifiche push ai client registrati, permettendo così di informare gli utenti su eventi importanti anche quando non stanno utilizzando attivamente l'applicazione. Per farlo abbiamo generato una coppia di chiavi VAPID (Voluntary Application Server Identification) che vengono utilizzate per autenticare il server di notifiche push con i client. Alla prima iscrizione ad una classe, l'app chiede il permesso di inviare notifiche push all'utente e registra il suo dispositivo con il server di notifiche push sul database. Quando un nuovo pdf viene aggiunto ad una classe a cui si è iscritti, il server invia una notifica push a tutti i dispositivi registrati per quella classe. Di seguito un esempio di codice che mostra come viene inviata una notifica push quando viene aggiunto un nuovo pdf ad una classe:
+
+\begin{lstlisting}[style=javascript, caption=Invio notifica push all'aggiunta di un nuovo PDF]
+\end{lstlisting}
