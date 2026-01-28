@@ -44,8 +44,8 @@ const handleButtonClick = (button: ButtonConfig, event: Event) => {
     }"
     @click="emit('click')"
   >
-    <div class="relative leading-[100%] font-medium">{{ title }}</div>
-    <div class="relative text-[0.813rem] leading-[100%] font-medium">
+    <div class="relative leading-[140%] font-medium flex-1 truncate overflow-hidden whitespace-nowrap min-w-0 mr-4">{{ title }}</div>
+    <div class="relative text-[0.813rem] leading-[140%] font-medium flex-shrink-0">
       {{ formatDate(date) }}
     </div>
     <div

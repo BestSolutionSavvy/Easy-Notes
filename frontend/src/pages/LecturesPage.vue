@@ -32,7 +32,8 @@ const fetchLectures = async () => {
       axios.get(`/api/pdfs/${pdfId}`),
     );
     const responses = await Promise.all(pdfPromises);
-    lectures.value = responses.map((res) => res.data);
+    lectures.value = responses.map((res) => res.data)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   } catch (error) {
     console.error("Error fetching lectures:", error);
     lectures.value = [];
@@ -118,8 +119,14 @@ const handleFileSelect = async (event: Event) => {
       pdfs: updatedPdfs,
     });
 
-    // Add the new lecture to the list immediately
-    lectures.value.push(response.data);
+    // Fetch all lectures including the new one using the updated array
+    const pdfPromises = updatedPdfs.map((pdfId) =>
+      axios.get(`/api/pdfs/${pdfId}`),
+    );
+    const responses = await Promise.all(pdfPromises);
+    lectures.value = responses
+      .map((res) => res.data)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     // Reset file input
     if (target) target.value = "";
