@@ -51,19 +51,14 @@ const handleDelete = async (lectureId: string) => {
   }
 
   try {
-    // Remove PDF ID from class's pdfs array
     const updatedPdfs = (props.classItem.pdfs || []).filter(
       (id) => id !== lectureId,
     );
     await axios.put(`/api/classes/${props.classItem._id}`, {
       pdfs: updatedPdfs,
     });
-
-    // Delete the PDF document
     await axios.delete(`/api/pdfs/${lectureId}`);
-
-    // Refresh lectures
-    await fetchLectures();
+    lectures.value = lectures.value.filter((l) => l._id !== lectureId);
   } catch (error) {
     console.error("Error deleting lecture:", error);
   }
