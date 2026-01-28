@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import type { Notebook } from '../types/notebook';
 import { loadPdf } from '../lib/pdfLoad';
 import type { Pdf } from '../types/pdf';
@@ -19,6 +19,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 
 const pdfFile = ref<Pdf | null>(null);
+const pdfTemplateRef = ref<InstanceType<typeof VuePdfEmbed> | null>(null);
 const totalPages = ref<number>(0);
 const isLoading = ref<boolean>(false);
 const error = ref<string | null>(null);
@@ -104,7 +105,6 @@ const toggleHighlightMode = () => {
 };
 
 const handlePdfClick = (event: MouseEvent) => {
-  // Solo post-it usa il drag, highlight usa la selezione di testo
   if (!isPostItMode.value || !props.notebook) return;
   event.preventDefault();
   event.stopPropagation();
@@ -312,19 +312,47 @@ const mergeRects = (rects: DOMRect[], pdfRect: DOMRect, scaleFactor: number) => 
   return mergedRects;
 };
 
-onMounted(async () => {
+const loadPdfFile = async (pdfId: string) => {
+  if (!pdfId) {
+    pdfFile.value = null;
+    error.value = null;
+    return;
+  }
+  
   try {
-    pdfFile.value = await loadPdf(props.notebook?.id_pdf || '');
+    isLoading.value = true;
+    error.value = null;
+    if (pdfUrl.value) {
+      URL.revokeObjectURL(pdfUrl.value);
+    }
+    
+    pdfFile.value = await loadPdf(pdfId);
   } catch (err) {
     error.value = 'Failed to load PDF';
     console.error('Error loading PDF:', err);
+  } finally {
+    isLoading.value = false;
   }
+};
+
+watch(() => props.notebook?.id_pdf, async (newPdfId, oldPdfId) => {
+  if (newPdfId !== oldPdfId) {
+    await loadPdfFile(newPdfId || '');
+  }
+}, { immediate: false });
+
+onMounted(async () => {
+  await loadPdfFile(props.notebook?.id_pdf || '');
   
   document.addEventListener('mousemove', handlePdfMouseMove);
   document.addEventListener('mouseup', handlePdfMouseUp);
 });
 
 onUnmounted(() => {
+  if (pdfUrl.value) {
+    URL.revokeObjectURL(pdfUrl.value);
+  }
+  
   document.removeEventListener('mousemove', handlePdfMouseMove);
   document.removeEventListener('mouseup', handlePdfMouseUp);
 });
@@ -355,13 +383,13 @@ onUnmounted(() => {
       <div v-else-if="!pdfUrl" class="flex items-center justify-center h-full w-full">
         <div class="text-gray-400">Select a notebook to view PDF</div>
       </div>
-      <div v-else class="w-[45vw] h-[60vh] relative overflow-auto flex items-center justify-center">
+      <div v-else class="w-[45vw] h-[60vh] relative overflow-auto flex justify-center">
         <div 
           class="pdf-wrapper relative" 
           :class="{ 'post-it-cursor': isPostItMode }" 
           @mousedown="handlePdfClick"
         >
-          <VuePdfEmbed :width="pdfWidth" :height="pdfHeight" :source="pdfUrl" :page="currentPage ?? 1" :text-layer="true" @loaded="handleDocumentRender" />
+          <VuePdfEmbed ref="pdfTemplateRef" :width="pdfWidth" :height="pdfHeight" :source="pdfUrl" :page="currentPage ?? 1" :text-layer="true" @loaded="handleDocumentRender" />
           
           <!-- Highlights -->
           <div
@@ -463,7 +491,7 @@ onUnmounted(() => {
               class="transition-colors duration-300" />
           </svg>
         </div>
-        <div class="flex items-center justify-center p-[0.25rem] rounded transition-all">
+        <div @click="pdfTemplateRef?.download(pdfFile?.name || 'download.pdf')" class="flex items-center justify-center p-[0.25rem] rounded transition-all">
           <img src="../assets/download.svg"
             class="h-[0.938rem] w-[0.875rem] cursor-pointer transition-transform hover:scale-125 hover:brightness-125"
             alt="" />

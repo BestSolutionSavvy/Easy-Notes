@@ -3,6 +3,7 @@ import { ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
 import ListElement from "../components/ListElement.vue";
+import ConfirmModal from "../components/ConfirmModal.vue";
 import plusIcon from "../assets/plus.svg";
 import trashIcon from "../assets/trash.svg";
 import loadIcon from "../assets/load.svg";
@@ -20,6 +21,8 @@ const authStore = useAuthStore();
 const router = useRouter();
 const lectures = ref<PDFDocument[]>([]);
 const fileInputRef = ref<HTMLInputElement | null>(null);
+const showDeleteModal = ref(false);
+const lectureToDelete = ref<PDFDocument | null>(null);
 
 const fetchLectures = async () => {
   if (!props.classItem?.pdfs || props.classItem.pdfs.length === 0) {
@@ -32,40 +35,44 @@ const fetchLectures = async () => {
       axios.get(`/api/pdfs/${pdfId}`),
     );
     const responses = await Promise.all(pdfPromises);
-    lectures.value = responses.map((res) => res.data);
+    lectures.value = responses.map((res) => res.data)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   } catch (error) {
     console.error("Error fetching lectures:", error);
     lectures.value = [];
   }
 };
 
-const handleDelete = async (lectureId: string) => {
-  if (!props.classItem?._id) return;
-
+const handleDelete = (lectureId: string) => {
   const lecture = lectures.value.find((l) => l._id === lectureId);
-  const lectureName = lecture?.name || "this lecture";
+  if (!lecture) return;
+  
+  lectureToDelete.value = lecture;
+  showDeleteModal.value = true;
+};
 
-  if (!confirm(`Are you sure you want to delete "${lectureName}"?`)) {
-    return;
-  }
+const confirmDelete = async () => {
+  showDeleteModal.value = false;
+  if (!props.classItem?._id || !lectureToDelete.value?._id) return;
 
   try {
-    // Remove PDF ID from class's pdfs array
     const updatedPdfs = (props.classItem.pdfs || []).filter(
-      (id) => id !== lectureId,
+      (id) => id !== lectureToDelete.value!._id,
     );
     await axios.put(`/api/classes/${props.classItem._id}`, {
       pdfs: updatedPdfs,
     });
-
-    // Delete the PDF document
-    await axios.delete(`/api/pdfs/${lectureId}`);
-
-    // Refresh lectures
-    await fetchLectures();
+    await axios.delete(`/api/pdfs/${lectureToDelete.value._id}`);
+    lectures.value = lectures.value.filter((l) => l._id !== lectureToDelete.value!._id);
+    lectureToDelete.value = null;
   } catch (error) {
     console.error("Error deleting lecture:", error);
   }
+};
+
+const cancelDelete = () => {
+  showDeleteModal.value = false;
+  lectureToDelete.value = null;
 };
 
 const handleLoad = (lectureId: string) => {
@@ -118,8 +125,14 @@ const handleFileSelect = async (event: Event) => {
       pdfs: updatedPdfs,
     });
 
-    // Add the new lecture to the list immediately
-    lectures.value.push(response.data);
+    // Fetch all lectures including the new one using the updated array
+    const pdfPromises = updatedPdfs.map((pdfId) =>
+      axios.get(`/api/pdfs/${pdfId}`),
+    );
+    const responses = await Promise.all(pdfPromises);
+    lectures.value = responses
+      .map((res) => res.data)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     // Reset file input
     if (target) target.value = "";
@@ -138,7 +151,7 @@ watch(
 </script>
 <template>
   <div
-    class="h-full flex-1 w-full relative bg-white overflow-hidden shrink-0 text-left text-[1rem] text-darkslateblue font-inter"
+    class="h-full flex-1 w-full relative bg-white shrink-0 text-left text-[1rem] text-darkslateblue font-inter flex items-center justify-center"
   >
     <input
       ref="fileInputRef"
@@ -148,8 +161,9 @@ watch(
       @change="handleFileSelect"
     />
     <div
-      class="absolute top-[calc(50%_-_147px)] left-[calc(50%_-_250px)] w-[31.25rem] overflow-hidden flex flex-col items-center p-[0.312rem] box-border gap-[0.625rem]"
+      class="w-[31.25rem] max-h-[90%] overflow-y-auto overflow-x-hidden p-[0.312rem] scrollbar-hidden"
     >
+      <div class="flex flex-col items-center gap-[0.625rem]">
       <div
         v-if="!classItem"
         class="animate-fade-in flex flex-col items-center justify-center gap-4 p-8 max-w-md"
@@ -206,6 +220,28 @@ watch(
               ]
         "
       />
+      </div>
     </div>
+    <ConfirmModal
+      :isOpen="showDeleteModal"
+      title="Delete Lecture"
+      :message="`Are you sure you want to delete &quot;${lectureToDelete?.name}&quot;? This action cannot be undone.`"
+      confirmText="Delete"
+      cancelText="Cancel"
+      variant="delete"
+      @confirm="confirmDelete"
+      @cancel="cancelDelete"
+    />
   </div>
 </template>
+
+<style scoped>
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hidden {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+</style>

@@ -1,16 +1,19 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
 import { useAuthStore } from "../stores/auth";
 import Menu from "../pages/Menu.vue";
 import HeaderButton from "./HeaderButton.vue";
 import ShortcutsList from "./ShortcutsList.vue";
 import openNotebookIcon from "../assets/open-notebook.svg";
+import createSimpleNotebookIcon from "../assets/new-notebook.svg";
 import saveIcon from "../assets/save.svg";
 import closeIcon from "../assets/close.svg";
 import shortcutIcon from "../assets/shortcut.svg";
 import type { Notebook } from "../types/notebook";
 import { loadNotebooks } from "../lib/notebookUtils";
 import axios from "axios";
+import type { Class } from "../types/class";
 
 interface Props {
   variant?: "default" | "tools";
@@ -27,13 +30,16 @@ const props = withDefaults(defineProps<Props>(), {
 
 const isMenuOpen = ref(false);
 const notebooks = ref<Notebook[]>([]);
-const classes = ref<string[]>([]);
+const classes = ref<Class[]>([]);
 const isSaving = ref(false);
 const saveSuccess = ref(false);
 const isEditingName = ref(false);
 const editedNotebookName = ref("");
 const authStore = useAuthStore();
+const router = useRouter();
+const selectedSubject = ref("");
 const openNotebookButtonRef = ref<InstanceType<typeof HeaderButton> | null>(null)
+const createSimpleNotebookRef = ref<InstanceType<typeof HeaderButton> | null>(null)
 const saveButtonRef = ref<InstanceType<typeof HeaderButton> | null>(null)
 const closeButtonRef = ref<InstanceType<typeof HeaderButton> | null>(null)
 
@@ -113,6 +119,25 @@ const emit = defineEmits<{
   (e: "close-notebook"): void;
 }>();
 
+const toggleSave = () => {
+  if (!isSaving.value) {
+    saveButtonRef.value?.openOverlay();
+  }
+}
+
+const createSimpleNotebook = async () => {
+  if (selectedSubject.value) {
+    createSimpleNotebookRef.value?.closeOverlay();
+    await router.replace({ path: '/', query: { subject: selectedSubject.value } });
+    router.go(0); // Forza il ricaricamento della pagina
+    selectedSubject.value = "";
+  }
+};
+
+defineExpose({
+  toggleSave
+})
+
 onMounted(async () => {
   if (!authStore.user?.email) {
     return;
@@ -159,19 +184,6 @@ onMounted(async () => {
         <h1 class="text-white text-[1.563rem] font-semibold font-['Inter'] px-2">
           Easy Notes
         </h1>
-        <div v-if="variant === 'tools' && props.currentNotebook" class="flex items-center gap-3 px-4">
-          <div class="relative group">
-            <input type="text" placeholder="Search in your notes..."
-              class="w-80 h-[1.875rem] pl-10 pr-4 bg-gray-100 rounded-[5px] focus:outline-none focus:ring-2 focus:ring-gray-300 text-gray-700 placeholder-gray-400 font-medium transition-all duration-200 hover:bg-gray-200" />
-            <div class="absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-              <svg class="w-4 h-4 text-gray-400 group-focus-within:text-gray-600 transition-colors" fill="none"
-                stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-              </svg>
-            </div>
-          </div>
-        </div>
       </div>
 
       <div v-if="variant === 'tools' && props.currentNotebook"
@@ -196,6 +208,29 @@ onMounted(async () => {
       </div>
 
       <div class="flex-1 flex items-center justify-end gap-2">
+        <HeaderButton ref="createSimpleNotebookRef" v-if="variant === 'tools' && !props.currentNotebook" :text= "'Create Simple Notebook'" :direction="'left'" :icon="createSimpleNotebookIcon">
+          <div class="flex flex-col gap-3 p-4 min-w-[16rem]">
+            <h3 class="text-sm font-semibold text-gray-800">Select Subject</h3>
+            <div class="flex flex-col gap-2 max-h-[300px] overflow-y-auto">
+              <label v-for="classItem in classes" :key="classItem._id" 
+                class="flex items-center gap-2 p-2 hover:bg-gray-100 rounded cursor-pointer">
+                <input 
+                  type="radio" 
+                  :value="classItem.name" 
+                  v-model="selectedSubject"
+                  class="w-4 h-4 text-orange-500 focus:ring-orange-500"
+                />
+                <span class="text-sm text-gray-700">{{ classItem.name }}</span>
+              </label>
+            </div>
+            <button 
+              @click="createSimpleNotebook"
+              :disabled="!selectedSubject"
+              class="px-4 py-2 text-sm font-medium text-white bg-orange-500 rounded hover:bg-orange-600 active:bg-orange-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-150">
+              Create
+            </button>
+          </div>
+        </HeaderButton>
         <HeaderButton ref="openNotebookButtonRef" v-if="variant === 'tools'" :text= "'Open Notebook'" :direction="'left'" :icon="openNotebookIcon">
           <div v-for="notebook in notebooks" :key="notebook._id"
             class="p-2 hover:bg-gainsboro-100 rounded-md cursor-pointer" @click="() => {

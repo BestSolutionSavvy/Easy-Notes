@@ -19,6 +19,9 @@ const openedNotebook = ref<Notebook | null>(null);
 const currentNotebookPage = ref<number>(0);
 const currentPdfPage = ref<number>(0);
 
+const headerRef = ref<InstanceType<typeof AppHeader> | null>(null);
+const notePageRightRef = ref<InstanceType<typeof NotePage> | null>(null);
+
 const handleOpenNotebook = (notebook: Notebook) => {
     handleCloseNotebook();
     openedNotebook.value = notebook;
@@ -65,10 +68,10 @@ const handlePagePrev = () => {
 const isTyping = (): boolean => {
     const activeElement = document.activeElement;
     if (!activeElement) return false;
-    
+
     const tagName = activeElement.tagName.toLowerCase();
     const isEditable = activeElement.getAttribute('contenteditable') === 'true';
-    
+
     return (
         tagName === 'input' ||
         tagName === 'textarea' ||
@@ -77,10 +80,32 @@ const isTyping = (): boolean => {
 };
 
 const handleKeydown = (event: KeyboardEvent) => {
-    if (isTyping() && !event.ctrlKey && !event.metaKey && !event.altKey) {
+    if (isTyping() && !event.ctrlKey && !event.metaKey && !event.altKey && event.key !== "Escape") {
+        return;
+    }
+
+    if (event.ctrlKey && event.key === "s") {
+        event.preventDefault();
+        headerRef.value?.toggleSave();
+        return;
+    }
+    if (event.ctrlKey && isTyping() && (event.key === "ArrowRight" || event.key === "ArrowLeft")) {
+        event.preventDefault();
+        if (event.key === "ArrowRight") {
+            handlePageNext();
+        } else {
+            handlePagePrev();
+        }
+        notePageRightRef.value?.startEditing();
+        return;
+    }
+    if (event.key === "Escape" && openedNotebook.value?.type === 'slide') {
+        event.preventDefault();
+        notePageRightRef.value?.stopEditing();
         return;
     }
     
+
     if (!isTyping()) {
         if (event.key === "ArrowRight") {
             event.preventDefault();
@@ -92,6 +117,12 @@ const handleKeydown = (event: KeyboardEvent) => {
             handlePagePrev();
             return;
         }
+        if (event.key === "Enter" && openedNotebook.value?.type === 'slide') {
+            event.preventDefault();
+            notePageRightRef.value?.startEditing();
+            return;
+        }
+
     }
 };
 
@@ -146,13 +177,13 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <AppHeader @open-notebook="handleOpenNotebook" @close-notebook="handleCloseNotebook" :variant="'tools'"
-        :currentNotebook="openedNotebook" :currentNotebookPage="currentNotebookPage" />
+    <AppHeader ref="headerRef" @open-notebook="handleOpenNotebook" @close-notebook="handleCloseNotebook"
+        :variant="'tools'" :currentNotebook="openedNotebook" :currentNotebookPage="currentNotebookPage" />
     <MainStructure>
         <template #left>
             <PdfPage v-if="openedNotebook?.type === 'slide'" :notebook="openedNotebook" :currentPage="currentPdfPage"
                 @page-next="handlePageNext" @page-prev="handlePagePrev" />
-            <NotePage v-else-if="openedNotebook?.type === 'simple'" :notebook="openedNotebook"
+            <NotePage ref="notePageLeftRef" v-else-if="openedNotebook?.type === 'simple'" :notebook="openedNotebook"
                 :currentPage="currentNotebookPage" />
             <div v-else
                 class="h-full flex-1 w-full rounded-tl-[10px] rounded-bl-[10px] flex flex-col items-center justify-center gap-4 p-8">
@@ -163,9 +194,9 @@ onUnmounted(() => {
             </div>
         </template>
         <template #right>
-            <NotePage v-if="openedNotebook?.type === 'slide'" :notebook="openedNotebook"
+            <NotePage ref="notePageRightRef" v-if="openedNotebook?.type === 'slide'" :notebook="openedNotebook"
                 :currentPage="currentNotebookPage" />
-            <NotePage v-else-if="openedNotebook?.type === 'simple'" :notebook="openedNotebook"
+            <NotePage ref="notePageRightRef" v-else-if="openedNotebook?.type === 'simple'" :notebook="openedNotebook"
                 :currentPage="currentNotebookPage + 1" />
             <div v-else
                 class="h-full flex-1 w-full rounded-tr-[10px] rounded-br-[10px] flex flex-col items-center justify-center gap-4 p-8">

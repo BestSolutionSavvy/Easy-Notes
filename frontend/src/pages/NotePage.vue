@@ -33,13 +33,19 @@ watch([() => props.currentPage, () => props.notebook], (_newVal, oldVal) => {
     saveNote(oldPageNumber);
   }
   noteContent.value = currentPageData.value?.note_content || '';
-  isEditing.value = false;
+  //isEditing.value = false;
 }, { immediate: true });
+
+watch(noteContent, () => {
+  if (isEditing.value) {
+    saveNote();
+  }
+});
 
 const saveNote = (pageNumber?: number) => {
   if (!props.notebook || !props.notebook.pages) return;
   
-  isEditing.value = false;
+  //isEditing.value = false;
   const targetPage = pageNumber !== undefined ? pageNumber : props.currentPage;
   const pageIndex = props.notebook.pages.findIndex(p => p.page_number === targetPage);
   
@@ -65,6 +71,15 @@ const startEditing = () => {
     textareaRef.value?.focus();
   });
 };
+
+const stopEditing = () => {
+  isEditing.value = false;
+};
+
+defineExpose({
+  startEditing,
+  stopEditing
+});
 
 </script>
 
