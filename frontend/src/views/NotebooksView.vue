@@ -7,6 +7,10 @@ import PdfPreviewPage from "../pages/PdfPreviewPage.vue";
 import type { Notebook } from "../types/notebook";
 import { useAuthStore } from "../stores/auth";
 
+const props = defineProps<{
+  summaryId?: string;
+}>();
+
 const authStore = useAuthStore();
 
 const selectedNotebook = ref<Notebook | undefined>(undefined);
@@ -19,7 +23,7 @@ const handleSelectNotebook = (notebook: Notebook) => {
   <AppHeader :username="authStore.user?.email"/>
   <MainStructure>
     <template #left>
-      <NotebooksList @select-notebook="handleSelectNotebook" />
+      <NotebooksList :summaryId="summaryId" @select-notebook="handleSelectNotebook" />
     </template>
     <template #right>
       <PdfPreviewPage :notebook="selectedNotebook" />

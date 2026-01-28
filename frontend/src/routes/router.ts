@@ -33,6 +33,9 @@ const routes: RouteRecordRaw[] = [
     name: "Notebooks",
     component: NotebooksView,
     meta: { requiresAuth: true },
+    props: (route) => ({
+      summaryId: route.query.summaryId as string | undefined,
+    }),
   },
   {
     path: "/signin",

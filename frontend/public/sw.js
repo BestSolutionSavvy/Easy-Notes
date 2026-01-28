@@ -29,14 +29,30 @@ self.addEventListener("push", (event) => {
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
   const notificationData = event.notification.data || {};
-  let targetUrl = self.registration.scope;
+  let targetPath = "/";
   if (notificationData.type === "NEW_PDF") {
-    targetUrl = new URL("/classes", self.registration.scope).href;
+    targetPath = "/classes";
+  } else if (notificationData.type === "SUMMARY") {
+    targetPath = `/notebooks?summaryId=${notificationData.notebookId}`;
   } else if (notificationData.url) {
-    targetUrl = new URL(notificationData.url, self.registration.scope).href;
+    targetPath = notificationData.url;
   }
   event.waitUntil(
-    clients.openWindow(targetUrl)
+    clients.matchAll({ type: "window", includeUncontrolled: true })
+      .then((clientList) => {
+        for (const client of clientList) {
+          if (client.url.includes(self.registration.scope) && "focus" in client) {
+            return client.focus().then(() => {
+              if ("navigate" in client) {
+                return client.navigate(targetPath);
+              }
+            });
+          }
+        }
+        if (clients.openWindow) {
+          return clients.openWindow(targetPath);
+        }
+      })
       .catch((err) => console.error("Error handling notification click:", err))
   );
 });

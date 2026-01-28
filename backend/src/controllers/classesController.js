@@ -90,6 +90,8 @@ exports.uploadPdfToClass = async (req, res) => {
           body: `A new PDF ${newPdf.name} has been uploaded to your class ${classDoc.name}.`,
           data: {
             type: "NEW_PDF",
+            pdfId: newPdfId,
+            classId: classId,
           },
         });
       });

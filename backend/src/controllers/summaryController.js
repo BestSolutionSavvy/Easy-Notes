@@ -2,6 +2,7 @@ const cerebrasClient = require("../config/cerebras");
 const { notebookModel } = require("../models/notebooksModel");
 const { pdfModel } = require("../models/pdfsModel");
 const { summaryModel } = require("../models/summariesModel");
+const { sendNotification } = require("../models/subscriptionsModel");
 const pdfParse = require("pdf-parse").PDFParse;
 const { getGridFSBucket } = require("../config/gridfs");
 
@@ -94,6 +95,14 @@ exports.summarizeNotebook = async (req, res) => {
       { content: summaryText },
       { new: true, upsert: true },
     );
+    await sendNotification(notebook.owner, {
+      title: "Summary Completed",
+      body: `The summary for "${notebook.name}" has been successfully generated`,
+      data: {
+        type: "SUMMARY",
+        notebookId: notebookId
+      }
+    });
     res.status(200).json({
       message: "Summary created successfully",
       summary,

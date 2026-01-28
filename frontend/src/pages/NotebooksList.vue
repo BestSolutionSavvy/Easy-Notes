@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, onMounted } from "vue";
+import { computed, ref, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "../stores/auth";
 import axios from "axios";
@@ -11,6 +11,10 @@ import ListElement from "../components/ListElement.vue";
 import ConfirmModal from "../components/ConfirmModal.vue";
 import SummaryModal from "../components/SummaryModal.vue";
 import type { Notebook } from "../types/notebook";
+
+const props = defineProps<{
+  summaryId?: string;
+}>();
 
 const authStore = useAuthStore();
 const notebooks = ref<Notebook[]>([]);
@@ -209,6 +213,53 @@ const closeErrorModal = () => {
 
 onMounted(() => {
   loadNotebooks();
+});
+
+const openSummaryModalById = async (summaryId: string) => {
+  const notebook = notebooks.value.find(n => n._id === summaryId);
+  if (!notebook) {
+    console.error('Notebook not found for summaryId:', summaryId);
+    return;
+  }
+  if (existingSummaries.value.has(summaryId)) {
+    const content = existingSummaries.value.get(summaryId)!;
+    currentSummary.value = {
+      notebookId: summaryId,
+      notebookName: notebook.name,
+      content: content
+    };
+    showSummaryModal.value = true;
+    router.replace({ query: {} });
+    return;
+  }
+  try {
+    const response = await axios.get(`/api/summary/${summaryId}`);
+    if (response.data && response.data.content) {
+      existingSummaries.value.set(summaryId, response.data.content);
+      currentSummary.value = {
+        notebookId: summaryId,
+        notebookName: notebook.name,
+        content: response.data.content
+      };
+      showSummaryModal.value = true;
+    }
+    router.replace({ query: {} });
+  } catch (error) {
+    console.error('Error loading summary:', error);
+    router.replace({ query: {} });
+  }
+};
+
+watch(() => props.summaryId, async (newSummaryId) => {
+  if (newSummaryId && notebooks.value.length > 0) {
+    await openSummaryModalById(newSummaryId);
+  }
+}, { immediate: true });
+
+watch(() => notebooks.value.length, async (newLength) => {
+  if (newLength > 0 && props.summaryId) {
+    await openSummaryModalById(props.summaryId);
+  }
 });
 </script>
 
