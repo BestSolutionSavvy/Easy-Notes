@@ -1,5 +1,4 @@
 {
-  "_id": "id",
   "name": "string",
   "teacher": "UserId",
   "date": "date",

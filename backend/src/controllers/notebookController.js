@@ -1,4 +1,5 @@
 const { notebookModel } = require('../models/notebooksModel');
+const { summaryModel } = require('../models/summariesModel');
 
 exports.listNotebooks = (req, res) => {
     notebookModel.find({owner: req.params.email})
@@ -41,10 +42,13 @@ exports.getNotebookById = (req, res) => {
 exports.updateNotebook = (req, res) => { 
     const notebookId = req.params.id;
     notebookModel.findByIdAndUpdate(notebookId, req.body, { new: true })
-        .then(updatedNotebook => {
+        .then(async updatedNotebook => {
             if (!updatedNotebook) {
                 return res.status(404).json({ error: 'Notebook not found' });
             }
+            await summaryModel.findByIdAndDelete(notebookId).catch(err => {
+                console.error('Error deleting summary:', err);
+            });
             res.json(updatedNotebook);
         })
         .catch(err => res.status(500).json({ error: err.message }));

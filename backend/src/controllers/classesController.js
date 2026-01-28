@@ -3,7 +3,7 @@ const { pdfModel } = require("../models/pdfsModel");
 const {
   subscriptionModel,
   sendNotification,
-} = require("../models/subscriptionModel");
+} = require("../models/subscriptionsModel");
 const { userModel } = require("../models/usersModel");
 
 exports.listClasses = (req, res) => {

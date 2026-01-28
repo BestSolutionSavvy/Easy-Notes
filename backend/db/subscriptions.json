@@ -1,0 +1,8 @@
+{
+  "endpoint": "String",
+  "keys": {
+    "p256dh": "String",
+    "auth": "String"
+  },
+  "userId": "UserId"
+}

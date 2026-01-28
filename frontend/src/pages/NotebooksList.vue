@@ -9,6 +9,7 @@ import trashIcon from "../assets/trash.svg";
 import downloadIcon from "../assets/download-file.svg";
 import ListElement from "../components/ListElement.vue";
 import ConfirmModal from "../components/ConfirmModal.vue";
+import SummaryModal from "../components/SummaryModal.vue";
 import type { Notebook } from "../types/notebook";
 
 const authStore = useAuthStore();
@@ -19,11 +20,13 @@ const errorMessage = ref("");
 // Modal states
 const showDeleteModal = ref(false);
 const showErrorModal = ref(false);
+const showSummaryModal = ref(false);
 const modalMessage = ref("");
 const modalTitle = ref("");
 const notebookToDelete = ref<Notebook | null>(null);
 const summarizingNotebooks = ref<Set<string>>(new Set());
-const summariesReady = ref<Map<string, Blob>>(new Map());
+const existingSummaries = ref<Map<string, string>>(new Map()); // notebookId -> summary content
+const currentSummary = ref<{ notebookId: string; notebookName: string; content: string } | null>(null);
 
 const emit = defineEmits<{
   (e: "select-notebook", notebook: Notebook): void;
@@ -37,6 +40,9 @@ const loadNotebooks = async () => {
   try {
     const response = await axios.get(`/api/notebooks/${authStore.user?.email}`);
     notebooks.value = Array.isArray(response.data) ? response.data : [];
+    
+    // Carica le summaries esistenti per ogni notebook
+    await loadExistingSummaries();
   } catch (error: any) {
     if (error.response?.status === 404) {
       notebooks.value = [];
@@ -47,6 +53,21 @@ const loadNotebooks = async () => {
     }
   } finally {
     isLoading.value = false;
+  }
+};
+
+const loadExistingSummaries = async () => {
+  for (const notebook of notebooks.value) {
+    if (notebook._id) {
+      try {
+        const response = await axios.get(`/api/summary/${notebook._id}`);
+        if (response.data && response.data.content) {
+          existingSummaries.value.set(notebook._id, response.data.content);
+        }
+      } catch (error: any) {
+        console.error(`Error loading summary for ${notebook._id}:`, error);
+      }
+    }
   }
 };
 
@@ -117,31 +138,23 @@ const cancelDelete = () => {
 
 const onSummarizeNotebook = async (notebook: Notebook) => {
   if (!notebook._id || !authStore.user?.email) return;
-  
-  // Se il summary è già pronto, scarica il file
-  if (summariesReady.value.has(notebook._id)) {
-    const blob = summariesReady.value.get(notebook._id)!;
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${notebook.name.replace(/[^a-z0-9]/gi, '_')}_summary.txt`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
-    summariesReady.value.delete(notebook._id);
+  if (existingSummaries.value.has(notebook._id)) {
+    const content = existingSummaries.value.get(notebook._id)!;
+    currentSummary.value = {
+      notebookId: notebook._id,
+      notebookName: notebook.name,
+      content: content
+    };
+    showSummaryModal.value = true;
     return;
   }
-  
-  // Altrimenti genera il summary
   summarizingNotebooks.value.add(notebook._id);
   try {
-    const response = await axios.post(`/api/summarize/${notebook._id}`, {}, {
-      responseType: 'blob'
-    });
-    
-    const blob = new Blob([response.data], { type: 'text/plain' });
-    summariesReady.value.set(notebook._id, blob);
+    const response = await axios.post(`/api/summary/${notebook._id}`);
+    if (response.data && response.data.summary && response.data.summary.content) {
+      const content = response.data.summary.content;
+      existingSummaries.value.set(notebook._id, content);
+    }
   } catch (error: any) {
     modalTitle.value = "Summarize Error";
     modalMessage.value =
@@ -151,6 +164,41 @@ const onSummarizeNotebook = async (notebook: Notebook) => {
   } finally {
     summarizingNotebooks.value.delete(notebook._id!);
   }
+};
+
+const onDownloadSummary = () => {
+  if (!currentSummary.value) return;
+  const blob = new Blob([currentSummary.value.content], { type: 'text/plain' });
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `${currentSummary.value.notebookName.replace(/[^a-z0-9]/gi, '_')}_summary.txt`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(url);
+  showSummaryModal.value = false;
+};
+
+const onDeleteSummary = async () => {
+  if (!currentSummary.value) return;
+  try {
+    await axios.delete(`/api/summary/${currentSummary.value.notebookId}`);
+    existingSummaries.value.delete(currentSummary.value.notebookId);
+    showSummaryModal.value = false;
+    currentSummary.value = null;
+  } catch (error: any) {
+    modalTitle.value = "Delete Error";
+    modalMessage.value =
+      error.response?.data?.message || "Failed to delete summary";
+    showErrorModal.value = true;
+    console.error("Error deleting summary:", error);
+  }
+};
+
+const onCloseSummaryModal = () => {
+  showSummaryModal.value = false;
+  currentSummary.value = null;
 };
 
 const closeErrorModal = () => {
@@ -230,8 +278,8 @@ onMounted(() => {
               @click="onSelectNotebook(notebook)"
               :buttons="[
                 {
-                  icon: summarizingNotebooks.has(notebook._id!) ? '' : (summariesReady.has(notebook._id!) ? downloadIcon : wandIcon),
-                  alt: summariesReady.has(notebook._id!) ? 'Download Summary' : 'AI Summary',
+                  icon: summarizingNotebooks.has(notebook._id!) ? '' : (existingSummaries.has(notebook._id!) ? downloadIcon : wandIcon),
+                  alt: existingSummaries.has(notebook._id!) ? 'View Summary' : 'Generate Summary',
                   background: 'bg-orangered-100',
                   isLoading: summarizingNotebooks.has(notebook._id!),
                   onClick: () => {
@@ -274,6 +322,14 @@ onMounted(() => {
       variant="default"
       @confirm="closeErrorModal"
       @cancel="closeErrorModal"
+    />
+    <SummaryModal
+      :isOpen="showSummaryModal"
+      :notebookName="currentSummary?.notebookName || ''"
+      :summaryContent="currentSummary?.content || ''"
+      @download="onDownloadSummary"
+      @delete="onDeleteSummary"
+      @close="onCloseSummaryModal"
     />
   </div>
 </template>
