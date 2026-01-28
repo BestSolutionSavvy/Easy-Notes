@@ -17,7 +17,7 @@ self.addEventListener("push", (event) => {
     tag: "easy-notes-notification",
     requireInteraction: true,
     silent: false,
-    data: data.data || {},  // Store custom data from backend
+    data: data.data || {}, // Store custom data from backend
   };
   event.waitUntil(
     self.registration
@@ -31,17 +31,25 @@ self.addEventListener("notificationclick", (event) => {
   const notificationData = event.notification.data || {};
   let targetPath = "/";
   if (notificationData.type === "NEW_PDF") {
-    targetPath = "/classes";
+    targetPath =
+      "/home?pdfId=" +
+      notificationData.pdfId +
+      "&subject=" +
+      notificationData.classId;
   } else if (notificationData.type === "SUMMARY") {
     targetPath = `/notebooks?summaryId=${notificationData.notebookId}`;
   } else if (notificationData.url) {
     targetPath = notificationData.url;
   }
   event.waitUntil(
-    clients.matchAll({ type: "window", includeUncontrolled: true })
+    clients
+      .matchAll({ type: "window", includeUncontrolled: true })
       .then((clientList) => {
         for (const client of clientList) {
-          if (client.url.includes(self.registration.scope) && "focus" in client) {
+          if (
+            client.url.includes(self.registration.scope) &&
+            "focus" in client
+          ) {
             return client.focus().then(() => {
               if ("navigate" in client) {
                 return client.navigate(targetPath);
@@ -53,6 +61,6 @@ self.addEventListener("notificationclick", (event) => {
           return clients.openWindow(targetPath);
         }
       })
-      .catch((err) => console.error("Error handling notification click:", err))
+      .catch((err) => console.error("Error handling notification click:", err)),
   );
 });
