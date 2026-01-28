@@ -9,7 +9,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-whitesmoke-200 flex flex-col p-2.5 gap-2.5">
+  <div class="h-screen bg-whitesmoke-200 flex flex-col p-2.5 gap-2.5 overflow-hidden">
     <RouterView />
   </div>
 </template>

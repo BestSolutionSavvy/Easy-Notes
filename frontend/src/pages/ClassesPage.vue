@@ -176,11 +176,12 @@ onMounted(async () => {
 </script>
 <template>
   <div
-    class="h-full flex-1 w-full relative bg-white overflow-hidden shrink-0 text-left text-[1rem] text-darkslateblue font-inter"
+    class="h-full flex-1 w-full relative bg-white shrink-0 text-left text-[1rem] text-darkslateblue font-inter flex items-center justify-center"
   >
     <div
-      class="absolute top-[calc(50%_-_147px)] left-[calc(50%_-_250px)] w-[31.25rem] overflow-hidden flex flex-col items-center p-[0.312rem] box-border gap-[0.625rem]"
+      class="w-[31.25rem] max-h-[90%] overflow-y-auto overflow-x-hidden p-[0.312rem] scrollbar-hidden"
     >
+      <div class="flex flex-col items-center gap-[0.625rem]">
       <!-- Teacher view -->
       <template v-if="props.role === 'teacher'">
         <div class="animate-fade-in">
@@ -256,6 +257,7 @@ onMounted(async () => {
           />
         </template>
       </template>
+      </div>
     </div>
 
     <!-- Create Class Modal -->
@@ -294,6 +296,15 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hidden {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 @keyframes scale-in {
   0% {
     transform: scale(0.8);
