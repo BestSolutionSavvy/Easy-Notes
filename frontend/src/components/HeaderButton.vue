@@ -33,7 +33,6 @@ async function openOverlay() {
         if (overlayRef.value) {
             const overlayRect = overlayRef.value.getBoundingClientRect()
 
-            // Calcola la posizione in base alla direzione
             const left = props.direction === 'right'
                 ? rect.left
                 : rect.right - overlayRect.width

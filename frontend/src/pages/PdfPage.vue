@@ -163,10 +163,8 @@ const handlePdfMouseUp = (event: MouseEvent) => {
           pageData.highlights = [];
         }
         
-        // Unisci i rettangoli per riga
         const mergedRects = mergeRects(Array.from(rects) as DOMRect[], pdfRect, scaleFactor);
         
-        // Aggiungi gli highlight uniti
         for (const rect of mergedRects) {
           const newHighlight = {
             left: rect.left,
@@ -184,8 +182,7 @@ const handlePdfMouseUp = (event: MouseEvent) => {
     }
     return;
   }
-  
-  // Gestione post-it con drag
+
   if (!isDragging.value || !props.notebook) return;
   event.preventDefault();
   
@@ -196,8 +193,7 @@ const handlePdfMouseUp = (event: MouseEvent) => {
   if (!box || box.width < 30 || box.height < 20) {
     return;
   }
-  
-  // Trova o crea la pagina corrente
+
   let pageData = props.notebook.pages?.find(p => p.slide_number === props.currentPage);
   if (!pageData) {
     pageData = {
@@ -256,7 +252,6 @@ const deleteHighlight = (index: number) => {
 const mergeRects = (rects: DOMRect[], pdfRect: DOMRect, scaleFactor: number) => {
   if (rects.length === 0) return [];
   
-  // Converti tutti i rect in coordinate relative al PDF
   const normalizedRects = Array.from(rects).map(rect => ({
     left: (rect.left - pdfRect.left) / scaleFactor,
     top: (rect.top - pdfRect.top) / scaleFactor,
@@ -266,17 +261,14 @@ const mergeRects = (rects: DOMRect[], pdfRect: DOMRect, scaleFactor: number) => 
     height: rect.height / scaleFactor
   }));
   
-  // Raggruppa i rect per righe (basandosi sulla sovrapposizione verticale)
   const rows: typeof normalizedRects[] = [];
   
   for (const rect of normalizedRects) {
-    // Trova una riga esistente che si sovrappone verticalmente
     let foundRow = false;
     for (const row of rows) {
       const rowTop = Math.min(...row.map(r => r.top));
       const rowBottom = Math.max(...row.map(r => r.bottom));
       
-      // Controlla se c'è sovrapposizione verticale (con una piccola tolleranza)
       const tolerance = 2; // pixel di tolleranza
       if (
         (rect.top >= rowTop - tolerance && rect.top <= rowBottom + tolerance) ||
@@ -294,7 +286,6 @@ const mergeRects = (rects: DOMRect[], pdfRect: DOMRect, scaleFactor: number) => 
     }
   }
   
-  // Unisci i rect di ogni riga in un unico rettangolo
   const mergedRects = rows.map(row => {
     const left = Math.min(...row.map(r => r.left));
     const top = Math.min(...row.map(r => r.top));

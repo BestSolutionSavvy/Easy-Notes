@@ -3,9 +3,9 @@ import { ref, watch, computed, nextTick } from 'vue';
 import type { Notebook } from '../types/notebook';
 import { marked } from 'marked';
 
-const noteContent = ref('');
 const isEditing = ref(false);
 const textareaRef = ref<HTMLTextAreaElement | null>(null);
+const noteContent = ref<string>('');
 
 interface Props {
   notebook?: Notebook | null;
@@ -27,14 +27,9 @@ const renderedContent = computed(() => {
   return marked.parse(noteContent.value);
 });
 
-watch([() => props.currentPage, () => props.notebook], (_newVal, oldVal) => {
-  if (isEditing.value && oldVal && oldVal[0] !== undefined) {
-    const oldPageNumber = oldVal[0] as number;
-    saveNote(oldPageNumber);
-  }
+watch(() => props.currentPage, () => {
   noteContent.value = currentPageData.value?.note_content || '';
-  //isEditing.value = false;
-}, { immediate: true });
+});
 
 watch(noteContent, () => {
   if (isEditing.value) {
