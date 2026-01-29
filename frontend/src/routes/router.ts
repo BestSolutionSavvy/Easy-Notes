@@ -22,6 +22,7 @@ const routes: RouteRecordRaw[] = [
     props: (route) => ({
       notebookId: route.query.notebookId as string | undefined,
       subject: route.query.subject as string | undefined,
+      pdfId: route.query.pdfId as string | undefined,
     }),
   },
   {

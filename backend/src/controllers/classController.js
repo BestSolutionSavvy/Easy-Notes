@@ -3,7 +3,7 @@ const { pdfModel } = require("../models/pdfsModel");
 const { sendNotification } = require("../models/subscriptionsModel");
 const { userModel } = require("../models/usersModel");
 
-exports.listClasses = (res) => {
+exports.listClasses = (req, res) => {
   classesModel
     .find()
     .then((classes) => {
