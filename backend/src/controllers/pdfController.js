@@ -24,16 +24,11 @@ exports.uploadPdf = (req, res) => {
   if (!req.file) {
     return res.status(400).json({ message: "No file uploaded" });
   }
-  const { type, owner } = req.body;
-  if (!type || !owner) {
+  const { owner } = req.body;
+  if (!owner) {
     return res
       .status(400)
-      .json({ message: "Missing required fields: type, owner" });
-  }
-  if (!["class", "note"].includes(type)) {
-    return res
-      .status(400)
-      .json({ message: "Invalid type. Must be 'class' or 'note'" });
+      .json({ message: "Missing required field: owner" });
   }
   const gridFSBucket = getGridFSBucket();
   uploadToGridFS(gridFSBucket, req.file)
@@ -41,7 +36,6 @@ exports.uploadPdf = (req, res) => {
       const name = req.file.originalname.replace(/\.pdf$/i, "");
       const newPdf = new pdfModel({
         name,
-        type,
         owner,
         gridFsFileId,
       });

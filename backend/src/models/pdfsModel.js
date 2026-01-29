@@ -9,11 +9,6 @@ const pdfSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-  type: {
-    type: String,
-    required: true,
-    enum: ["class", "note"],
-  },
   owner: {
     type: String,
     ref: "User",

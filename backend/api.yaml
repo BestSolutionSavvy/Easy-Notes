@@ -378,19 +378,12 @@ paths:
               type: object
               required:
               - pdf
-              - type
               - owner
               properties:
                 pdf:
                   type: string
                   format: binary
                   description: PDF file to upload
-                type:
-                  type: string
-                  enum:
-                  - class
-                  - note
-                  example: "note"
                 owner:
                   type: string
                   example: "user@example.com"
@@ -827,12 +820,6 @@ components:
           type: string
           format: date-time
           example: "2026-01-01T10:30:00Z"
-        type:
-          type: string
-          enum:
-          - class
-          - note
-          example: "note"
         owner:
           type: string
           example: "user@example.com"

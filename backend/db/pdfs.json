@@ -1,7 +1,6 @@
 {
   "name": "string",
   "date": "ISODate",
-  "type": "class | note",
   "owner": "UserId",
   "gridFsFileId": "FileId"
 }
