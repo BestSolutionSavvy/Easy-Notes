@@ -1,11 +1,12 @@
 const { subscriptionModel } = require('../models/subscriptionsModel');
 
+// POST /subscriptions
 exports.subscribe = async (req, res) => {
     try {
         const existing = await subscriptionModel.findOne({
             userId: req.user.email,
             endpoint: req.body.endpoint
-        });  
+        });
         if (existing) {
             existing.keys = {
                 p256dh: req.body.keys.p256dh,
@@ -29,6 +30,7 @@ exports.subscribe = async (req, res) => {
     }
 };
 
+// DELETE /subscriptions
 exports.unsubscribe = async (req, res) => {
     try {
         const result = await subscriptionModel.deleteMany({ userId: req.user.email });

@@ -6,6 +6,70 @@ const { sendNotification } = require("../models/subscriptionsModel");
 const pdfParse = require("pdf-parse").PDFParse;
 const { getGridFSBucket } = require("../config/gridfs");
 
+/**
+ * Function to prepare text for summarization by combining PDF text and notebook notes.
+ * @param {Object} notebook - The notebook document.
+ * @param {Object} [pdf] - The PDF document (optional).
+ * @returns {string} - The combined text ready for summarization.
+ */
+async function prepareTextForSummarization(notebook, pdf = null) {
+  let textToSummarize = "";
+  let pdfPageTexts = {};
+  let totalPdfPages = 0;
+  if (pdf) {
+    try {
+      const gridFSBucket = getGridFSBucket();
+      const chunks = [];
+      const downloadStream = gridFSBucket.openDownloadStream(
+        pdf.gridFsFileId,
+      );
+      await new Promise((resolve, reject) => {
+        downloadStream.on("data", (chunk) => chunks.push(chunk));
+        downloadStream.on("error", reject);
+        downloadStream.on("end", resolve);
+      });
+      const pdfBuffer = Buffer.concat(chunks);
+      const parser = new pdfParse({ data: pdfBuffer });
+      const pdfData = await parser.getText();
+      const textContent = pdfData.text;
+      totalPdfPages = 1;
+      pdfPageTexts[1] = textContent;
+    } catch (pdfError) {
+      console.error("Error extracting PDF text:", pdfError);
+    }
+  }
+  const notesBySlide = {};
+  if (notebook.pages && notebook.pages.length > 0) {
+    for (const page of notebook.pages) {
+      if (page.slide_number && page.note_content) {
+        if (!notesBySlide[page.slide_number]) {
+          notesBySlide[page.slide_number] = [];
+        }
+        notesBySlide[page.slide_number].push({
+          pageNumber: page.page_number,
+          content: page.note_content,
+        });
+      }
+    }
+  }
+  for (let slideNum = 1; slideNum <= totalPdfPages; slideNum++) {
+    textToSummarize += `--- Slide ${slideNum} ---\n`;
+    if (pdfPageTexts[slideNum]) {
+      textToSummarize += pdfPageTexts[slideNum] + "\n\n";
+    } else {
+      textToSummarize += "\n";
+    }
+    if (notesBySlide[slideNum]) {
+      for (const note of notesBySlide[slideNum]) {
+        textToSummarize += `--- Note (Page ${note.pageNumber}) ---\n`;
+        textToSummarize += note.content + "\n\n";
+      }
+    }
+  }
+  return textToSummarize;
+}
+
+// POST /summaries/:notebookId
 exports.summarizeNotebook = async (req, res) => {
   try {
     const notebookId = req.params.notebookId;
@@ -18,61 +82,11 @@ exports.summarizeNotebook = async (req, res) => {
     if (!notebook) {
       return res.status(404).json({ error: "Notebook not found" });
     }
-    let textToSummarize = "";
-    let pdfPageTexts = {};
-    let totalPdfPages = 0;
     if (notebook.id_pdf) {
       const pdf = await pdfModel.findById(notebook.id_pdf);
-      if (pdf) {
-        try {
-          const gridFSBucket = getGridFSBucket();
-          const chunks = [];
-          const downloadStream = gridFSBucket.openDownloadStream(
-            pdf.gridFsFileId,
-          );
-          await new Promise((resolve, reject) => {
-            downloadStream.on("data", (chunk) => chunks.push(chunk));
-            downloadStream.on("error", reject);
-            downloadStream.on("end", resolve);
-          });
-          const pdfBuffer = Buffer.concat(chunks);
-          const parser = new pdfParse({ data: pdfBuffer });
-          const pdfData = await parser.getText();
-          const textContent = pdfData.text;
-          totalPdfPages = 1;
-          pdfPageTexts[1] = textContent;
-        } catch (pdfError) {
-          console.error("Error extracting PDF text:", pdfError);
-        }
-      }
-    }
-    const notesBySlide = {};
-    if (notebook.pages && notebook.pages.length > 0) {
-      for (const page of notebook.pages) {
-        if (page.slide_number && page.note_content) {
-          if (!notesBySlide[page.slide_number]) {
-            notesBySlide[page.slide_number] = [];
-          }
-          notesBySlide[page.slide_number].push({
-            pageNumber: page.page_number,
-            content: page.note_content,
-          });
-        }
-      }
-    }
-    for (let slideNum = 1; slideNum <= totalPdfPages; slideNum++) {
-      textToSummarize += `--- Slide ${slideNum} ---\n`;
-      if (pdfPageTexts[slideNum]) {
-        textToSummarize += pdfPageTexts[slideNum] + "\n\n";
-      } else {
-        textToSummarize += "\n";
-      }
-      if (notesBySlide[slideNum]) {
-        for (const note of notesBySlide[slideNum]) {
-          textToSummarize += `--- Note (Page ${note.pageNumber}) ---\n`;
-          textToSummarize += note.content + "\n\n";
-        }
-      }
+      textToSummarize = await prepareTextForSummarization(notebook, pdf);
+    } else {
+      textToSummarize = await prepareTextForSummarization(notebook);
     }
     if (!textToSummarize.trim()) {
       return res.status(400).json({ error: "No content found to summarize" });
@@ -115,20 +129,22 @@ exports.summarizeNotebook = async (req, res) => {
   }
 };
 
+// GET /summaries/:notebookId
 exports.getSummary = async (req, res) => {
-    try {
-        const notebookId = req.params.notebookId;
-        if (!notebookId) {
-            return res.status(400).json({ error: 'Notebook ID is required' });
-        }
-        const summary = await summaryModel.findById(notebookId);
-        res.status(200).json(summary);
-    } catch (error) {
-        console.error('Error retrieving summary:', error);
-        res.status(500).json({ error: 'Error retrieving summary', details: error.message });
+  try {
+    const notebookId = req.params.notebookId;
+    if (!notebookId) {
+      return res.status(400).json({ error: 'Notebook ID is required' });
     }
+    const summary = await summaryModel.findById(notebookId);
+    res.status(200).json(summary);
+  } catch (error) {
+    console.error('Error retrieving summary:', error);
+    res.status(500).json({ error: 'Error retrieving summary', details: error.message });
+  }
 };
 
+// DELETE /summaries/:notebookId
 exports.deleteSummary = async (req, res) => {
   try {
     const notebookId = req.params.notebookId;
