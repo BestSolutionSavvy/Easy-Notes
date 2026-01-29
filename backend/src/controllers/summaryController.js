@@ -82,6 +82,7 @@ exports.summarizeNotebook = async (req, res) => {
     if (!notebook) {
       return res.status(404).json({ error: "Notebook not found" });
     }
+    let textToSummarize;
     if (notebook.id_pdf) {
       const pdf = await pdfModel.findById(notebook.id_pdf);
       textToSummarize = await prepareTextForSummarization(notebook, pdf);

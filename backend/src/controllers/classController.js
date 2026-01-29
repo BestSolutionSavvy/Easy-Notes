@@ -4,60 +4,58 @@ const { sendNotification } = require("../models/subscriptionsModel");
 const { userModel } = require("../models/usersModel");
 
 // GET /classes
-exports.listClasses = (req, res) => {
-  classesModel
-    .find()
-    .then((classes) => {
-      if (!classes || classes.length === 0) {
-        return res.status(404).json({ error: "No classes found" });
-      }
-      res.json(classes);
-    })
-    .catch((err) => res.status(500).json({ error: err.message }));
+exports.listClasses = async (req, res) => {
+  try {
+    const classes = await classesModel.find();
+    if (!classes || classes.length === 0) {
+      return res.status(404).json({ error: "No classes found" });
+    }
+    res.json(classes);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 };
 
 // POST /classes
-exports.createClass = (req, res) => {
+exports.createClass = async (req, res) => {
   if (!req.body) {
     return res.status(400).json({ error: "Invalid class data" });
   }
-  const newClass = new classesModel(req.body);
-  newClass
-    .save()
-    .then((doc) => {
-      res.status(201).json(doc);
-    })
-    .catch((err) => {
-      res.status(400).json({ error: err.message });
-    });
+  try {
+    const newClass = new classesModel(req.body);
+    const doc = await newClass.save();
+    res.status(201).json(doc);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
 };
 
 // GET /classes/:id
-exports.getClassById = (req, res) => {
+exports.getClassById = async (req, res) => {
   const classId = req.params.id;
-  classesModel
-    .findById(classId)
-    .then((classDoc) => {
-      if (!classDoc) {
-        return res.status(404).json({ error: "Class not found" });
-      }
-      res.json(classDoc);
-    })
-    .catch((err) => res.status(500).json({ error: err.message }));
+  try {
+    const classDoc = await classesModel.findById(classId);
+    if (!classDoc) {
+      return res.status(404).json({ error: "Class not found" });
+    }
+    res.json(classDoc);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 };
 
 // PUT /classes/:id
-exports.updateClass = (req, res) => {
+exports.updateClass = async (req, res) => {
   const classId = req.params.id;
-  classesModel
-    .findByIdAndUpdate(classId, req.body, { new: true })
-    .then((updatedClass) => {
-      if (!updatedClass) {
-        return res.status(404).json({ error: "Class not found" });
-      }
-      res.json(updatedClass);
-    })
-    .catch((err) => res.status(500).json({ error: err.message }));
+  try {
+    const updatedClass = await classesModel.findByIdAndUpdate(classId, req.body, { new: true });
+    if (!updatedClass) {
+      return res.status(404).json({ error: "Class not found" });
+    }
+    res.json(updatedClass);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 };
 
 // POST /classes/:id/pdfs
