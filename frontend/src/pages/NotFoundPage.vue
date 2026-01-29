@@ -8,10 +8,10 @@
       <div class="relative font-semibold">
         Ups!<br />This page<br />does not exist :(
       </div>
-      <div class="flex items-start text-left text-[2rem] text-gray-200">
+      <div class="flex items-start text-left text-[2rem]">
         <RouterLink
           to="/"
-          class="relative [text-decoration:underline] leading-[140%]"
+          class="relative text-blue-500 underline leading-[140%]"
         >
           Home Page
         </RouterLink>

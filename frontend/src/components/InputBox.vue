@@ -58,7 +58,6 @@ const togglePasswordVisibility = () => {
           : 'border-gainsboro-200 focus:border-darkslateblue focus:ring-1 focus:ring-inset focus:ring-darkslateblue'
       ]"
     />
-    
     <button
       v-if="type === 'password'"
       type="button"

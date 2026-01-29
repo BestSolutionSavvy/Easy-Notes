@@ -9,7 +9,7 @@ export const useAuthStore = defineStore("auth", () => {
   const isLoggedIn = computed(() => !!user.value);
 
   /**
-   * Verifies the stored token's validity
+   * Verifies the cookie stored token's validity
    */
   async function verifyToken(): Promise<boolean> {
     isLoading.value = true;

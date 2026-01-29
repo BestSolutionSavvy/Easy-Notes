@@ -26,6 +26,7 @@ const passwordPlaceholder = computed(() => {
   return isEditMode.value ? "New Password (or leave empty)" : "********";
 });
 
+// Handles the modify user information button click
 const handleModify = async () => {
   if (!isEditMode.value) {
     isEditMode.value = true;
@@ -39,7 +40,6 @@ const handleModify = async () => {
   isModifying.value = true;
   try {
     const updateData: any = {
-      email: email.value,
       name: name.value,
       surname: surname.value,
       role: authStore.user.role,
@@ -54,14 +54,7 @@ const handleModify = async () => {
     setTimeout(() => {
       successMessage.value = "";
     }, 2000);
-    if (email.value !== authStore.user.email) {
-      setTimeout(async () => {
-        await authStore.logout();
-        router.push("/signin");
-      }, 1500);
-    } else {
-      await authStore.verifyToken();
-    }
+    await authStore.verifyToken();
   } catch (error: any) {
     errorMessage.value =
       error.response?.data?.message || "Failed to update profile";
@@ -70,12 +63,14 @@ const handleModify = async () => {
   }
 };
 
+// Handles the delete account button click
 const handleDeleteAccount = async () => {
   if (!authStore.user?.email) return;
   showDeleteModal.value = true;
 };
 
-const confirmDelete = async () => {
+// Confirms the account deletion
+const onConfirmDelete = async () => {
   showDeleteModal.value = false;
   if (!authStore.user?.email) return;
   isDeleting.value = true;
@@ -90,10 +85,12 @@ const confirmDelete = async () => {
   }
 };
 
-const cancelDelete = () => {
+// Cancels the account deletion
+const onCancelDelete = () => {
   showDeleteModal.value = false;
 };
 
+// Handles the logout button click
 const handleLogout = async () => {
   isLoggingOut.value = true;
   try {
@@ -105,18 +102,19 @@ const handleLogout = async () => {
   }
 };
 
+// Loads the user information from the auth store
 onMounted(() => {
   if (authStore.user) {
+    email.value = authStore.user.email || "";
     name.value = authStore.user.name || "";
     surname.value = authStore.user.surname || "";
-    email.value = authStore.user.email || "";
   }
 });
 </script>
 
 <template>
   <div
-    class="animate-fade-in self-stretch h-full px-5 py-12 bg-white rounded-tr-[10px] rounded-br-[10px] flex flex-col justify-center items-center overflow-hidden"
+    class="animate-fade-in self-stretch h-full px-5 bg-white rounded-tr-[10px] rounded-br-[10px] flex flex-col justify-center items-center overflow-hidden"
   >
     <div class="flex flex-col justify-center items-center gap-4">
       <div
@@ -146,7 +144,7 @@ onMounted(() => {
           v-model="email"
           placeholder="Email"
           type="email"
-          :disabled="!isEditMode"
+          :disabled="true"
         ></InputBox>
         <InputBox
           v-model="password"
@@ -194,8 +192,8 @@ onMounted(() => {
       confirmText="Delete Account"
       cancelText="Cancel"
       variant="delete"
-      @confirm="confirmDelete"
-      @cancel="cancelDelete"
+      @confirm="onConfirmDelete"
+      @cancel="onCancelDelete"
     />
   </div>
 </template>

@@ -4,14 +4,13 @@ import {
   type RouteRecordRaw,
 } from "vue-router";
 import { useAuthStore } from "../stores/auth";
-import NotFound from "../pages/NotFound.vue";
-import LogoPage from "../pages/LogoPage.vue";
 import SigninView from "../views/SigninView.vue";
 import SignupView from "../views/SignupView.vue";
 import NotebooksView from "../views/NotebooksView.vue";
 import ClassesView from "../views/ClassesView.vue";
 import HomeView from "../views/HomeView.vue";
 import ProfileView from "../views/ProfileView.vue";
+import NotFoundView from "../views/NotFoundView.vue";
 
 const routes: RouteRecordRaw[] = [
   {
@@ -40,12 +39,12 @@ const routes: RouteRecordRaw[] = [
   {
     path: "/signin",
     name: "Signin",
-    component: SigninView
+    component: SigninView,
   },
   {
     path: "/signup",
     name: "Signup",
-    component: SignupView
+    component: SignupView,
   },
   {
     path: "/profile",
@@ -60,10 +59,7 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: "/:pathMatch(.*)*",
-    components: {
-      left: LogoPage,
-      right: NotFound,
-    },
+    component: NotFoundView,
   },
 ];
 
@@ -79,8 +75,10 @@ router.beforeEach(async (to, _from, next) => {
     if (!isValid) {
       next("/signin");
     } else {
-      // Redirect teachers from home to classes
-      if ((to.path === "/" || to.path === "/home") && authStore.user?.role === "teacher") {
+      if (
+        authStore.user?.role === "teacher" &&
+        (to.path === "/" || to.path === "/home")
+      ) {
         next("/classes");
       } else {
         next();
