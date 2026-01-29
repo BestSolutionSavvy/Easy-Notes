@@ -73,7 +73,6 @@ const shortcutSections: ShortcutSection[] = [
 </template>
 
 <style scoped>
-/* Scrollbar personalizzata */
 ::-webkit-scrollbar {
   width: 6px;
 }
