@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const controller = require('../controllers/classesController');
+const controller = require('../controllers/classController');
 const { authenticateToken } = require("../config/jwt");
 
 router.use(authenticateToken);

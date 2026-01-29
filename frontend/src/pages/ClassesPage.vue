@@ -44,7 +44,7 @@ const filteredClasses = computed(() => {
 
 const classesByTeacher = computed(() => {
   if (props.role === "teacher") return {};
-  
+
   const grouped: Record<string, Class[]> = {};
   filteredClasses.value.forEach((classItem) => {
     const teacherEmail = classItem.teacher || "unknown";
@@ -60,9 +60,7 @@ const listClasses = async () => {
   try {
     const response = await axios.get("/api/classes");
     classes.value = response.data;
-    
-    // Fetch teacher data for students
-    if (props.role !== "teacher") {
+    if (props.role === "student") {
       const teacherEmails = [...new Set(classes.value.map(c => c.teacher).filter(Boolean))];
       for (const email of teacherEmails) {
         try {
@@ -98,7 +96,7 @@ const isSubscribed = (classId: string): boolean => {
 const handleDelete = (index: string) => {
   const classItem = classes.value.find(c => c._id === index);
   if (!classItem) return;
-  
+
   classToDelete.value = classItem;
   showDeleteModal.value = true;
 };
@@ -106,7 +104,7 @@ const handleDelete = (index: string) => {
 const confirmDelete = async () => {
   showDeleteModal.value = false;
   if (!classToDelete.value?._id) return;
-  
+
   try {
     await axios.delete(`/api/classes/${classToDelete.value._id}`);
     await listClasses();
@@ -133,27 +131,20 @@ const closeCreateModal = () => {
 
 const createClass = async () => {
   if (!authStore.user?.email || !newClassName.value.trim()) return;
-
   try {
     const newClass = {
       name: newClassName.value.trim(),
       teacher: authStore.user.email,
       date: new Date().toISOString(),
     };
-
     const response = await axios.post("/api/classes", newClass);
     const createdClassId = response.data._id;
-
-    // Add the new class to teacher's classes array
     if (props.role === "teacher" && createdClassId) {
       const updatedClasses = [...subscribedClassIds.value, createdClassId];
-
       await axios.put(`/api/users/${authStore.user.email}`, {
         classes: updatedClasses,
       });
     }
-
-    // Refresh data from database
     await listClasses();
     await fetchUserClasses();
     closeCreateModal();
@@ -164,23 +155,19 @@ const createClass = async () => {
 
 const handleSubscribe = async (classId: string) => {
   if (!authStore.user?.email) return;
-  
   try {
     const isCurrentlySubscribed = isSubscribed(classId);
     const updatedClasses = isCurrentlySubscribed
       ? subscribedClassIds.value.filter((id) => id !== classId)
       : [...subscribedClassIds.value, classId];
-
     if (!isCurrentlySubscribed) {
       await enablePush();
     } else {
       await disablePush();
     }
-
     await axios.put(`/api/users/${authStore.user.email}`, {
       classes: updatedClasses,
     });
-
     await fetchUserClasses();
   } catch (error) {
     console.error("Error updating subscription:", error);
@@ -194,132 +181,80 @@ onMounted(async () => {
 </script>
 <template>
   <div
-    class="h-full flex-1 w-full relative bg-white shrink-0 text-left text-[1rem] text-darkslateblue font-inter flex items-center justify-center"
-  >
-    <div
-      class="w-[31.25rem] max-h-[90%] overflow-y-auto overflow-x-hidden p-[0.312rem] scrollbar-hidden"
-    >
+    class="h-full flex-1 w-full relative bg-white shrink-0 text-left text-[1rem] text-darkslateblue font-inter flex items-center justify-center">
+    <div class="w-[31.25rem] max-h-[90%] overflow-y-auto overflow-x-hidden p-[0.312rem] scrollbar-hidden">
       <div class="flex flex-col items-center gap-[0.625rem]">
-      <!-- Teacher view -->
-      <template v-if="props.role === 'teacher'">
-        <div class="animate-fade-in">
-          <div
-            class="self-stretch flex items-center gap-[0.625rem] text-[1.875rem] text-darkslategray"
-          >
-            <div class="relative font-semibold">
-              Your classes
-            </div>
-            <AddItemButton
-              :icon="plusIcon"
-              alt="Add Lecture"
-              :onClick="openCreateModal"
-            />
-          </div>
-          <div
-            class="w-[30.063rem] h-[0.063rem] relative border-black border-solid border-t-[1px] box-border opacity-[0.5]"
-          />
-        </div>
-        <ListElement
-          v-for="(classItem, index) in filteredClasses"
-          :key="classItem._id || index"
-          :title="classItem.name || 'Unknown'"
-          :date="classItem.date"
-          :index="index"
-          :buttons="[
-            {
-              icon: trashIcon,
-              alt: 'Delete',
-              onClick: () => handleDelete(classItem._id || ''),
-            },
-          ]"
-          @click="$emit('select-class', classItem)"
-        />
-      </template>
-
-      <!-- Student view -->
-      <template v-else>
-        <template v-for="(teacherClasses, teacherEmail) in classesByTeacher" :key="teacherEmail">
-          <div class="animate-fade-in w-full">
-            <div class="self-stretch flex flex-col gap-[0.125rem] text-darkslategray">
-              <div class="relative font-semibold text-[1.875rem]">
-                Classes of 
-                {{ teachersData[teacherEmail]?.name || 'Unknown' }} 
-                {{ teachersData[teacherEmail]?.surname || '' }}
+        <!-- Teacher view -->
+        <template v-if="props.role === 'teacher'">
+          <div class="animate-fade-in">
+            <div class="self-stretch flex items-center gap-[0.625rem] text-[1.875rem] text-darkslategray">
+              <div class="relative font-semibold">
+                Your classes
               </div>
-              <div class="relative text-[0.875rem] text-left opacity-70">
-                {{ teacherEmail }}
-              </div>
+              <AddItemButton :icon="plusIcon" alt="Add Lecture" :onClick="openCreateModal" />
             </div>
             <div
-              class="w-[30.063rem] h-[0.063rem] relative border-black border-solid border-t-[1px] box-border opacity-[0.5]"
-            />
+              class="w-[30.063rem] h-[0.063rem] relative border-black border-solid border-t-[1px] box-border opacity-[0.5]" />
           </div>
-          <ListElement
-            v-for="(classItem, index) in teacherClasses"
-            :key="classItem._id || index"
-            :title="classItem.name || 'Unknown'"
-            :date="classItem.date"
-            :index="index"
-            :buttons="[
+          <ListElement v-for="(classItem, index) in filteredClasses" :key="classItem._id || index"
+            :title="classItem.name || 'Unknown'" :date="classItem.date" :index="index" :buttons="[
               {
-                icon: isSubscribed(classItem._id || '')
-                  ? subscribedIcon
-                  : unsubscribedIcon,
-                alt: isSubscribed(classItem._id || '')
-                  ? 'Subscribed'
-                  : 'Subscribe',
-                onClick: () => handleSubscribe(classItem._id || ''),
+                icon: trashIcon,
+                alt: 'Delete',
+                onClick: () => handleDelete(classItem._id || ''),
               },
-            ]"
-            @click="$emit('select-class', classItem)"
-          />
+            ]" @click="$emit('select-class', classItem)" />
         </template>
-      </template>
+        <!-- Student view -->
+        <template v-else>
+          <template v-for="(teacherClasses, teacherEmail) in classesByTeacher" :key="teacherEmail">
+            <div class="animate-fade-in w-full">
+              <div class="self-stretch flex flex-col gap-[0.125rem] text-darkslategray">
+                <div class="relative font-semibold text-[1.875rem]">
+                  Classes of
+                  {{ teachersData[teacherEmail]?.name || 'Unknown' }}
+                  {{ teachersData[teacherEmail]?.surname || '' }}
+                </div>
+                <div class="relative text-[0.875rem] text-left opacity-70">
+                  {{ teacherEmail }}
+                </div>
+              </div>
+              <div
+                class="w-[30.063rem] h-[0.063rem] relative border-black border-solid border-t-[1px] box-border opacity-[0.5]" />
+            </div>
+            <ListElement v-for="(classItem, index) in teacherClasses" :key="classItem._id || index"
+              :title="classItem.name || 'Unknown'" :date="classItem.date" :index="index" :buttons="[
+                {
+                  icon: isSubscribed(classItem._id || '')
+                    ? subscribedIcon
+                    : unsubscribedIcon,
+                  alt: isSubscribed(classItem._id || '')
+                    ? 'Subscribed'
+                    : 'Subscribe',
+                  onClick: () => handleSubscribe(classItem._id || ''),
+                },
+              ]" @click="$emit('select-class', classItem)" />
+          </template>
+        </template>
       </div>
     </div>
-
     <!-- Create Class Modal -->
-    <div
-      v-if="showCreateModal"
-      class="fixed inset-0 z-40"
-      @click="closeCreateModal"
-    ></div>
-    
-    <div
-      v-if="showCreateModal"
+    <div v-if="showCreateModal" class="fixed inset-0 z-40" @click="closeCreateModal"></div>
+    <div v-if="showCreateModal"
       class="fixed top-[calc(50%_-_100px)] left-[calc(50%_-_200px)] z-50 bg-white rounded-lg shadow-lg p-6 w-[25rem] animate-scale-in"
-      @click.stop
-    >
+      @click.stop>
       <div class="flex flex-col gap-4">
         <h2 class="text-xl font-semibold text-darkslategray">Create New Class</h2>
-        <InputBox
-          v-model="newClassName"
-          type="text"
-          placeholder="Class name"
-          @keyup.enter="createClass"
-        />
+        <InputBox v-model="newClassName" type="text" placeholder="Class name" @keyup.enter="createClass" />
         <div class="flex gap-3 justify-end">
-          <SimpleButton
-            text="Cancel"
-            @click="closeCreateModal"
-          />
-          <SimpleButton
-            text="Create"
-            @click="createClass"
-          />
+          <SimpleButton text="Cancel" @click="closeCreateModal" />
+          <SimpleButton text="Create" @click="createClass" />
         </div>
       </div>
     </div>
-    <ConfirmModal
-      :isOpen="showDeleteModal"
-      title="Delete Class"
+    <ConfirmModal :isOpen="showDeleteModal" title="Delete Class"
       :message="`Are you sure you want to delete &quot;${classToDelete?.name}&quot;? This action cannot be undone.`"
-      confirmText="Delete"
-      cancelText="Cancel"
-      variant="delete"
-      @confirm="confirmDelete"
-      @cancel="cancelDelete"
-    />
+      confirmText="Delete" cancelText="Cancel" variant="delete" @confirm="confirmDelete" @cancel="cancelDelete" />
   </div>
 </template>
 
@@ -338,6 +273,7 @@ onMounted(async () => {
     transform: scale(0.8);
     opacity: 0;
   }
+
   100% {
     transform: scale(1);
     opacity: 1;

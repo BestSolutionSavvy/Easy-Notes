@@ -1,12 +1,9 @@
 const classesModel = require("../models/classesModel");
 const { pdfModel } = require("../models/pdfsModel");
-const {
-  subscriptionModel,
-  sendNotification,
-} = require("../models/subscriptionsModel");
+const { sendNotification } = require("../models/subscriptionsModel");
 const { userModel } = require("../models/usersModel");
 
-exports.listClasses = (req, res) => {
+exports.listClasses = (res) => {
   classesModel
     .find()
     .then((classes) => {
@@ -72,17 +69,11 @@ exports.uploadPdfToClass = async (req, res) => {
     if (!classDoc) {
       return res.status(404).json({ error: "Class not found" });
     }
-
-    // Update class with new PDFs array
     classDoc.pdfs = pdfs;
     await classDoc.save();
-
-    // Get the newly added PDF (last one in array)
     const newPdfId = pdfs[pdfs.length - 1];
     const newPdf = await pdfModel.findById(newPdfId);
-
     if (newPdf) {
-      // Send notification to users about new PDF upload
       const users = await userModel.find({ classes: classId }).select("email");
       const notificationPromises = users.map((user) => {
         return sendNotification(user.email, {

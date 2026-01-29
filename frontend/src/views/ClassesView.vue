@@ -17,10 +17,10 @@ const role = authStore.user?.role;
 </script>
 
 <template>
-  <AppHeader :username="authStore.user?.email"/>
+  <AppHeader :username="authStore.user?.email" />
   <MainStructure>
     <template #left>
-      <ClassesPage :role="role" @select-class="handleSelectClass"/>
+      <ClassesPage :role="role" @select-class="handleSelectClass" />
     </template>
     <template #right>
       <LecturesPage :role="role" :class-item="selectedClass" />

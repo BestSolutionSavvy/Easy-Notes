@@ -18,11 +18,11 @@ const isTeacher = computed(() => authStore.isLoggedIn && authStore.user?.role ==
 <template>
     <div
         class="w-full h-full relative bg-white overflow-y-auto flex flex-col items-start py-[0.812rem] px-[0.937rem] box-border gap-[0.625rem] text-left text-[1.875rem] text-darkslategray font-inter">
-        <div
-            class="self-stretch h-[4.063rem] relative rounded-lg bg-white box-border overflow-hidden shrink-0">
+        <div class="self-stretch h-[4.063rem] relative rounded-lg bg-white box-border overflow-hidden shrink-0">
             <div
                 class="absolute top-[calc(50%_-_22.5px)] left-[calc(50%_-_124px)] w-[15.5rem] h-[2.813rem] overflow-hidden shrink-0">
-                <img class="absolute top-[0.313rem] left-[1.094rem] w-[2.188rem] h-[2.188rem] object-cover" :src="logo" alt="Easy Notes Logo" />
+                <img class="absolute top-[0.313rem] left-[1.094rem] w-[2.188rem] h-[2.188rem] object-cover" :src="logo"
+                    alt="Easy Notes Logo" />
                 <div class="absolute top-[0.281rem] left-[4.219rem] font-semibold">Easy Notes</div>
             </div>
         </div>

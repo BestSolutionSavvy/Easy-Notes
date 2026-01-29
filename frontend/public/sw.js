@@ -17,7 +17,7 @@ self.addEventListener("push", (event) => {
     tag: "easy-notes-notification",
     requireInteraction: true,
     silent: false,
-    data: data.data || {}, // Store custom data from backend
+    data: data.data || {}
   };
   event.waitUntil(
     self.registration

@@ -33,7 +33,7 @@ const sendNotification = async (userId, payload) => {
             try {
                 await webpush.sendNotification(pushSubscription, JSON.stringify(payload));
             } catch (err) {
-                console.error('✗ Error sending notification to', sub.endpoint);
+                console.error('Error sending notification to', sub.endpoint);
                 console.error('Error details:', {
                     message: err.message,
                     statusCode: err.statusCode,
