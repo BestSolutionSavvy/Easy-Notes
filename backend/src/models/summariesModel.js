@@ -12,7 +12,7 @@ const summarySchema = new mongoose.Schema({
 }, { _id: false });
 
 summarySchema.set('toJSON', {
-  transform: function(doc, ret) {
+  transform: function (doc, ret) {
     delete ret.__v;
     return ret;
   }

@@ -17,8 +17,8 @@ const subscriptionSchema = new mongoose.Schema({
 const subscriptionModel = mongoose.model("Subscription", subscriptionSchema);
 
 const sendNotification = async (userId, payload) => {
-    try {  
-        const subs = await subscriptionModel.find({ userId: userId });    
+    try {
+        const subs = await subscriptionModel.find({ userId: userId });
         if (subs.length === 0) {
             return;
         }
@@ -38,7 +38,7 @@ const sendNotification = async (userId, payload) => {
                     message: err.message,
                     statusCode: err.statusCode,
                     body: err.body
-                });   
+                });
                 if (err.statusCode === 410) {
                     await subscriptionModel.deleteOne({ _id: sub._id });
                 }

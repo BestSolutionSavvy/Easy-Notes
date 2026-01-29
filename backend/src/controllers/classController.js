@@ -3,7 +3,8 @@ const { pdfModel } = require("../models/pdfsModel");
 const { sendNotification } = require("../models/subscriptionsModel");
 const { userModel } = require("../models/usersModel");
 
-exports.listClasses = (res) => {
+// GET /classes
+exports.listClasses = (req, res) => {
   classesModel
     .find()
     .then((classes) => {
@@ -15,6 +16,7 @@ exports.listClasses = (res) => {
     .catch((err) => res.status(500).json({ error: err.message }));
 };
 
+// POST /classes
 exports.createClass = (req, res) => {
   if (!req.body) {
     return res.status(400).json({ error: "Invalid class data" });
@@ -30,6 +32,7 @@ exports.createClass = (req, res) => {
     });
 };
 
+// GET /classes/:id
 exports.getClassById = (req, res) => {
   const classId = req.params.id;
   classesModel
@@ -43,6 +46,7 @@ exports.getClassById = (req, res) => {
     .catch((err) => res.status(500).json({ error: err.message }));
 };
 
+// PUT /classes/:id
 exports.updateClass = (req, res) => {
   const classId = req.params.id;
   classesModel
@@ -56,6 +60,7 @@ exports.updateClass = (req, res) => {
     .catch((err) => res.status(500).json({ error: err.message }));
 };
 
+// POST /classes/:id/pdfs
 exports.uploadPdfToClass = async (req, res) => {
   const classId = req.params.id;
   const { pdfs } = req.body;
@@ -95,6 +100,7 @@ exports.uploadPdfToClass = async (req, res) => {
   }
 };
 
+// DELETE /classes/:id
 exports.deleteClass = async (req, res) => {
   const classId = req.params.id;
   try {
