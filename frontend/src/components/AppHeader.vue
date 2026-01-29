@@ -129,7 +129,7 @@ const createSimpleNotebook = async () => {
   if (selectedSubject.value) {
     createSimpleNotebookRef.value?.closeOverlay();
     await router.replace({ path: '/', query: { subject: selectedSubject.value } });
-    router.go(0); // Forza il ricaricamento della pagina
+    router.go(0);
     selectedSubject.value = "";
   }
 };

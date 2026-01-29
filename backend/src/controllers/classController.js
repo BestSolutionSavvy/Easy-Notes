@@ -3,17 +3,16 @@ const { pdfModel } = require("../models/pdfsModel");
 const { sendNotification } = require("../models/subscriptionsModel");
 const { userModel } = require("../models/usersModel");
 
-// GET /classes
-exports.listClasses = async (req, res) => {
-  try {
-    const classes = await classesModel.find();
-    if (!classes || classes.length === 0) {
-      return res.status(404).json({ error: "No classes found" });
-    }
-    res.json(classes);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+exports.listClasses = (req, res) => {
+  classesModel
+    .find()
+    .then((classes) => {
+      if (!classes || classes.length === 0) {
+        return res.status(404).json({ error: "No classes found" });
+      }
+      res.json(classes);
+    })
+    .catch((err) => res.status(500).json({ error: err.message }));
 };
 
 // POST /classes

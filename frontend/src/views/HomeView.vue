@@ -5,20 +5,21 @@ import PdfPage from "../pages/PdfPage.vue";
 import NotePage from "../pages/NotePage.vue";
 import { onMounted, onUnmounted, ref } from "vue";
 import type { Notebook } from "../types/notebook";
-import { useRoute } from "vue-router";
 import axios from "axios";
 import { useAuthStore } from "../stores/auth";
 
 defineOptions({ inheritAttrs: false })
 
+const props = defineProps<{
+    notebookId?: string;
+    subject?: string;
+    pdfId?: string;
+}>();
+
 const authStore = useAuthStore();
-
-const route = useRoute();
-
 const openedNotebook = ref<Notebook | null>(null);
 const currentNotebookPage = ref<number>(0);
 const currentPdfPage = ref<number>(0);
-
 const headerRef = ref<InstanceType<typeof AppHeader> | null>(null);
 const notePageRightRef = ref<InstanceType<typeof NotePage> | null>(null);
 
@@ -67,83 +68,57 @@ const handlePagePrev = () => {
 
 const isTyping = (): boolean => {
     const activeElement = document.activeElement;
-    if (!activeElement) return false;
-
-    const tagName = activeElement.tagName.toLowerCase();
-    const isEditable = activeElement.getAttribute('contenteditable') === 'true';
-
-    return (
-        tagName === 'input' ||
-        tagName === 'textarea' ||
-        isEditable
-    );
+    let isTyping = false;
+    if (activeElement) {
+        const tagName = activeElement.tagName.toLowerCase();
+        const isEditable = activeElement.getAttribute('contenteditable') === 'true';
+        isTyping = tagName === 'input' || tagName === 'textarea' || isEditable;
+    }
+    return isTyping;
 };
 
 const handleKeydown = (event: KeyboardEvent) => {
-    if (isTyping() && !event.ctrlKey && !event.metaKey && !event.altKey && event.key !== "Escape") {
-        return;
-    }
-
+    const isTypingNow = isTyping();
     if (event.ctrlKey && event.key === "s") {
         event.preventDefault();
         headerRef.value?.toggleSave();
-        return;
-    }
-    if (event.ctrlKey && isTyping() && (event.key === "ArrowRight" || event.key === "ArrowLeft")) {
+    } else if ((event.ctrlKey && isTypingNow && event.key === "ArrowRight")) {
         event.preventDefault();
-        if (event.key === "ArrowRight") {
-            handlePageNext();
-        } else {
-            handlePagePrev();
-        }
+        handlePageNext();
         notePageRightRef.value?.startEditing();
-        return;
-    }
-    if (event.key === "Escape" && openedNotebook.value?.type === 'slide') {
+    } else if ((event.ctrlKey && isTypingNow && event.key === "ArrowLeft")) {
+        event.preventDefault();
+        handlePagePrev();
+        notePageRightRef.value?.startEditing();
+    } else if (!isTypingNow && event.key === "ArrowRight") {
+        event.preventDefault();
+        handlePageNext();
+    } else if (!isTypingNow && event.key === "ArrowLeft") {
+        event.preventDefault();
+        handlePagePrev();
+    } else if (!isTypingNow && event.key === "Enter" && openedNotebook.value?.type === 'slide') {
+        event.preventDefault();
+        notePageRightRef.value?.startEditing();
+    } else if (isTypingNow && event.key === "Escape" && openedNotebook.value?.type === 'slide') {
         event.preventDefault();
         notePageRightRef.value?.stopEditing();
-        return;
-    }
-    
-
-    if (!isTyping()) {
-        if (event.key === "ArrowRight") {
-            event.preventDefault();
-            handlePageNext();
-            return;
-        }
-        if (event.key === "ArrowLeft") {
-            event.preventDefault();
-            handlePagePrev();
-            return;
-        }
-        if (event.key === "Enter" && openedNotebook.value?.type === 'slide') {
-            event.preventDefault();
-            notePageRightRef.value?.startEditing();
-            return;
-        }
-
     }
 };
 
 onMounted(() => {
-    const notebookId = route.query.notebookId as string | undefined;
-    const subject = route.query.subject as string | undefined;
-    const pdfId = route.query.pdfId as string | undefined;
-
-    if (notebookId) {
-        axios.get(`/api/notebooks/id/${notebookId}`).then(response => {
+    if (props.notebookId) {
+        axios.get(`/api/notebooks/id/${props.notebookId}`).then(response => {
             handleOpenNotebook(response.data);
         });
-    } else if (subject && pdfId) {
-        axios.get(`/api/pdfs/${pdfId}`).then(res => {
+    } else if (props.subject && props.pdfId) {
+        axios.get(`/api/pdfs/${props.pdfId}`).then(res => {
             const pdfData = res.data;
             const newNotebook = {
                 _id: "",
                 name: pdfData.name + " notes",
-                subject: subject,
+                subject: props.subject || "General",
                 owner: authStore.user?.email || "unknown",
-                id_pdf: pdfId,
+                id_pdf: props.pdfId || "",
                 type: "slide",
                 date: new Date().toISOString(),
                 num_notebook_pages: 100,
@@ -153,11 +128,11 @@ onMounted(() => {
             handleOpenNotebook(newNotebook);
         });
     }
-    else if (subject) {
+    else if (props.subject) {
         const newNotebook = {
             _id: "",
-            name: subject + " notes",
-            subject: subject,
+            name: props.subject + " notes",
+            subject: props.subject,
             owner: authStore.user?.email || "unknown",
             id_pdf: "",
             type: "simple",

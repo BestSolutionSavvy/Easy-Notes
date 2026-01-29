@@ -40,8 +40,6 @@ watch(noteContent, () => {
 
 const saveNote = (pageNumber?: number) => {
   if (!props.notebook || !props.notebook.pages) return;
-  
-  //isEditing.value = false;
   const targetPage = pageNumber !== undefined ? pageNumber : props.currentPage;
   const pageIndex = props.notebook.pages.findIndex(p => p.page_number === targetPage);
   
@@ -95,7 +93,6 @@ onMounted(() => {
         </div>
         <div
             class="self-stretch flex-1 flex flex-col items-start text-left text-[1.5rem] text-gray-500">
-            <!-- Modalità visualizzazione -->
             <div
                 v-if="!isEditing"
                 @click="startEditing"
@@ -105,8 +102,6 @@ onMounted(() => {
                 <div v-if="noteContent" v-html="renderedContent"></div>
                 <div v-else>Clicca per aggiungere note...</div>
             </div>
-            
-            <!-- Modalità editing -->
             <textarea
                 v-else
                 v-model="noteContent"
