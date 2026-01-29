@@ -14,22 +14,22 @@ const user = ref<User>({
   email: "",
   role: "student",
   name: "",
-  surname: ""
+  surname: "",
 });
 const password = ref("");
 const errorMessage = ref("");
 const fieldErrors = ref({
   email: false,
-  password: false
+  password: false,
 });
 
+// Handles the sign-up button click
 const handleSignup = async () => {
   errorMessage.value = "";
   fieldErrors.value = {
     email: false,
-    password: false
+    password: false,
   };
-  
   if (!user.value.email || !password.value) {
     errorMessage.value = "Please fill all required fields";
     fieldErrors.value.email = !user.value.email;
@@ -37,11 +37,11 @@ const handleSignup = async () => {
     return;
   }
   const result = await authStore.signup(
-    user.value.email, 
-    password.value, 
-    user.value.role, 
-    user.value.name, 
-    user.value.surname
+    user.value.email,
+    password.value,
+    user.value.role,
+    user.value.name,
+    user.value.surname,
   );
   if (result.success) {
     router.push("/profile");
@@ -67,24 +67,38 @@ const handleSignup = async () => {
       >
         <InputBox v-model="user.name" type="text" placeholder="Name" />
         <InputBox v-model="user.surname" type="text" placeholder="Surname" />
-        <InputBox v-model="user.email" type="email" placeholder="E-mail *" :error="fieldErrors.email" />
-        <InputBox v-model="password" type="password" placeholder="Password *" :error="fieldErrors.password" />
+        <InputBox
+          v-model="user.email"
+          type="email"
+          placeholder="E-mail *"
+          :error="fieldErrors.email"
+        />
+        <InputBox
+          v-model="password"
+          type="password"
+          placeholder="Password *"
+          :error="fieldErrors.password"
+        />
         <div class="text-xs text-gray-400 self-start">
           <span class="text-red-500">*</span> Required fields
         </div>
-        <label class="flex items-center gap-[0.75rem] min-w-[7.5rem] cursor-pointer">
-          <input 
-            type="radio" 
-            v-model="user.role" 
+        <label
+          class="flex items-center gap-[0.75rem] min-w-[7.5rem] cursor-pointer"
+        >
+          <input
+            type="radio"
+            v-model="user.role"
             value="student"
             class="h-[1rem] w-[1rem] relative rounded-full cursor-pointer accent-darkslateblue-100"
           />
           <span class="flex-1 relative leading-[140%]">Student</span>
         </label>
-        <label class="flex items-center gap-[0.75rem] min-w-[7.5rem] cursor-pointer">
-          <input 
-            type="radio" 
-            v-model="user.role" 
+        <label
+          class="flex items-center gap-[0.75rem] min-w-[7.5rem] cursor-pointer"
+        >
+          <input
+            type="radio"
+            v-model="user.role"
             value="teacher"
             class="h-[1rem] w-[1rem] relative rounded-full cursor-pointer accent-darkslateblue-100"
           />
@@ -96,10 +110,20 @@ const handleSignup = async () => {
         <div v-if="errorMessage" class="text-red-500 text-sm text-center">
           {{ errorMessage }}
         </div>
-        <SimpleButton text="Sign Up" @click="handleSignup" :disabled="authStore.isLoading" />
-        <div class="relative text-[0.813rem] font-medium text-darkslategray text-center">
+        <SimpleButton
+          text="Sign Up"
+          @click="handleSignup"
+          :disabled="authStore.isLoading"
+        />
+        <div
+          class="relative text-[0.813rem] font-medium text-darkslategray text-center"
+        >
           Already have an account?<br />
-          <RouterLink to="/signin" class="underline text-blue-500 hover:underline font-medium">Sign in</RouterLink>
+          <RouterLink
+            to="/signin"
+            class="underline text-blue-500 hover:underline font-medium"
+            >Sign in</RouterLink
+          >
           to access your notes!
         </div>
       </div>

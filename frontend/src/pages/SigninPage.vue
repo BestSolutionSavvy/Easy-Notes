@@ -14,14 +14,15 @@ const password = ref("");
 const errorMessage = ref("");
 const fieldErrors = ref({
   email: false,
-  password: false
+  password: false,
 });
 
+// Handles the sign-in button click
 const handleSignin = async () => {
   errorMessage.value = "";
   fieldErrors.value = {
     email: false,
-    password: false
+    password: false,
   };
   if (!email.value || !password.value) {
     errorMessage.value = "Please fill all fields";
@@ -52,11 +53,27 @@ const handleSignin = async () => {
       <div
         class="w-[19.875rem] overflow-hidden flex flex-col items-center justify-center py-[2.125rem] px-[0rem] box-border gap-[0.625rem]"
       >
-        <InputBox v-model="email" type="email" placeholder="E-mail" :error="fieldErrors.email" />
-        <InputBox v-model="password" type="password" placeholder="Password" :error="fieldErrors.password" />
-        <div class="relative text-[0.813rem] font-medium text-darkslategray text-center">
+        <InputBox
+          v-model="email"
+          type="email"
+          placeholder="E-mail"
+          :error="fieldErrors.email"
+        />
+        <InputBox
+          v-model="password"
+          type="password"
+          placeholder="Password"
+          :error="fieldErrors.password"
+        />
+        <div
+          class="relative text-[0.813rem] font-medium text-darkslategray text-center"
+        >
           Don't have an account yet?<br />
-          <RouterLink to="/signup" class="underline text-blue-500 hover:underline font-medium">Sign up</RouterLink>
+          <RouterLink
+            to="/signup"
+            class="underline text-blue-500 hover:underline font-medium"
+            >Sign up</RouterLink
+          >
           for free to bring your notes everywhere!
         </div>
         <div
@@ -65,7 +82,11 @@ const handleSignin = async () => {
         <div v-if="errorMessage" class="text-red-500 text-sm text-center">
           {{ errorMessage }}
         </div>
-        <SimpleButton text="Sign In" @click="handleSignin" :disabled="authStore.isLoading" />
+        <SimpleButton
+          text="Sign In"
+          @click="handleSignin"
+          :disabled="authStore.isLoading"
+        />
       </div>
       <div class="w-[2.188rem] flex-1 relative overflow-hidden" />
       <PrivacyLink />
