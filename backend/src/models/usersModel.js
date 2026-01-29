@@ -4,6 +4,9 @@ const userSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
+    unique: true,
+    lowercase: true,
+    trim: true,
   },
   name: {
     type: String,
@@ -22,27 +25,29 @@ const userSchema = new mongoose.Schema({
     required: true,
     enum: ["student", "teacher"],
   },
-  classes: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Class",
-  }],
+  classes: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Class",
+    },
+  ],
 });
 
-// Method to get user info without password
-userSchema.methods.toUserInfo = function() {
+// Converts the document to a user info object without sensitive fields
+userSchema.methods.toUserInfo = function () {
   const obj = this.toObject();
   delete obj.password;
   delete obj.__v;
   return obj;
 };
 
-// Automatically exclude password when converting to JSON
-userSchema.set('toJSON', {
-  transform: function(doc, ret) {
+// Converts the document to JSON without sensitive fields
+userSchema.set("toJSON", {
+  transform: function (doc, ret) {
     delete ret.password;
     delete ret.__v;
     return ret;
-  }
+  },
 });
 
 const userModel = mongoose.model("User", userSchema);

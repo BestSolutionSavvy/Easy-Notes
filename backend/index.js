@@ -11,10 +11,10 @@ const notebookRouter = require("./src/routes/notebooksRoutes");
 const userRouter = require("./src/routes/userRoutes");
 const classesRouter = require("./src/routes/classesRoutes");
 const pdfRouter = require("./src/routes/pdfRouter");
-const summaryRouter = require('./src/routes/summaryRoutes');
-const subscriptionRouter = require('./src/routes/subscriptionRoute');
+const summaryRouter = require("./src/routes/summaryRoutes");
+const subscriptionRouter = require("./src/routes/subscriptionRoute");
 
-const isDevelopment = process.argv.includes('--dev');
+const isDevelopment = process.env.NODE_ENV === "development";
 
 mongoose.connect(process.env.MONGO_URI, {
   dbName: "easy-notes",
@@ -24,10 +24,12 @@ mongoose.connect(process.env.MONGO_URI, {
 });
 
 const app = express();
-app.use(cors({
-  origin: process.env.FRONTEND_URL,
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL,
+    credentials: true,
+  }),
+);
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.static("public"));
@@ -36,16 +38,16 @@ app.use("/api/notebooks", notebookRouter);
 app.use("/api/users", userRouter);
 app.use("/api/classes", classesRouter);
 app.use("/api/pdfs", pdfRouter);
-app.use('/api/summary', summaryRouter);
-app.use('/api/push', subscriptionRouter);
+app.use("/api/summary", summaryRouter);
+app.use("/api/push", subscriptionRouter);
 
 if (isDevelopment) {
-    app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+  app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 }
 
 app.listen(3000, () => {
-    console.log('Server listening on http://localhost:3000');
-    if (isDevelopment) {
-        console.log('API docs available at http://localhost:3000/api/docs');
-    }
+  console.log("Server listening on http://localhost:3000");
+  if (isDevelopment) {
+    console.log("API docs available at http://localhost:3000/api/docs");
+  }
 });

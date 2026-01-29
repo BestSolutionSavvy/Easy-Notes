@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES_IN = "7d";
-const JWT_MAX_AGE = 7 * 24 * 60 * 60 * 1000;
+const JWT_MAX_AGE = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
 
 /**
  * Generates a JWT token for a user
@@ -55,11 +55,29 @@ const authenticateToken = (req, res, next) => {
   }
 };
 
+/**
+ * Sets authentication cookie and returns sanitized user object
+ * @param {Object} res - The response object
+ * @param {Object} user - The user object (Mongoose document)
+ * @returns {Object} Sanitized user object without password
+ */
+const setAuthCookie = (res, user) => {
+  const token = generateToken(user);
+  res.cookie("authToken", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    maxAge: JWT_MAX_AGE,
+  });
+  const userResponse = user.toObject();
+  delete userResponse.password;
+
+  return userResponse;
+};
+
 module.exports = {
   generateToken,
   verifyToken,
   authenticateToken,
-  JWT_SECRET,
-  JWT_EXPIRES_IN,
-  JWT_MAX_AGE,
+  setAuthCookie,
 };
