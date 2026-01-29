@@ -10,7 +10,7 @@ const swaggerDocument = YAML.load("./api.yaml");
 const notebookRouter = require("./src/routes/notebooksRoutes");
 const userRouter = require("./src/routes/userRoutes");
 const classesRouter = require("./src/routes/classesRoutes");
-const pdfRouter = require("./src/routes/pdfRouter");
+const pdfRouter = require("./src/routes/pdfRoutes");
 const summaryRouter = require("./src/routes/summaryRoutes");
 const subscriptionRouter = require("./src/routes/subscriptionRoute");
 

@@ -150,11 +150,9 @@ exports.updateUser = (req, res) => {
       if (name !== undefined) updateFields.name = name;
       if (surname !== undefined) updateFields.surname = surname;
       if (classes !== undefined) updateFields.classes = classes;
-
       const hashPromise = password
         ? bcrypt.hash(password, SALT_ROUNDS)
         : Promise.resolve(null);
-
       return hashPromise.then((hashedPassword) => {
         if (hashedPassword) {
           updateFields.password = hashedPassword;
