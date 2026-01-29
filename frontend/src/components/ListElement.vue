@@ -19,7 +19,8 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  gradient: "[background:linear-gradient(90deg,_#ced8ff,_#e5ebff_65.38%,_#f5f7ff)]",
+  gradient:
+    "[background:linear-gradient(90deg,_#ced8ff,_#e5ebff_65.38%,_#f5f7ff)]",
 });
 
 const emit = defineEmits<{
@@ -38,15 +39,21 @@ const handleButtonClick = (button: ButtonConfig, event: Event) => {
   <li
     :class="[
       'animate-slide-in w-full relative shadow-[0px_2px_4px_rgba(0,_0,_0,_0.25)] rounded-[10px] overflow-hidden flex items-center justify-between py-[0.625rem] px-[1.125rem] gap-[1.25rem] text-left text-[1rem] text-darkslateblue font-inter ease-in-out ease-in-out hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 cursor-pointer',
-      props.gradient
+      props.gradient,
     ]"
     :style="{
       animationDelay: `${props.index * 0.2}s`,
     }"
     @click="emit('click')"
   >
-    <div class="relative leading-[140%] font-medium flex-1 truncate overflow-hidden whitespace-nowrap min-w-0 mr-4">{{ title }}</div>
-    <div class="relative text-[0.813rem] leading-[140%] font-medium flex-shrink-0">
+    <div
+      class="relative leading-[140%] font-medium flex-1 truncate overflow-hidden whitespace-nowrap min-w-0 mr-4"
+    >
+      {{ title }}
+    </div>
+    <div
+      class="relative text-[0.813rem] leading-[140%] font-medium flex-shrink-0"
+    >
       {{ formatDate(date) }}
     </div>
     <div
@@ -65,9 +72,3 @@ const handleButtonClick = (button: ButtonConfig, event: Event) => {
     </div>
   </li>
 </template>
-
-<style scoped>
-.default-gradient {
-  background: linear-gradient(90deg, #ced8ff, #e5ebff 65.38%, #f5f7ff);
-}
-</style>

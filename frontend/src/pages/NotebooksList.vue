@@ -17,11 +17,11 @@ const props = defineProps<{
 }>();
 
 const authStore = useAuthStore();
+const router = useRouter();
+
 const notebooks = ref<Notebook[]>([]);
 const isLoading = ref(false);
 const errorMessage = ref("");
-
-// Modal states
 const showDeleteModal = ref(false);
 const showErrorModal = ref(false);
 const showSummaryModal = ref(false);
@@ -29,51 +29,12 @@ const modalMessage = ref("");
 const modalTitle = ref("");
 const notebookToDelete = ref<Notebook | null>(null);
 const summarizingNotebooks = ref<Set<string>>(new Set());
-const existingSummaries = ref<Map<string, string>>(new Map()); // notebookId -> summary content
-const currentSummary = ref<{ notebookId: string; notebookName: string; content: string } | null>(null);
-
-const emit = defineEmits<{
-  (e: "select-notebook", notebook: Notebook): void;
-}>();
-
-const router = useRouter();
-
-const loadNotebooks = async () => {
-  isLoading.value = true;
-  errorMessage.value = "";
-  try {
-    const response = await axios.get(`/api/notebooks/${authStore.user?.email}`);
-    notebooks.value = Array.isArray(response.data) ? response.data : [];
-    
-    // Carica le summaries esistenti per ogni notebook
-    await loadExistingSummaries();
-  } catch (error: any) {
-    if (error.response?.status === 404) {
-      notebooks.value = [];
-    } else {
-      errorMessage.value =
-        error.response?.data?.message || "Failed to load notebooks";
-      console.error("Error loading notebooks:", error);
-    }
-  } finally {
-    isLoading.value = false;
-  }
-};
-
-const loadExistingSummaries = async () => {
-  for (const notebook of notebooks.value) {
-    if (notebook._id) {
-      try {
-        const response = await axios.get(`/api/summary/${notebook._id}`);
-        if (response.data && response.data.content) {
-          existingSummaries.value.set(notebook._id, response.data.content);
-        }
-      } catch (error: any) {
-        console.error(`Error loading summary for ${notebook._id}:`, error);
-      }
-    }
-  }
-};
+const existingSummaries = ref<Map<string, string>>(new Map());
+const currentSummary = ref<{
+  notebookId: string;
+  notebookName: string;
+  content: string;
+} | null>(null);
 
 const subjects = computed(() => {
   const uniqueSubjects = new Set<string>();
@@ -93,6 +54,48 @@ const notebooksPerSubject = computed(() => {
   return map;
 });
 
+const emit = defineEmits<{
+  (e: "select-notebook", notebook: Notebook): void;
+}>();
+
+// Loads the list of notebooks for the current user
+const loadNotebooks = async () => {
+  isLoading.value = true;
+  errorMessage.value = "";
+  try {
+    const response = await axios.get(`/api/notebooks/${authStore.user?.email}`);
+    notebooks.value = Array.isArray(response.data) ? response.data : [];
+    await loadExistingSummaries();
+  } catch (error: any) {
+    if (error.response?.status === 404) {
+      notebooks.value = [];
+    } else {
+      errorMessage.value =
+        error.response?.data?.message || "Failed to load notebooks";
+      console.error("Error loading notebooks:", error);
+    }
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+// Loads existing summaries for all notebooks
+const loadExistingSummaries = async () => {
+  for (const notebook of notebooks.value) {
+    if (notebook._id) {
+      try {
+        const response = await axios.get(`/api/summary/${notebook._id}`);
+        if (response.data && response.data.content) {
+          existingSummaries.value.set(notebook._id, response.data.content);
+        }
+      } catch (error: any) {
+        console.error(`Error loading summary for ${notebook._id}:`, error);
+      }
+    }
+  }
+};
+
+// Navigates to the home page with the selected notebook loaded
 const onLoadNotebook = (subject: string, notebook?: Notebook) => {
   router.push({
     name: "Home",
@@ -103,21 +106,23 @@ const onLoadNotebook = (subject: string, notebook?: Notebook) => {
   });
 };
 
+// Emits the selected notebook to the parent component
 const onSelectNotebook = (notebook: Notebook) => {
   emit("select-notebook", notebook);
 };
 
-const onDeleteNotebook = async (notebook: Notebook) => {
+// Shows the delete confirmation modal for the selected notebook
+const handleDeleteNotebook = async (notebook: Notebook) => {
   if (!notebook._id || !authStore.user?.email) return;
   notebookToDelete.value = notebook;
   showDeleteModal.value = true;
 };
 
-const confirmDeleteNotebook = async () => {
+// Confirms the deletion of the selected notebook
+const onConfirmDeleteNotebook = async () => {
   showDeleteModal.value = false;
   const notebook = notebookToDelete.value;
   if (!notebook?._id || !authStore.user?.email) return;
-
   try {
     await axios.delete(
       `/api/notebooks/${authStore.user.email}/${notebook._id}`,
@@ -135,19 +140,21 @@ const confirmDeleteNotebook = async () => {
   }
 };
 
-const cancelDelete = () => {
+// Cancels the deletion of the selected notebook
+const onCancelDelete = () => {
   showDeleteModal.value = false;
   notebookToDelete.value = null;
 };
 
-const onSummarizeNotebook = async (notebook: Notebook) => {
+// Handles the summarization click and requests the backend to generate the summary, if needed
+const handleSummarizeNotebook = async (notebook: Notebook) => {
   if (!notebook._id || !authStore.user?.email) return;
   if (existingSummaries.value.has(notebook._id)) {
     const content = existingSummaries.value.get(notebook._id)!;
     currentSummary.value = {
       notebookId: notebook._id,
       notebookName: notebook.name,
-      content: content
+      content: content,
     };
     showSummaryModal.value = true;
     return;
@@ -155,7 +162,11 @@ const onSummarizeNotebook = async (notebook: Notebook) => {
   summarizingNotebooks.value.add(notebook._id);
   try {
     const response = await axios.post(`/api/summary/${notebook._id}`);
-    if (response.data && response.data.summary && response.data.summary.content) {
+    if (
+      response.data &&
+      response.data.summary &&
+      response.data.summary.content
+    ) {
       const content = response.data.summary.content;
       existingSummaries.value.set(notebook._id, content);
     }
@@ -170,13 +181,14 @@ const onSummarizeNotebook = async (notebook: Notebook) => {
   }
 };
 
+// Downloads the current summary as a text file
 const onDownloadSummary = () => {
   if (!currentSummary.value) return;
-  const blob = new Blob([currentSummary.value.content], { type: 'text/plain' });
+  const blob = new Blob([currentSummary.value.content], { type: "text/plain" });
   const url = window.URL.createObjectURL(blob);
-  const link = document.createElement('a');
+  const link = document.createElement("a");
   link.href = url;
-  link.download = `${currentSummary.value.notebookName.replace(/[^a-z0-9]/gi, '_')}_summary.txt`;
+  link.download = `${currentSummary.value.notebookName.replace(/[^a-z0-9]/gi, "_")}_summary.txt`;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
@@ -184,6 +196,7 @@ const onDownloadSummary = () => {
   showSummaryModal.value = false;
 };
 
+// Deletes the current summary both from backend and local state
 const onDeleteSummary = async () => {
   if (!currentSummary.value) return;
   try {
@@ -200,25 +213,24 @@ const onDeleteSummary = async () => {
   }
 };
 
+// Closes the summary modal
 const onCloseSummaryModal = () => {
   showSummaryModal.value = false;
   currentSummary.value = null;
 };
 
-const closeErrorModal = () => {
+// Closes the error modal
+const onCloseErrorModal = () => {
   showErrorModal.value = false;
   modalMessage.value = "";
   modalTitle.value = "";
 };
 
-onMounted(() => {
-  loadNotebooks();
-});
-
+// Opens the summary modal for the given summaryId from props
 const openSummaryModalById = async (summaryId: string) => {
-  const notebook = notebooks.value.find(n => n._id === summaryId);
+  const notebook = notebooks.value.find((n) => n._id === summaryId);
   if (!notebook) {
-    console.error('Notebook not found for summaryId:', summaryId);
+    console.error("Notebook not found for summaryId:", summaryId);
     return;
   }
   if (existingSummaries.value.has(summaryId)) {
@@ -226,7 +238,7 @@ const openSummaryModalById = async (summaryId: string) => {
     currentSummary.value = {
       notebookId: summaryId,
       notebookName: notebook.name,
-      content: content
+      content: content,
     };
     showSummaryModal.value = true;
     router.replace({ query: {} });
@@ -239,27 +251,29 @@ const openSummaryModalById = async (summaryId: string) => {
       currentSummary.value = {
         notebookId: summaryId,
         notebookName: notebook.name,
-        content: response.data.content
+        content: response.data.content,
       };
       showSummaryModal.value = true;
     }
     router.replace({ query: {} });
   } catch (error) {
-    console.error('Error loading summary:', error);
+    console.error("Error loading summary:", error);
     router.replace({ query: {} });
   }
 };
 
-watch(() => props.summaryId, async (newSummaryId) => {
-  if (newSummaryId && notebooks.value.length > 0) {
-    await openSummaryModalById(newSummaryId);
-  }
-}, { immediate: true });
+// Watches for changes in notebooks length to open summary modal if summaryId prop is provided
+watch(
+  () => notebooks.value.length,
+  async (newLength) => {
+    if (newLength > 0 && props.summaryId) {
+      await openSummaryModalById(props.summaryId);
+    }
+  },
+);
 
-watch(() => notebooks.value.length, async (newLength) => {
-  if (newLength > 0 && props.summaryId) {
-    await openSummaryModalById(props.summaryId);
-  }
+onMounted(() => {
+  loadNotebooks();
 });
 </script>
 
@@ -290,14 +304,14 @@ watch(() => notebooks.value.length, async (newLength) => {
         <div class="text-xl font-semibold text-gray-700">No notebooks yet</div>
         <div class="text-center text-gray-500 leading-relaxed">
           Create your first notebook by using the
-          <router-link to="/" class="text-blue-500 hover:underline font-medium"
-            >home screen</router-link
+          <RouterLink to="/" class="text-blue-500 hover:underline font-medium"
+            >home screen</RouterLink
           >
           or starting from a PDF of a
-          <router-link
+          <RouterLink
             to="/classes"
             class="text-blue-500 hover:underline font-medium"
-            >class</router-link
+            >class</RouterLink
           >!
         </div>
       </div>
@@ -329,12 +343,18 @@ watch(() => notebooks.value.length, async (newLength) => {
               @click="onSelectNotebook(notebook)"
               :buttons="[
                 {
-                  icon: summarizingNotebooks.has(notebook._id!) ? '' : (existingSummaries.has(notebook._id!) ? downloadIcon : wandIcon),
-                  alt: existingSummaries.has(notebook._id!) ? 'View Summary' : 'Generate Summary',
+                  icon: summarizingNotebooks.has(notebook._id!)
+                    ? ''
+                    : existingSummaries.has(notebook._id!)
+                      ? downloadIcon
+                      : wandIcon,
+                  alt: existingSummaries.has(notebook._id!)
+                    ? 'View Summary'
+                    : 'Generate Summary',
                   background: 'bg-orangered-100',
                   isLoading: summarizingNotebooks.has(notebook._id!),
                   onClick: () => {
-                    onSummarizeNotebook(notebook);
+                    handleSummarizeNotebook(notebook);
                   },
                 },
                 {
@@ -347,7 +367,7 @@ watch(() => notebooks.value.length, async (newLength) => {
                   icon: trashIcon,
                   alt: 'Delete Note',
                   background: 'bg-orangered-100',
-                  onClick: () => onDeleteNotebook(notebook),
+                  onClick: () => handleDeleteNotebook(notebook),
                 },
               ]"
             />
@@ -362,8 +382,8 @@ watch(() => notebooks.value.length, async (newLength) => {
       confirmText="Delete"
       cancelText="Cancel"
       variant="delete"
-      @confirm="confirmDeleteNotebook"
-      @cancel="cancelDelete"
+      @confirm="onConfirmDeleteNotebook"
+      @cancel="onCancelDelete"
     />
     <ConfirmModal
       :isOpen="showErrorModal"
@@ -371,8 +391,8 @@ watch(() => notebooks.value.length, async (newLength) => {
       :message="modalMessage"
       confirmText="OK"
       variant="default"
-      @confirm="closeErrorModal"
-      @cancel="closeErrorModal"
+      @confirm="onCloseErrorModal"
+      @cancel="onCloseErrorModal"
     />
     <SummaryModal
       :isOpen="showSummaryModal"
