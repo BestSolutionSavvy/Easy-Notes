@@ -66,7 +66,7 @@ const setAuthCookie = (res, user) => {
   res.cookie("authToken", token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    sameSite: "none",
     maxAge: JWT_MAX_AGE,
   });
   const userResponse = user.toObject();

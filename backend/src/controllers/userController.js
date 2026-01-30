@@ -84,7 +84,7 @@ exports.logout = (req, res) => {
   res.cookie("authToken", "", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    sameSite: "none",
     maxAge: 0,
   });
   res.json({ message: "Logout successful" });

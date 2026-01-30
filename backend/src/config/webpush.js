@@ -5,7 +5,7 @@ if (!process.env.VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) {
 }
 
 webpush.setVapidDetails(
-    'mailto:dev@localhost', // Replace with real email in production
+    'mailto:noreply@easy-notes-j8m3.onrender.com',
     process.env.VAPID_PUBLIC_KEY,
     process.env.VAPID_PRIVATE_KEY
 );
