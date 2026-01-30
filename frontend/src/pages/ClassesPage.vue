@@ -196,14 +196,16 @@ onMounted(async () => {
             <div
               class="w-[30.063rem] h-[0.063rem] relative border-black border-solid border-t-[1px] box-border opacity-[0.5]" />
           </div>
-          <ListElement v-for="(classItem, index) in filteredClasses" :key="classItem._id || index"
-            :title="classItem.name || 'Unknown'" :date="classItem.date" :index="index" :buttons="[
-              {
-                icon: trashIcon,
-                alt: 'Delete',
-                onClick: () => handleDelete(classItem._id || ''),
-              },
-            ]" @click="$emit('select-class', classItem)" />
+          <ul class="w-full flex flex-col gap-[0.625rem]">
+            <ListElement v-for="(classItem, index) in filteredClasses" :key="classItem._id || index"
+              :title="classItem.name || 'Unknown'" :date="classItem.date" :index="index" :buttons="[
+                {
+                  icon: trashIcon,
+                  alt: 'Delete',
+                  onClick: () => handleDelete(classItem._id || ''),
+                },
+              ]" @click="$emit('select-class', classItem)" />
+          </ul>
         </template>
         <!-- Student view -->
         <template v-else>
@@ -222,18 +224,20 @@ onMounted(async () => {
               <div
                 class="w-[30.063rem] h-[0.063rem] relative border-black border-solid border-t-[1px] box-border opacity-[0.5]" />
             </div>
-            <ListElement v-for="(classItem, index) in teacherClasses" :key="classItem._id || index"
-              :title="classItem.name || 'Unknown'" :date="classItem.date" :index="index" :buttons="[
-                {
-                  icon: isSubscribed(classItem._id || '')
-                    ? subscribedIcon
-                    : unsubscribedIcon,
-                  alt: isSubscribed(classItem._id || '')
-                    ? 'Subscribed'
-                    : 'Subscribe',
-                  onClick: () => handleSubscribe(classItem._id || ''),
-                },
-              ]" @click="$emit('select-class', classItem)" />
+            <ul class="w-full flex flex-col gap-[0.625rem]">
+              <ListElement v-for="(classItem, index) in teacherClasses" :key="classItem._id || index"
+                :title="classItem.name || 'Unknown'" :date="classItem.date" :index="index" :buttons="[
+                  {
+                    icon: isSubscribed(classItem._id || '')
+                      ? subscribedIcon
+                      : unsubscribedIcon,
+                    alt: isSubscribed(classItem._id || '')
+                      ? 'Subscribed'
+                      : 'Subscribe',
+                    onClick: () => handleSubscribe(classItem._id || ''),
+                  },
+                ]" @click="$emit('select-class', classItem)" />
+            </ul>
           </template>
         </template>
       </div>

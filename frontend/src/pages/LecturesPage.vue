@@ -159,26 +159,28 @@ watch(
           <div
             class="w-[30.063rem] h-[0.063rem] relative border-black border-solid border-t-[1px] box-border opacity-[0.5]" />
         </div>
-        <ListElement v-for="(lecture, index) in lectures" :key="lecture._id" :title="lecture.name"
-          :date="classItem?.date || ''" :index="index"
-          :gradient="'[background:linear-gradient(90deg,_#ffcee9,_#ffe5f3_65.38%,_#fff3f9)]'" :buttons="props.role === 'teacher'
-            ? [
-              {
-                icon: trashIcon,
-                alt: 'Delete',
-                background: 'bg-pink-600',
-                onClick: () => handleDelete(lecture._id),
-              },
-            ]
-            : [
-              {
-                icon: loadIcon,
-                alt: 'Load',
-                background: 'bg-pink-600',
-                onClick: () => handleLoad(lecture._id),
-              },
-            ]
-            " />
+        <ul class="w-full flex flex-col gap-[0.625rem]">
+          <ListElement v-for="(lecture, index) in lectures" :key="lecture._id" :title="lecture.name"
+            :date="classItem?.date || ''" :index="index"
+            :gradient="'[background:linear-gradient(90deg,_#ffcee9,_#ffe5f3_65.38%,_#fff3f9)]'" :buttons="props.role === 'teacher'
+              ? [
+                {
+                  icon: trashIcon,
+                  alt: 'Delete',
+                  background: 'bg-pink-600',
+                  onClick: () => handleDelete(lecture._id),
+                },
+              ]
+              : [
+                {
+                  icon: loadIcon,
+                  alt: 'Load',
+                  background: 'bg-pink-600',
+                  onClick: () => handleLoad(lecture._id),
+                },
+              ]
+              " />
+        </ul>
       </div>
     </div>
     <ConfirmModal :isOpen="showDeleteModal" title="Delete Lecture"
