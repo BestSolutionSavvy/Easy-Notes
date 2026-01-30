@@ -50,7 +50,7 @@ const handleDocumentRender = async (data: any) => {
   const scale = calculateFitToContainerScale(
     viewport.width,
     viewport.height,
-    45,
+    40,
     60,
   );
   pdfHeight.value = (viewport.height * scale) / 100;
@@ -90,7 +90,7 @@ watch(
       </div>
     </div>
     <div
-      class="self-stretch flex-1 overflow-hidden flex flex-col items-start gap-[0.312rem] text-[0.875rem]"
+      class="self-stretch flex-1 overflow-hidden flex flex-col items-center gap-[0.312rem] text-[0.875rem]"
     >
       <div
         v-if="isLoading"
@@ -119,7 +119,7 @@ watch(
       </div>
       <div
         v-else
-        class="w-[45vw] h-[60vh] relative overflow-auto flex items-center justify-center"
+        class="w-[40vw] h-[60vh] relative overflow-auto flex items-center justify-center"
       >
         <div class="pdf-wrapper relative">
           <VuePdfEmbed

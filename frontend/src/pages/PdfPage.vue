@@ -92,8 +92,8 @@ const fitToContainer = () => {
   scale.value = calculateFitToContainerScale(
     basePageWidth.value,
     basePageHeight.value,
-    45, // 45vw
-    60, // 60vh
+    40,
+    53,
   );
 };
 
@@ -370,7 +370,7 @@ onUnmounted(() => {
       </div>
     </div>
     <div
-      class="self-stretch flex-1 overflow-hidden flex flex-col items-start gap-[0.312rem] text-[0.875rem]"
+      class="self-stretch flex-1 overflow-hidden flex flex-col items-center gap-[0.312rem] text-[0.875rem]"
     >
       <div
         v-if="isLoading"
@@ -392,7 +392,7 @@ onUnmounted(() => {
       </div>
       <div
         v-else
-        class="w-[45vw] h-[60vh] relative overflow-auto flex justify-center"
+        class="w-[40vw] h-[53vh] relative overflow-auto flex justify-center"
       >
         <div
           class="pdf-wrapper relative"
