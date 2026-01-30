@@ -133,7 +133,7 @@ watch(
       </div>
     </div>
     <div
-      class="self-stretch h-[2.313rem] overflow-hidden shrink-0 flex items-start justify-end p-[0.625rem] box-border"
+      class="self-stretch h-[2.313rem] overumew-hidden shrink-0 flex items-start justify-end p-[0.625rem] box-border"
     />
   </div>
 </template>

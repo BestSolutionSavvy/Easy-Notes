@@ -124,7 +124,7 @@ onMounted(() => {
           {{ authStore.user?.role || "User" }}
         </div>
       </div>
-      <div class="text-zinc-700 text-[4rem] font-semibold mb-8">
+      <div class="text-zinc-700 text-[3rem] font-semibold mb-3">
         {{ name + " " + surname }}
       </div>
       <div class="w-96 flex flex-col justify-center items-center gap-4">
@@ -160,7 +160,7 @@ onMounted(() => {
           {{ successMessage }}
         </div>
 
-        <div class="mt-4">
+        <div class="mt-2">
           <SimpleButton
             :text="isEditMode ? 'Confirm' : 'Modify'"
             variant="default"
@@ -169,7 +169,7 @@ onMounted(() => {
           ></SimpleButton>
         </div>
       </div>
-      <div class="mt-20 flex flex-col gap-3">
+      <div class="mt-14 flex flex-row gap-3">
         <SimpleButton
           text="Logout"
           variant="default"
