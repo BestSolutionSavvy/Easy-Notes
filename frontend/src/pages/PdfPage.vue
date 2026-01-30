@@ -157,19 +157,20 @@ const saveHighlight = () => {
         const textLayer = pdfWrapper?.querySelector(
           ".textLayer",
         ) as HTMLElement;
-        const textLayerRect = textLayer.getBoundingClientRect();
+        const textLayerRect = pdfWrapper.getBoundingClientRect();
         if (pdfWrapper && textLayer) {
+          const scaleFactor = Math.max(scale.value / 100, 0.01);
           for (let i = 0; i < rects.length; i++) {
             const rect = rects[i];
             if (rect) {
               if (rect.width > 1 && rect.height > 1) {
-                const relativeLeft = rect.left - textLayerRect.left;
-                const relativeTop = rect.top - textLayerRect.top;
+                const relativeLeft = (rect.left - textLayerRect.left) / scaleFactor;
+                const relativeTop = (rect.top - textLayerRect.top) / scaleFactor;
                 const newHighlight = {
                   left: relativeLeft,
                   top: relativeTop,
-                  width: rect.width,
-                  height: rect.height,
+                  width: rect.width / scaleFactor,
+                  height: rect.height / scaleFactor,
                   content: selection.toString(),
                 };
                 if (!currentPageData.value) {
