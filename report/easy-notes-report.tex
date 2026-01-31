@@ -1,7 +1,12 @@
 \documentclass{report}
 \usepackage[utf8]{inputenc}
 \usepackage[italian]{babel}
-\usepackage{hyperref}
+\usepackage[
+    colorlinks=true, 
+    citecolor=black, 
+    filecolor=black,
+    linkcolor=black, 
+    urlcolor=black]{hyperref}
 
 \title{
     Easy Notes \\
@@ -23,13 +28,7 @@ Tommaso Severi - 0001172431 \{tommaso.severi2@studio.unibo.it\}}
 
 \clearpage
 
-\hypersetup{
-    colorlinks,
-    citecolor=black,
-    filecolor=black,
-    linkcolor=black,
-    urlcolor=black
-}
+
 \tableofcontents
 \clearpage
 
@@ -59,7 +58,6 @@ Tommaso Severi - 0001172431 \{tommaso.severi2@studio.unibo.it\}}
 
 \input{./chapters/conclusions.tex}
 \newpage
-
 
 % TODO: remove this line when done
 \citep{adams1995hitchhiker}
