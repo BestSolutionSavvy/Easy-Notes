@@ -20,7 +20,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  "select-class": [classItem: Class];
+  "select-class": [classItem?: Class];
 }>();
 
 const authStore = useAuthStore();
@@ -109,6 +109,7 @@ const confirmDelete = async () => {
     await axios.delete(`/api/classes/${classToDelete.value._id}`);
     await listClasses();
     classToDelete.value = null;
+    emit('select-class', undefined);
   } catch (error) {
     console.error("Error deleting class:", error);
   }
