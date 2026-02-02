@@ -63,12 +63,20 @@ const authenticateToken = (req, res, next) => {
  */
 const setAuthCookie = (res, user) => {
   const token = generateToken(user);
-  res.cookie("authToken", token, {
+  const cookieOptions = {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "none",
     maxAge: JWT_MAX_AGE,
-  });
+  };
+  const isProduction = process.env.NODE_ENV === "production";
+  if (isProduction) {
+    cookieOptions.secure = true;
+    cookieOptions.sameSite = "none";
+    cookieOptions.partitioned = true;
+  } else {
+    cookieOptions.sameSite = "lax";
+    cookieOptions.secure = false;
+  }
+  res.cookie("authToken", token, cookieOptions);
   const userResponse = user.toObject();
   delete userResponse.password;
 

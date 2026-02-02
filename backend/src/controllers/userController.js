@@ -81,12 +81,20 @@ exports.signup = (req, res) => {
 
 // POST /users/logout
 exports.logout = (req, res) => {
-  res.cookie("authToken", "", {
+  const cookieOptions = {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "none",
     maxAge: 0,
-  });
+  };
+  const isProduction = process.env.NODE_ENV === "production";
+  if (isProduction) {
+    cookieOptions.secure = true;
+    cookieOptions.sameSite = "none";
+    cookieOptions.partitioned = true;
+  } else {
+    cookieOptions.sameSite = "lax";
+    cookieOptions.secure = false;
+  }
+  res.cookie("authToken", "", cookieOptions);
   res.json({ message: "Logout successful" });
 };
 

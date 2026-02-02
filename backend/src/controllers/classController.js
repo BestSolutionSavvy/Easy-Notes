@@ -2,6 +2,8 @@ const classesModel = require("../models/classesModel");
 const { pdfModel } = require("../models/pdfsModel");
 const { sendNotification } = require("../models/subscriptionsModel");
 const { userModel } = require("../models/usersModel");
+const { isPdfReferenced, deletePdfFile } = require("../utils/pdfHelpers");
+const mongoose = require("mongoose");
 
 exports.listClasses = (req, res) => {
   classesModel
@@ -47,7 +49,11 @@ exports.getClassById = async (req, res) => {
 exports.updateClass = async (req, res) => {
   const classId = req.params.id;
   try {
-    const updatedClass = await classesModel.findByIdAndUpdate(classId, req.body, { new: true });
+    const updatedClass = await classesModel.findByIdAndUpdate(
+      classId,
+      req.body,
+      { new: true },
+    );
     if (!updatedClass) {
       return res.status(404).json({ error: "Class not found" });
     }
@@ -100,22 +106,36 @@ exports.uploadPdfToClass = async (req, res) => {
 // DELETE /classes/:id
 exports.deleteClass = async (req, res) => {
   const classId = req.params.id;
+  const session = await mongoose.startSession();
   try {
-    const classDoc = await classesModel.findById(classId);
+    const classDoc = await classesModel.findById(classId).session(session);
     if (!classDoc) {
       return res.status(404).json({ error: "Class not found" });
     }
     const classPdfs = classDoc.pdfs;
     if (classPdfs && classPdfs.length > 0) {
-      await pdfModel.deleteMany({ _id: { $in: classPdfs } });
+      for (const pdfId of classPdfs) {
+        const pdf = await pdfModel.findById(pdfId).session(session);
+        if (pdf) {
+          const isReferenced = await isPdfReferenced(
+            pdf._id,
+            [classId],
+            session,
+          );
+          if (!isReferenced) {
+            await deletePdfFile(pdf, session);
+          }
+        }
+      }
     }
-    await userModel.updateMany(
-      { classes: classId },
-      { $pull: { classes: classId } },
-    );
-    await classesModel.findByIdAndDelete(classId);
+    await userModel
+      .updateMany({ classes: classId }, { $pull: { classes: classId } })
+      .session(session);
+    await classesModel.findByIdAndDelete(classId).session(session);
     res.status(204).send();
   } catch (err) {
     res.status(500).json({ error: err.message });
+  } finally {
+    session.endSession();
   }
 };
