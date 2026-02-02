@@ -13,7 +13,7 @@ import AddItemButton from "../components/AddItemButton.vue";
 import { useAuthStore } from "../stores/auth";
 import type { Class } from "../types/class";
 import type { User } from "../types/user";
-import { disablePush, enablePush } from "../lib/pushNotifications";
+import { enablePush, arePushEnabled } from "../lib/pushNotifications";
 
 const props = defineProps<{
   role?: string;
@@ -160,10 +160,8 @@ const handleSubscribe = async (classId: string) => {
     const updatedClasses = isCurrentlySubscribed
       ? subscribedClassIds.value.filter((id) => id !== classId)
       : [...subscribedClassIds.value, classId];
-    if (!isCurrentlySubscribed) {
+    if (!isCurrentlySubscribed && !(await arePushEnabled())) {
       await enablePush();
-    } else {
-      await disablePush();
     }
     await axios.put(`/api/users/${authStore.user.email}`, {
       classes: updatedClasses,

@@ -11,6 +11,7 @@ import ListElement from "../components/ListElement.vue";
 import ConfirmModal from "../components/ConfirmModal.vue";
 import SummaryModal from "../components/SummaryModal.vue";
 import type { Notebook } from "../types/notebook";
+import { enablePush, arePushEnabled } from "../lib/pushNotifications";
 
 const props = defineProps<{
   summaryId?: string;
@@ -158,6 +159,9 @@ const handleSummarizeNotebook = async (notebook: Notebook) => {
     };
     showSummaryModal.value = true;
     return;
+  }
+  if (!(await arePushEnabled())) {
+    await enablePush();
   }
   summarizingNotebooks.value.add(notebook._id);
   try {
