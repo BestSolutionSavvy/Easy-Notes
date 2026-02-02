@@ -14,17 +14,24 @@ e poi una volta completata l'integrazione, entrambe nello stesso momento. \\
     generata automaticamente, in fase di sviluppo tramite il comando \texttt{npm run dev}, 
     a partire dal file di specifica OpenAPI che abbiamo redatto per documentare le api stesse.
     Come si può vedere in figura \ref{fig:swagger} sono visibili tutte le nostre api divise
-    per protocollo utilizzato, ognuna singolarmente testabile, e, in fondo, 
+    per protocollo utilizzato, ognuna singolarmente testabile, e, in figura \ref{fig:swagger-schemas}
     gli schemi utilizzati nelle richieste.
     \begin{figure}[h!]
         \centering
-        \includegraphics[width=1\textwidth]{figures/swagger.png}
+        \includegraphics[width=1\textwidth]{figures/swagger-api.png}
         \caption{Swagger UI}
         \label{fig:swagger}
+    \end{figure}
+    \begin{figure}[h!]
+        \centering
+        \includegraphics[width=1\textwidth]{figures/swagger-schemas.png}
+        \caption{Swagger UI - Schemi}
+        \label{fig:swagger-schemas}
     \end{figure}
     \item \textbf{Frontend} \par
     Per il frontend sono stati eseguiti test manuali, in quanto l'interfaccia grafica
     richiede un'interazione umana che non può essere simulata in maniera automatica.
+    \newpage
     \item \textbf{Integrazione} \par
     Per l'integrazione tra frontend e backend sono stati eseguiti test manuali,
     in quanto è necessario verificare che le richieste inviate dal frontend vengano correttamente gestite

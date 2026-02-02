@@ -60,41 +60,20 @@
 }
 
 \section{Struttura delle pagine e dei componenti}
-Per avere una struttura il più possibile intercambiabile, modulare e coerente tra le pagine, abbiamo deciso di realizzare le pagine come una sorta di quaderno aperto, avendo così all'interno due parti: \textbf{left} e \textbf{right} oltre che sopra a tutto l'header. In questo modo, l'utente non avrà difficoltà a trovare le funzionalità principali dell'applicazione, che saranno sempre nello stesso punto e soprattutto, nel caso si vogliano aggiungere nuove pagine, basterà replicare la struttura e cambiare solo il contenuto delle due sezioni principali. Per farlo abbiamo utilizzato al massimo le funzionalità di Vue.js e Vite di composizione dei componenti.
+Per avere una struttura il più possibile intercambiabile, modulare e coerente tra le pagine, abbiamo deciso di realizzare le pagine come una sorta di quaderno aperto, avendo così all'interno due parti: \textbf{left} e \textbf{right} oltre che l'header in alto. In questo modo, l'utente non avrà difficoltà a trovare le funzionalità principali dell'applicazione, che saranno sempre nello stesso punto e soprattutto, nel caso si vogliano aggiungere nuove pagine, basterà replicare la struttura e cambiare solo il contenuto delle due sezioni principali. Per farlo abbiamo utilizzato al massimo le funzionalità di Vue.js di composizione dei componenti.
 
-Sotto viene proposto un esempio di codice, in particolare della pagina home:
-\begin{lstlisting}[style=html, caption=Struttura Vue della pagina Home]
+Sotto viene proposto un esempio di codice, in particolare della pagina Notebooks:
+\begin{lstlisting}[style=html, caption=Struttura Vue della pagina Notebooks]
 <template>
-    <AppHeader ref="headerRef" @open-notebook="handleOpenNotebook" @close-notebook="handleCloseNotebook"
-        :variant="'tools'" :currentNotebook="openedNotebook" :currentNotebookPage="currentNotebookPage" />
-    <MainStructure>
-        <template #left>
-            <PdfPage v-if="openedNotebook?.type === 'slide'" :notebook="openedNotebook" :currentPage="currentPdfPage"
-                @page-next="handlePageNext" @page-prev="handlePagePrev" />
-            <NotePage ref="notePageLeftRef" v-else-if="openedNotebook?.type === 'simple'" :notebook="openedNotebook"
-                :currentPage="currentNotebookPage" />
-            <div v-else
-                class="h-full flex-1 w-full rounded-tl-[10px] rounded-bl-[10px] flex flex-col items-center justify-center gap-4 p-8">
-                <img src="../assets/pdf.svg" class="w-24 h-24 opacity-30" alt="" />
-                <h2 class="text-2xl font-bold text-gray-400">No PDF opened</h2>
-                <p class="text-gray-500 text-center max-w-md">Open a notebook with PDF from the header options to view
-                    slides</p>
-            </div>
-        </template>
-        <template #right>
-            <NotePage ref="notePageRightRef" v-if="openedNotebook?.type === 'slide'" :notebook="openedNotebook"
-                :currentPage="currentNotebookPage" />
-            <NotePage ref="notePageRightRef" v-else-if="openedNotebook?.type === 'simple'" :notebook="openedNotebook"
-                :currentPage="currentNotebookPage + 1" />
-            <div v-else
-                class="h-full flex-1 w-full rounded-tr-[10px] rounded-br-[10px] flex flex-col items-center justify-center gap-4 p-8">
-                <img src="../assets/notes.svg" class="w-24 h-24 opacity-30" alt="" />
-                <h2 class="text-2xl font-bold text-gray-400">No notebook opened</h2>
-                <p class="text-gray-500 text-center max-w-md">Create a new notebook or open an existing one to start
-                    taking notes</p>
-            </div>
-        </template>
-    </MainStructure>
+  <AppHeader :username="authStore.user?.email"/>
+  <MainStructure>
+    <template #left>
+      <NotebooksList :summaryId="summaryId" @select-notebook="handleSelectNotebook" />
+    </template>
+    <template #right>
+      <PdfPreviewPage :notebook="selectedNotebook" />
+    </template>
+  </MainStructure>
 </template>
 \end{lstlisting}
 
@@ -166,10 +145,10 @@ exports.summarizeNotebook = async (req, res) => {
 \end{lstlisting}
 
 \section{Notifiche push}
-Le notifiche push sono state implementate utilizzando la libreria \texttt{web-push} di Node.js. Questa libreria consente di inviare notifiche push ai client registrati, permettendo così di informare gli utenti su eventi importanti anche quando non stanno utilizzando attivamente l'applicazione. Per farlo abbiamo generato una coppia di chiavi VAPID (Voluntary Application Server Identification) che vengono utilizzate per autenticare il server di notifiche push con i client. Alla prima iscrizione ad una classe, l'app chiede il permesso di inviare notifiche push all'utente e registra il suo dispositivo con il server di notifiche push sul database. Quando un nuovo pdf viene aggiunto ad una classe a cui si è iscritti, il server invia una notifica push a tutti i dispositivi registrati per quella classe. Le notifiche vengono anche usate quando si chiede il riassunto delle note, per informare l'utente quando il riassunto è pronto per essere visualizzato ed eventualmente scaricato.
-Di seguito un esempio di codice che mostra come viene inviata una notifica push quando viene aggiunto un nuovo pdf ad una classe:
+Le notifiche push sono state implementate utilizzando la libreria \texttt{web-push} di Node.js. Questa libreria consente di inviare notifiche push ai client registrati, permettendo così di informare gli utenti su eventi importanti anche quando non stanno utilizzando attivamente l'applicazione. Per farlo abbiamo generato una coppia di chiavi VAPID (Voluntary Application Server Identification) che vengono utilizzate per autenticare il server di notifiche push con i client. Alla prima iscrizione ad una classe oppure alla richiesta di un riassunto, l'app chiede il permesso di inviare notifiche push all'utente e registra il suo dispositivo con il server di notifiche push sul database. Quando un nuovo pdf viene aggiunto ad una classe a cui si è iscritti, il server invia una notifica push a tutti i dispositivi registrati per quella classe. Le notifiche vengono anche usate quando si chiede il riassunto delle note, per informare l'utente quando il riassunto è pronto per essere visualizzato ed eventualmente scaricato.
+Di seguito un esempio di codice che mostra come viene inviata una notifica push:
 
-\begin{lstlisting}[style=javascript, caption=Invio notifica push all'aggiunta di un nuovo PDF]
+\begin{lstlisting}[style=javascript, caption=Invio notifica push]
 const sendNotification = async (userId, payload) => {
     try {  
         const subs = await subscriptionModel.find({ userId: userId });    
@@ -203,49 +182,10 @@ const sendNotification = async (userId, payload) => {
         console.error('Error in sendNotification:', error);
     }
 };
-
-exports.uploadPdfToClass = async (req, res) => {
-  const classId = req.params.id;
-  const { pdfs } = req.body;
-
-  if (!pdfs || !Array.isArray(pdfs)) {
-    return res.status(400).json({ error: "PDF IDs array is required" });
-  }
-
-  try {
-    const classDoc = await classesModel.findById(classId);
-    if (!classDoc) {
-      return res.status(404).json({ error: "Class not found" });
-    }
-    classDoc.pdfs = pdfs;
-    await classDoc.save();
-    const newPdfId = pdfs[pdfs.length - 1];
-    const newPdf = await pdfModel.findById(newPdfId);
-    if (newPdf) {
-      const users = await userModel.find({ classes: classId }).select("email");
-      const notificationPromises = users.map((user) => {
-        return sendNotification(user.email, {
-          title: "New PDF Uploaded",
-          body: `A new PDF ${newPdf.name} has been uploaded to your class ${classDoc.name}.`,
-          data: {
-            type: "NEW_PDF",
-            pdfId: newPdfId,
-            classId: classId,
-          },
-        });
-      });
-      await Promise.all(notificationPromises);
-    }
-
-    res.status(200).json(classDoc);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
 \end{lstlisting}
 
 \section{Watcher per il salvataggio automatico delle note}
-Per salvare sempre correttamente lo stato corrente del notebook, la variabile noteContent è collegata al contenuto della textarea tramite v-model di Vue. Inoltre, utilizzando un watcher, ad ogni aggiornamento del contenuto della textarea e quindi di noteContent, si effettua un salvataggio automatico delle note nel database. In questo modo, l'utente non rischia di perdere le modifiche apportate alle sue note in caso di chiusura accidentale dell'applicazione o di crash del sistema e non si deve preoccupare di salvare manualmente le modifiche. Infine, tramite l'utilizzo della libreria marked, si può visualizzare in tempo reale l'anteprima delle note in formato markdown. Di seguito un esempio di codice che mostra come viene implementato il watcher per il salvataggio automatico delle note e l'anteprima in markdown:
+Per salvare sempre correttamente lo stato corrente del notebook, la variabile noteContent è collegata al contenuto della textarea tramite v-model di Vue. Inoltre, utilizzando un watcher, ad ogni aggiornamento del contenuto della textarea e quindi di noteContent, si effettua un salvataggio automatico delle note nello stato locale. Infine, tramite l'utilizzo della libreria marked, si può visualizzare in tempo reale l'anteprima delle note in formato markdown. Di seguito un esempio di codice che mostra come viene implementato il watcher per il salvataggio automatico delle note e l'anteprima in markdown:
 \begin{lstlisting}[style=javascript, caption=Watcher per il salvataggio automatico delle note e anteprima markdown]
 const renderedContent = computed(() => {
   if (!noteContent.value) return '';
