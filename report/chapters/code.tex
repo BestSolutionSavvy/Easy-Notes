@@ -1,0 +1,203 @@
+\chapter{Code}
+
+% Define colors for code listings
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+% Define JavaScript language
+\lstdefinelanguage{JavaScript}{
+  keywords={break, case, catch, continue, debugger, default, delete, do, else, finally, for, function, if, in, instanceof, new, return, switch, this, throw, try, typeof, var, void, while, with, const, let, class, extends, export, import, super, async, await},
+  morecomment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]',
+  morestring=[b]",
+  sensitive=true
+}
+
+% Define styles for code listings in JavaScript
+\lstdefinestyle{javascript}{
+  language=JavaScript,
+  backgroundcolor=\color{backcolour},
+  commentstyle=\color{codegreen},
+  keywordstyle=\color{blue},
+  numberstyle=\tiny\color{codegray},
+  stringstyle=\color{codepurple},
+  basicstyle=\ttfamily\small,
+  breakatwhitespace=false,
+  breaklines=true,
+  captionpos=b,
+  keepspaces=true,
+  numbers=left,
+  numbersep=5pt,
+  showspaces=false,
+  showstringspaces=false,
+  showtabs=false,
+  tabsize=2
+}
+
+% Define styles for code listings in HTML
+\lstdefinestyle{html}{
+  language=HTML,
+  backgroundcolor=\color{backcolour},
+  commentstyle=\color{codegreen},
+  keywordstyle=\color{blue},
+  numberstyle=\tiny\color{codegray},
+  stringstyle=\color{codepurple},
+  basicstyle=\ttfamily\footnotesize,
+  breakatwhitespace=false,
+  breaklines=true,
+  captionpos=b,
+  keepspaces=true,
+  numbers=left,
+  numbersep=5pt,
+  showspaces=false,
+  showstringspaces=false,
+  showtabs=false,
+  tabsize=2,
+  morekeywords={DOCTYPE,html,head,title,body,div,span,script, template, MainStructure, AppHeader, PdfPage, NotePage, v-if, v-else-if, v-else, :notebook, :currentPage, @page-next, @page-prev}
+}
+
+\section{Struttura delle pagine e dei componenti}
+Per avere una struttura il più possibile intercambiabile, modulare e coerente tra le pagine, abbiamo deciso di realizzare le pagine come una sorta di quaderno aperto, avendo così all'interno due parti: \textbf{left} e \textbf{right} oltre che l'header in alto. In questo modo, l'utente non avrà difficoltà a trovare le funzionalità principali dell'applicazione, che saranno sempre nello stesso punto e soprattutto, nel caso si vogliano aggiungere nuove pagine, basterà replicare la struttura e cambiare solo il contenuto delle due sezioni principali. Per farlo abbiamo utilizzato al massimo le funzionalità di Vue.js di composizione dei componenti.
+
+Sotto viene proposto un esempio di codice, in particolare della pagina Notebooks:
+\begin{lstlisting}[style=html, caption=Struttura Vue della pagina Notebooks]
+<template>
+  <AppHeader :username="authStore.user?.email"/>
+  <MainStructure>
+    <template #left>
+      <NotebooksList :summaryId="summaryId" @select-notebook="handleSelectNotebook" />
+    </template>
+    <template #right>
+      <PdfPreviewPage :notebook="selectedNotebook" />
+    </template>
+  </MainStructure>
+</template>
+\end{lstlisting}
+
+\section{Riassunto delle note tramite API esterna}
+All'interno della nostra app è possibile riassumere le proprie note grazie all'integrazione con un LLM (modello llama3.1-8b) integrato tramite un'API esterna. Il testo viene prima estratto sia dai pdf che dalle note, poi inviato all'API che restituisce il riassunto salvandolo anche nel database.
+
+Qui di seguito un esempio di codice che mostra come viene effettuata la chiamata all'API per ottenere il riassunto delle note, in cui viene omessa la fase di estrazione del testo dai pdf e dalle note (eseguita tramite la funzione prepareTextForSummarization) per semplicità:
+
+\begin{lstlisting}[style=javascript, caption=Funzione per riassumere le note di un notebook]
+exports.summarizeNotebook = async (req, res) => {
+  try {
+    const notebookId = req.params.notebookId;
+    if (!notebookId) {
+      return res
+        .status(400)
+        .json({ error: "Notebook ID is required for summarization" });
+    }
+    const notebook = await notebookModel.findById(notebookId);
+    if (!notebook) {
+      return res.status(404).json({ error: "Notebook not found" });
+    }
+    let textToSummarize;
+    if (notebook.id_pdf) {
+      const pdf = await pdfModel.findById(notebook.id_pdf);
+      textToSummarize = await prepareTextForSummarization(notebook, pdf);
+    } else {
+      textToSummarize = await prepareTextForSummarization(notebook);
+    }
+    if (!textToSummarize.trim()) {
+      return res.status(400).json({ error: "No content found to summarize" });
+    }
+    const completionCreateResponse =
+      await cerebrasClient.chat.completions.create({
+        messages: [
+          {
+            role: "user",
+            content:
+              "Summarize this text maintaining the key points and considering it is for educational purposes so it has to be clear without losing important informations. The content could be in markdown format so, in that case, keep a markdown format; otherwise give an output of a normal text. It is very important that you keep the same language as the given text " +
+              textToSummarize,
+          },
+        ],
+        model: "llama3.1-8b",
+      });
+    const summaryText = completionCreateResponse.choices[0].message.content;
+    const summary = await summaryModel.findOneAndUpdate(
+      { _id: notebookId },
+      { content: summaryText },
+      { new: true, upsert: true },
+    );
+    await sendNotification(notebook.owner, {
+      title: "Summary Completed",
+      body: `The summary for "${notebook.name}" has been successfully generated`,
+      data: {
+        type: "SUMMARY",
+        notebookId: notebookId
+      }
+    });
+    res.status(200).json({
+      message: "Summary created successfully",
+      summary,
+    });
+  } catch (error) {
+    console.error("Error summarizing notebook:", error);
+    res
+      .status(500)
+      .json({ error: "Error summarizing notebook", details: error.message });
+  }
+};
+\end{lstlisting}
+
+\section{Notifiche push}
+Le notifiche push sono state implementate utilizzando la libreria \texttt{web-push} di Node.js. Questa libreria consente di inviare notifiche push ai client registrati, permettendo così di informare gli utenti su eventi importanti anche quando non stanno utilizzando attivamente l'applicazione. Per farlo abbiamo generato una coppia di chiavi VAPID (Voluntary Application Server Identification) che vengono utilizzate per autenticare il server di notifiche push con i client. Alla prima iscrizione ad una classe oppure alla richiesta di un riassunto, l'app chiede il permesso di inviare notifiche push all'utente e registra il suo dispositivo con il server di notifiche push sul database. Quando un nuovo pdf viene aggiunto ad una classe a cui si è iscritti, il server invia una notifica push a tutti i dispositivi registrati per quella classe. Le notifiche vengono anche usate quando si chiede il riassunto delle note, per informare l'utente quando il riassunto è pronto per essere visualizzato ed eventualmente scaricato.
+Di seguito un esempio di codice che mostra come viene inviata una notifica push:
+
+\begin{lstlisting}[style=javascript, caption=Invio notifica push]
+const sendNotification = async (userId, payload) => {
+    try {  
+        const subs = await subscriptionModel.find({ userId: userId });    
+        if (subs.length === 0) {
+            return;
+        }
+        const promises = subs.map(async (sub) => {
+            const pushSubscription = {
+                endpoint: sub.endpoint,
+                keys: {
+                    p256dh: sub.keys.p256dh,
+                    auth: sub.keys.auth
+                }
+            };
+            try {
+                await webpush.sendNotification(pushSubscription, JSON.stringify(payload));
+            } catch (err) {
+                console.error('Error sending notification to', sub.endpoint);
+                console.error('Error details:', {
+                    message: err.message,
+                    statusCode: err.statusCode,
+                    body: err.body
+                });   
+                if (err.statusCode === 410) {
+                    await subscriptionModel.deleteOne({ _id: sub._id });
+                }
+            }
+        });
+        await Promise.all(promises);
+    } catch (error) {
+        console.error('Error in sendNotification:', error);
+    }
+};
+\end{lstlisting}
+
+\section{Watcher per il salvataggio automatico delle note}
+Per salvare sempre correttamente lo stato corrente del notebook, la variabile noteContent è collegata al contenuto della textarea tramite v-model di Vue. Inoltre, utilizzando un watcher, ad ogni aggiornamento del contenuto della textarea e quindi di noteContent, si effettua un salvataggio automatico delle note nello stato locale. Infine, tramite l'utilizzo della libreria marked, si può visualizzare in tempo reale l'anteprima delle note in formato markdown. Di seguito un esempio di codice che mostra come viene implementato il watcher per il salvataggio automatico delle note e l'anteprima in markdown:
+\begin{lstlisting}[style=javascript, caption=Watcher per il salvataggio automatico delle note e anteprima markdown]
+const renderedContent = computed(() => {
+  if (!noteContent.value) return '';
+  return marked.parse(noteContent.value);
+});
+
+watch(() => props.currentPage, () => {
+  noteContent.value = currentPageData.value?.note_content || '';
+});
+
+watch(noteContent, () => {
+  if (isEditing.value) {
+    saveNote();
+  }
+\end{lstlisting}

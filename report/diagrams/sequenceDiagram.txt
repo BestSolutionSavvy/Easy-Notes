@@ -1,0 +1,19 @@
+sequenceDiagram
+    participant Teacher as Client Teacher
+    participant Server as Server
+    participant Student as Client Student
+
+    Teacher->>Server: Upload PDF to class
+    activate Server
+    Server->>Server: Store PDF
+    
+    alt Notifications enabled
+        Server->>Student: Push notification: New PDF available
+        activate Student
+        Student->>Student: Display notification
+        deactivate Student
+    else Notifications disabled
+        Note over Server,Student: No notification sent
+    end
+    
+    deactivate Server

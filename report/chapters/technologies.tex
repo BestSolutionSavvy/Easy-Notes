@@ -1,0 +1,32 @@
+\chapter{Tecnologie}
+\section{Stack}
+L'applicazione è sviluppata utilizzando lo stack \b{MEVN}, per cui:
+\begin{itemize}
+    \item \textbf{MongoDB} come database NoSQL per la gestione dei dati;
+    \item \textbf{Express.js} come framework backend di Node.js;
+    \item \textbf{Vue.js} come framework frontend per la costruzione dell'interfaccia utente;
+    \item \textbf{Node.js} come runtime environment per l'esecuzione del codice JavaScript.
+\end{itemize}
+La scelta viene motivata direttamente dalle richieste del progetto d'esame.
+
+Lo stack MEVN viene messo in pratica attraverso una serie di servizi PAAS che verranno spiegati meglio nel capitolo dedicato al deployment. I servizi utilizzati sono: \textbf{Render}, \textbf{Vercel} e \textbf{MongoDB Atlas}.
+
+\section{Librerie e Framework principali}
+Per lo sviluppo dell'applicazione sono state utilizzate le seguenti librerie e framework principali:
+\begin{itemize}
+    \item \textbf{GridFS}: per la gestione e l'archiviazione di file di grandi dimensioni all'interno di MongoDB, nel nostro caso cruciale per poter salvare i file pdf all'interno del database senza dover ricorrere a soluzioni esterne tramite URL;
+    \item \textbf{Mongoose}: per la modellazione degli oggetti MongoDB in ambiente Node.js, semplificando l'interazione con il database attraverso uno schema definito;
+    \item \textbf{Axios}: per effettuare richieste HTTP dal frontend Vue.js al backend Express.js, facilitando la comunicazione tra client e server;
+    \item \textbf{Vue Router}: per la gestione della navigazione tra le diverse pagine dell'applicazione Vue.js, permettendo una struttura a singola pagina (SPA);
+    \item \textbf{Cerebras SDK}: per l'integrazione con i modelli di intelligenza artificiale offerti da Cerebras, utilizzati per riassumere note e pdf;
+    \item \textbf{Web Push}: per implementare le notifiche push nel browser.
+\end{itemize}
+
+\section{Strumenti di Sviluppo}
+Per lo sviluppo dell'applicazione sono stati utilizzati i seguenti strumenti:
+\begin{itemize}
+    \item \textbf{Visual Studio Code}: come ambiente di sviluppo integrato (IDE) per la scrittura e la gestione del codice sorgente;
+    \item \textbf{Swagger}: per test e debug delle API RESTful sviluppate con Express.js, facilitando la verifica delle funzionalità del backend;
+    \item \textbf{Google Sheets}: per la gestione e l'organizzazione delle attività di progetto in stile SCRUM;
+    \item \textbf{Git}: per il controllo di versione del codice sorgente, permettendo una gestione efficiente delle modifiche e la collaborazione tra sviluppatori.
+\end{itemize}

@@ -1,0 +1,43 @@
+\chapter{Test}
+I test sono sempre stati svolti meticolosamente terminato lo sviluppo di ogni funzionalità e 
+dell'intera applicazione ogni qual volta che una versione intermedia fosse completata. \\
+Lo stile di sviluppo agile adottato ha permesso, infatti, di giungere a versioni incrementali
+sulle quali testare le funzionalità implementate fino a quel momento, in modo da individuare
+eventuali bug o malfunzionamenti prima di procedere con lo sviluppo. \\
+Nello specifico, le porzioni di codice di frontend e backend sono state testate in maniera differente,
+e poi una volta completata l'integrazione, entrambe nello stesso momento. \\
+\begin{itemize}
+    \item \textbf{Backend} \par
+    Per il backend è stato fondamentale l'utilizzo della libreria di node 
+    \href{https://www.npmjs.com/package/swagger-ui-express}{swagger-ui-express},
+    che ci ha permesso di testare le nostre api direttamente tramite una pagina web Swagger 
+    generata automaticamente, in fase di sviluppo tramite il comando \texttt{npm run dev}, 
+    a partire dal file di specifica OpenAPI che abbiamo redatto per documentare le api stesse.
+    Come si può vedere in figura \ref{fig:swagger} sono visibili tutte le nostre api divise
+    per protocollo utilizzato, ognuna singolarmente testabile, e, in figura \ref{fig:swagger-schemas}
+    gli schemi utilizzati nelle richieste.
+    \begin{figure}[h!]
+        \centering
+        \includegraphics[width=1\textwidth]{figures/swagger-api.png}
+        \caption{Swagger UI}
+        \label{fig:swagger}
+    \end{figure}
+    \begin{figure}[h!]
+        \centering
+        \includegraphics[width=1\textwidth]{figures/swagger-schemas.png}
+        \caption{Swagger UI - Schemi}
+        \label{fig:swagger-schemas}
+    \end{figure}
+    \item \textbf{Frontend} \par
+    Per il frontend sono stati eseguiti test manuali, in quanto l'interfaccia grafica
+    richiede un'interazione umana che non può essere simulata in maniera automatica.
+    \newpage
+    \item \textbf{Integrazione} \par
+    Per l'integrazione tra frontend e backend sono stati eseguiti test manuali,
+    in quanto è necessario verificare che le richieste inviate dal frontend vengano correttamente gestite
+    dal backend e che le risposte siano adeguatamente processate e visualizzate dall'interfaccia utente.
+    Il tutto avvalendosi degli strumenti di sviluppo messi a disposizione dai browser web.
+\end{itemize}
+Per finire, l'applicazione è stata testata su diversi browser per garantire la compatibilità 
+cross-browser e da un bacino di utenti limitato per raccogliere feedback sull'usabilità e
+sull'esperienza utente complessiva.

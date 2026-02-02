@@ -1,0 +1,20 @@
+\section{Diagrammi di sequenza}
+
+\subsection{Notifica nuovo PDF caricato nella classe}
+Come si può vedere in figura \ref{fig:seq_pdf}, quando un insegnante carica un nuovo PDF all'interno di una classe, se lo studente ha attivato le notifiche per quella classe, riceverà una notifica. Questo processo parte direttamente dal server che, previa registrazione dell'utente per le notifiche e richiesta del consenso, invia la notifica al dispositivo dell'utente tramite il servizio di notifiche push.\\
+Nel diagramma è omessa la parte relativa alla richiesta del consenso e della registrazione per semplicità, ma è comunque un passaggio fondamentale per poter ricevere le notifiche.
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=1\textwidth]{diagrams/Sequence-pdf.png}
+    \caption{Diagramma di sequenza per la notifica relativa ad un nuovo PDF}
+    \label{fig:seq_pdf}
+\end{figure}
+
+\subsection{Notifica generazione riassunto tramite LLM}
+In figura \ref{fig:seq_llm} è possibile vedere il diagramma di sequenza relativo alla generazione di un riassunto tramite LLM. In questo caso, lo studente richiede al server la generazione del riassunto per un determinato Notebook. Il server, a sua volta, invia la richiesta al servizio di LLM e, una volta ricevuta la risposta, la inoltra allo studente.
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=1\textwidth]{diagrams/Sequence-llm.png}
+    \caption{Diagramma di sequenza per la notifica relativa alla generazione di un riassunto tramite LLM}
+    \label{fig:seq_llm}
+\end{figure}

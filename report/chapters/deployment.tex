@@ -1,0 +1,103 @@
+\chapter{Deployment}
+La nostra applicazione è formata da tre componenti principali: il backend, il frontend e il database. 
+Per il deployment di queste componenti, abbiamo scelto di utilizzare servizi cloud che offrono soluzioni gratuite e affidabili:
+\begin{itemize}
+    \item \textbf{Backend}\par
+    Il backend è ospitato sulla piattaforma Render (\url{https://render.com}), una piattaforma di hosting cloud che supporta applicazioni Node.js. Render offre un piano gratuito che include funzionalità sufficienti per esigenze di sviluppo e test dell'applicazione. Il deployment viene effettuato automaticamente ogni volta che si effettua un push sul branch release del repository GitHub collegato.
+
+    \item \textbf{Frontend}\par
+    Per il frontend, abbiamo scelto Vercel (\url{https://vercel.com/}), una piattaforma di hosting specializzata in applicazioni frontend. Anche in questo caso il deployment è automatizzato e avviene con ogni push sul branch release del repository GitHub.
+    
+    \item \textbf{Database}\par
+    Per il database, abbiamo scelto MongoDB Atlas (\url{https://www.mongodb.com/cloud/atlas}), un servizio di database cloud che offre un piano gratuito con funzionalità sufficienti per le nostre esigenze. MongoDB Atlas consente di creare e gestire cluster MongoDB senza doverci preoccupare dell'infrastruttura sottostante.
+\end{itemize}
+
+Per esigenze di sviluppo, oltre a ospitare il backend e il frontend dell'applicazione sui servizi cloud, abbiamo configurato anche un ambiente di sviluppo locale. Questo ci ha permesso di testare e sviluppare l'applicazione in modo più efficiente prima di effettuare il deployment sui servizi cloud. Di seguito sono riportati i dettagli per la configurazione dell'ambiente di sviluppo locale:
+
+\begin{enumerate}
+    \item \textbf{Clonare il Repository}
+    \begin{verbatim}
+git clone https://github.com/BestSolutionSavvy/Easy-Notes
+    \end{verbatim}
+
+    \item \textbf{Configurazione del Backend}
+    \par Navigare nella directory del backend:
+    \begin{verbatim}
+cd backend
+    \end{verbatim}
+    
+    Installare le dipendenze:
+    \begin{verbatim}
+npm install
+    \end{verbatim}
+    
+    Creare il file \texttt{.env}:
+    \begin{verbatim}
+touch .env
+    \end{verbatim}
+    
+    Configurare il file \texttt{.env} con le seguenti variabili:
+    \begin{verbatim}
+FRONTEND_URL=http://localhost:5173
+MONGO_URI=your_mongodb_connection_string_here
+CEREBRAS_API_KEY=your_cerebras_api_key_here
+JWT_SECRET=your_jwt_secret_here
+VAPID_PUBLIC_KEY=your_vapid_public_key_here
+VAPID_PRIVATE_KEY=your_vapid_private_key_here
+NODE_ENV=development
+    \end{verbatim}
+    
+    Per generare \texttt{JWT\_SECRET}:
+    \begin{verbatim}
+node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
+    \end{verbatim}
+    
+    Per generare le chiavi VAPID:
+    \begin{verbatim}
+npx web-push generate-vapid-keys
+    \end{verbatim}
+    
+    Avviare il server di sviluppo:
+    \begin{verbatim}
+npm run dev
+    \end{verbatim}
+    
+    Il backend sarà disponibile su \url{http://localhost:3000}. La documentazione API su \url{http://localhost:3000/api/docs}.
+
+    \item \textbf{Configurazione del Frontend}
+    \par Dalla directory principale, navigare nella directory del frontend:
+    \begin{verbatim}
+cd frontend
+    \end{verbatim}
+    
+    Installare le dipendenze:
+    \begin{verbatim}
+npm install
+    \end{verbatim}
+    
+    Creare il file \texttt{.env}:
+    \begin{verbatim}
+touch .env
+    \end{verbatim}
+    
+    Configurare il file \texttt{.env}:
+    \begin{verbatim}
+VITE_BACKEND_URL=http://localhost:3000
+VITE_VAPID_PUBLIC_KEY=your_vapid_public_key_here
+    \end{verbatim}
+    
+    Avviare il server di sviluppo:
+    \begin{verbatim}
+npm run dev
+    \end{verbatim}
+    
+    Il frontend sarà disponibile su \url{http://localhost:5173}.
+
+    \item \textbf{Test dell'Applicazione}
+    \begin{itemize}
+        \item Aprire il browser e navigare su \url{http://localhost:5173}
+        \item Creare un nuovo account o effettuare il login
+        \item Iniziare a creare notebook e prendere appunti.
+    \end{itemize}
+\end{enumerate}
+

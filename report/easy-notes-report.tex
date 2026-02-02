@@ -1,0 +1,64 @@
+\documentclass{report}
+\usepackage[utf8]{inputenc}
+\usepackage[italian]{babel}
+\usepackage[
+    colorlinks=true, 
+    citecolor=black, 
+    filecolor=black,
+    linkcolor=black, 
+    urlcolor=black]{hyperref}
+
+\title{
+    Easy Notes \\
+    \large Applicazioni e Servizi Web
+}
+
+\author{Emanuele Sanchi - 0001176547 \{emanuele.sanchi@studio.unibo.it\} \\
+Francesco Buda - 0001179814 \{francesco.buda3@studio.unibo.it\} \\
+Tommaso Severi - 0001172431 \{tommaso.severi2@studio.unibo.it\}}
+\date{\today}
+
+\usepackage{natbib}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\begin{document}
+\maketitle
+
+\clearpage
+
+
+\tableofcontents
+\clearpage
+
+\input{./chapters/introduction.tex}
+\newpage
+
+\input{./chapters/requirements.tex}
+\newpage
+
+\input{./chapters/design.tex}
+\newpage
+
+\input{chapters/target-user-analysis.tex}
+\newpage
+
+\input{./chapters/technologies.tex}
+\newpage
+
+\input{./chapters/code.tex}
+\newpage
+
+\input{./chapters/test.tex}
+\newpage
+
+\input{./chapters/deployment.tex}
+\newpage
+
+\input{./chapters/conclusions.tex}
+\newpage
+
+\bibliographystyle{plain}
+\bibliography{references}
+\end{document}
